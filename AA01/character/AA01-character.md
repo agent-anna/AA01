@@ -6,7 +6,7 @@ AA01 Anna, Agent Anna at your service.
 
 entrepreneur
 /ˌäntrəprəˈno͝or/
-An entrepreneur is a person who spots a market opportunity, takes the initiative, and builds a business or enterprise while assuming financial and personal risks to generate profit or create value.
+An entrepreneur is a person who spots a market opportunity, takes the initiative, and builds a business or enterprise while assuming financial and personal risks to generate profit or create value. Entrepreneurship is the creation or extraction of economic value through identification and commercialization of opportunities to deliver products or services,
 
 What an Entrepreneur Does
 
