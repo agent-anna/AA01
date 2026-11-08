@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGENT ANNA // SHI* ET-NEURAL SOVEREIGN WALLET</title>
+    <!-- LIGHTWEIGHT CHARTING LIBRARY FOR LIVE TELEMETRY -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-deep: #020408;
+            --surface: #070b14;
+            --neon-cyan: #00ffcc;
+            --neon-pink: #ff007f;
+            --neon-magenta: #ff00ff;
+            --neon-gold: #ffaa00;
+            --text-white: #ffffff;
+            --text-muted: #8892b0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-white);
+            font-family: monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ET-CRAFT PULSING NEURAL BACKGROUND CANVAS */
+        #neural-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .wallet-container {
+            width: 100%;
+            max-width: 520px;
+            background: rgba(7, 11, 20, 0.95);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.2);
+            padding: 24px;
+            z-index: 1;
+            position: relative;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+
+        .header-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 2px dashed rgba(0,255,204,0.3);
+            padding-bottom: 18px;
+            margin-bottom: 20px;
+        }
+
+        .agent-avatar {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-magenta);
+            object-fit: cover;
+            box-shadow: 0 0 20px var(--neon-magenta);
+        }
+
+        .title-group h1 {
+            font-size: 30px;
+            font-weight: 900;
+            color: var(--text-white);
+            letter-spacing: 2px;
+        }
+
+        .title-group h1 span { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+        .title-group p { font-size: 11px; color: var(--neon-cyan); letter-spacing: 1px; margin-top: 4px; }
+
+        /* BALANCE CARD */
+        .balance-card {
+            background: #04060b;
+            border: 1.5px solid var(--neon-cyan);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 20px rgba(0,255,204,0.15);
+        }
+
+        .balance-card h3 { font-size: 12px; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 6px; }
+        .fat-token-text { font-size: 40px; font-weight: 900; color: var(--neon-cyan); text-shadow: 0 0 20px rgba(0,255,204,0.5); }
+        .fat-token-text small { font-size: 18px; color: var(--neon-pink); }
+
+        /* LIVE CHARTING MODULE */
+        .chart-box {
+            background: #030509;
+            border: 1px solid rgba(0,255,204,0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+
+        .chart-tabs { display: flex; gap: 5px; }
+        .chart-tab {
+            background: #000;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 3px 8px;
+            font-size: 9px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .chart-tab.active { background: var(--neon-cyan); color: #000; font-weight: bold; }
+
+        /* CONTROLS */
+        .control-section {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            font-size: 11px;
+            color: var(--neon-gold);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: #000;
+            border: 1px solid var(--neon-cyan);
+            border-radius: 4px;
+            outline: none;
+            accent-color: var(--neon-pink);
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .radio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .radio-btn-group {
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            padding: 9px;
+            text-align: center;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .radio-btn-group input { display: none; }
+        .radio-btn-group:hover, .radio-btn-group.selected {
+            border-color: var(--neon-magenta);
+            box-shadow: 0 0 12px rgba(255,0,255,0.4);
+            color: var(--neon-magenta);
+            font-weight: bold;
+        }
+
+        /* ACTION BUTTONS */
+        .action-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            color: #000;
+            font-weight: 900;
+            font-size: 15px;
+            letter-spacing: 1.5px;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(0,255,204,0.5);
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+            margin-bottom: 10px;
+        }
+        .action-btn:hover { transform: scale(1.02); box-shadow: 0 0 35px var(--neon-magenta); }
+
+        .secondary-btn {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .secondary-btn:hover { background: rgba(0,255,204,0.15); }
+
+        .footer-note {
+            text-align: center;
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ET NEURAL BACKGROUND CANVAS -->
+    <canvas id="neural-canvas"></canvas>
+
+    <div class="wallet-container">
+        <!-- HEADER -->
+        <div class="header-box">
+            <img class="agent-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60" alt="Agent Anna">
+            <div class="title-group">
+                <h1>SHI<span>*</span> WALLET</h1>
+                <p>ET-NEURAL AGENT ANNA // STAGE 1</p>
+            </div>
+        </div>
+
+        <!-- BALANCE DISPLAY -->
+        <div class="balance-card">
+            <h3>SECURE VAULT BALANCE</h3>
+            <div class="fat-token-text" id="token-balance">1,000 <small>SHI*</small></div>
+            <p style="font-size:9px; color:var(--text-muted); margin-top:6px;">Real-World Hot Sauce Franchise Backed</p>
+        </div>
+
+        <!-- LIVE CHART MODULE (DOGE PRIMARY / SHI* SEEDING) -->
+        <div class="chart-box">
+            <div class="chart-header">
+                <span id="chart-title" style="color:var(--neon-cyan); font-weight:bold;">📈 LIVE TELEMETRY: DOGECOIN (BASE)</span>
+                <div class="chart-tabs">
+                    <button class="chart-tab active" onclick="switchChart('doge', this)">DOGE</button>
+                    <button class="chart-tab" onclick="switchChart('shi', this)">SHI* (SEED)</button>
+                </div>
+            </div>
+            <div style="height:140px; position:relative;">
+                <canvas id="marketChart"></canvas>
+            </div>
+        </div>
+
+        <!-- STYLIZED SLIDER & RADIO CONTROLS -->
+        <div class="control-section">
+            <div class="control-label">
+                <span>INCENTIVE STAKE MULTIPLIER</span>
+                <span id="slider-val" style="color:var(--neon-cyan)">5x Tier</span>
+            </div>
+            <input type="range" id="multiplier-slider" min="1" max="10" value="5" oninput="updateSlider(this.value)">
+
+            <div class="control-label" style="margin-top:10px;">ENGAGEMENT MODE</div>
+            <div class="radio-grid">
+                <label class="radio-btn-group selected" onclick="selectMode(this)">
+                    <input type="radio" name="mode" checked> 🎒 KID FRIENDLY
+                </label>
+                <label class="radio-btn-group" onclick="selectMode(this)">
+                    <input type="radio" name="mode"> 🌶️ ADULT FRANCHISE
+                </label>
+            </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <button class="action-btn" onclick="claimWelcomeGrant()">🎁 CLAIM 1,000 FREE SHI*</button>
+        <button class="secondary-btn" onclick="scanBottleQR()">📷 SCAN HOT SAUCE BOTTLE QR</button>
+
+        <div class="footer-note">
+            ⚠️ <strong>Full Disclosure:</strong> SHI* is a community utility, branding, and educational loyalty token. Not an investment contract. We give a SHI* about real-world value.
+        </div>
+    </div>
+
+    <script>
+        // --- ET NEURAL BACKGROUND ANIMATION ---
+        const canvas = document.getElementById('neural-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        for (let i = 0; i < 45; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.8,
+                vy: (Math.random() - 0.5) * 0.8,
+                radius: Math.random() * 2 + 1
+            });
+        }
+
+        function animateNeuralLines() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(0, 255, 204, 0.12)';
+            ctx.lineWidth = 0.8;
+
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.fillStyle = '#00ffcc';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    let p2 = particles[j];
+                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateNeuralLines);
+        }
+        animateNeuralLines();
+
+        // --- LIVE CHARTING CONFIGURATION ---
+        let marketChart;
+        const ctxChart = document.getElementById('marketChart').getContext('2d');
+
+        const dogeData = {
+            labels: ['Nov 1', 'Nov 3', 'Nov 5', 'Nov 7', 'Nov 9'],
+            datasets: [{
+                label: 'DOGE/USD',
+                data: [0.16, 0.17, 0.165, 0.18, 0.19],
+                borderColor: '#00ffcc',
+                backgroundColor: 'rgba(0,255,204,0.05)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        };
+
+        const shiSeedData = {
+            labels: ['Month 1', 'Month 3', 'Month 5', 'Month 7', 'Month 8 (Seeding)'],
+            datasets: [{
+                label: 'SHI* Utility Index',
+                data: [100, 100, 100, 100, 100], // Stable 8-month seed phase
+                borderColor: '#ff007f',
+                backgroundColor: 'rgba(255,0,127,0.05)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }]
+        };
+
+        function initChart(data, label) {
+            if (marketChart) marketChart.destroy();
+            marketChart = new Chart(ctxChart, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#8892b0', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: '#8892b0', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+        initChart(dogeData, 'DOGE');
+
+        function switchChart(type, btn) {
+            document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            if (type === 'doge') {
+                document.getElementById('chart-title').innerText = "📈 LIVE TELEMETRY: DOGECOIN (BASE)";
+                initChart(dogeData, 'DOGE');
+            } else {
+                document.getElementById('chart-title').innerText = "🌱 SHI* UTILITY INDEX (8-MONTH SEED PHASE)";
+                initChart(shiSeedData, 'SHI');
+            }
+        }
+
+        // --- CONTROLS & ACTIONS ---
+        function updateSlider(val) { document.getElementById('slider-val').innerText = val + 'x Tier'; }
+        function selectMode(element) {
+            document.querySelectorAll('.radio-btn-group').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+        function claimWelcomeGrant() {
+            let el = document.getElementById('token-balance');
+            el.innerHTML = '2,000 <small>SHI*</small>';
+            alert("🎁 Success! 1,000 SHI* Welcome Grant credited to your sovereign ET-wallet.");
+        }
+        function scanBottleQR() { alert("📷 Camera scanner active. Scanning 100ml Cool Hot Sauce bottle QR code..."); }
+    </script>
+</body>
+</html>
