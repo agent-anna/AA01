@@ -1,4 +1,4 @@
-AA01 MASTER CORE OPERAATIONAL MANIFESTATION AGENT 
+AA01 MASTER CORE OPERATIONAL MANIFESTATION AGENT 
 
 Welcome fam. How an I help you? Did you buy a coffee for the community?
 
