@@ -160,10 +160,26 @@
     </div>
 
     <!-- AUDIO HELPER HUD (TOP RIGHT) -->
-    <div class="fixed top-20 right-6 z-40 pointer-events-auto">
+    <div class="fixed top-20 right-6 z-40 pointer-events-auto flex flex-col gap-2 items-end">
+        <button onclick="toggleAutoRotate()" id="rotateBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoLime flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span id="rotateText">Auto-Rotate: OFF</span>
+        </button>
+        <button onclick="cycleAntiPopMode()" id="antiPopBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoGold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all">
+            <i data-lucide="layers" class="w-4 h-4"></i> <span id="antiPopText">Anti-Pop: MODE 1 (360.AVIF)</span>
+        </button>
         <button onclick="toggleAudioSynth()" id="synthBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoGold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all">
             <i data-lucide="volume-2" class="w-4 h-4"></i> <span id="synthText">Synth Audio: ON</span>
         </button>
+    </div>
+
+    <!-- ON-SCREEN D-PAD NAVIGATION CLUSTER (BOTTOM RIGHT) -->
+    <div class="fixed bottom-6 right-6 z-40 pointer-events-auto flex flex-col items-center gap-1 glass-spatial p-2 rounded-2xl">
+        <button onclick="manualPan(0, 15)" class="p-2.5 rounded-xl hover:bg-momoLime hover:text-black text-momoGold transition"><i data-lucide="chevron-up" class="w-5 h-5"></i></button>
+        <div class="flex gap-1">
+            <button onclick="manualPan(-15, 0)" class="p-2.5 rounded-xl hover:bg-momoLime hover:text-black text-momoGold transition"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+            <button onclick="manualPan(15, 0)" class="p-2.5 rounded-xl hover:bg-momoLime hover:text-black text-momoGold transition"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+        </div>
+        <button onclick="manualPan(0, -15)" class="p-2.5 rounded-xl hover:bg-momoLime hover:text-black text-momoGold transition"><i data-lucide="chevron-down" class="w-5 h-5"></i></button>
     </div>
 
     <!-- MODAL POPUP FOR WHO GIVES A SHI.MP4 VIDEO & TRANSCRIPT -->
@@ -277,6 +293,15 @@
         // Audio Synth Engine (Web Audio API - Hyrule Ocarina Tone Generator)
         let audioCtx = null;
         let synthEnabled = true;
+        let autoRotateEnabled = false;
+        let antiPopMode = 1; // 1: 360.avif, 2: 360.png, 3: 360-SECRET.mp4
+        let secretVideoElem = null;
+        let secretVideoTexture = null;
+        let worldSphereMesh = null;
+        let worldMaterial = null;
+
+        // Key states for smooth keyboard movement
+        const keysPressed = {};
 
         function playOcarinaNote(freq = 440) {
             if (!synthEnabled) return;
@@ -298,6 +323,49 @@
         function toggleAudioSynth() {
             synthEnabled = !synthEnabled;
             document.getElementById('synthText').innerText = synthEnabled ? "Synth Audio: ON" : "Synth Audio: OFF";
+        }
+
+        function toggleAutoRotate() {
+            autoRotateEnabled = !autoRotateEnabled;
+            document.getElementById('rotateText').innerText = autoRotateEnabled ? "Auto-Rotate: ON" : "Auto-Rotate: OFF";
+        }
+
+        function manualPan(deltaLon, deltaLat) {
+            lon += deltaLon;
+            lat += deltaLat;
+        }
+
+        function cycleAntiPopMode() {
+            antiPopMode = (antiPopMode % 3) + 1;
+            const btnText = document.getElementById('antiPopText');
+            const textureLoader = new THREE.TextureLoader();
+
+            if (antiPopMode === 1) {
+                btnText.innerText = "Anti-Pop: MODE 1 (360.AVIF)";
+                textureLoader.load('360.avif', (tex) => {
+                    worldMaterial.map = tex;
+                    worldMaterial.needsUpdate = true;
+                });
+            } else if (antiPopMode === 2) {
+                btnText.innerText = "Anti-Pop: MODE 2 (360.PNG)";
+                textureLoader.load('360.png', (tex) => {
+                    worldMaterial.map = tex;
+                    worldMaterial.needsUpdate = true;
+                });
+            } else if (antiPopMode === 3) {
+                btnText.innerText = "Anti-Pop: MODE 3 (SECRET VIDEO)";
+                if (!secretVideoElem) {
+                    secretVideoElem = document.createElement('video');
+                    secretVideoElem.src = '360-SECRET.mp4';
+                    secretVideoElem.loop = true;
+                    secretVideoElem.muted = true;
+                    secretVideoElem.playsInline = true;
+                    secretVideoElem.play().catch(e => console.log('Secret video play state:', e));
+                    secretVideoTexture = new THREE.VideoTexture(secretVideoElem);
+                }
+                worldMaterial.map = secretVideoTexture;
+                worldMaterial.needsUpdate = true;
+            }
         }
 
         // WebGL 360 Scene Variables
@@ -333,44 +401,39 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
-            // 1. Create 360 World Sphere using 360.avif (or fallback procedure grid)
+            // 1. Create 360 World Sphere using 360.avif
             const sphereGeo = new THREE.SphereGeometry(500, 60, 40);
             sphereGeo.scale(-1, 1, 1);
+
+            worldMaterial = new THREE.MeshBasicMaterial({ color: 0x121f17, wireframe: true });
+            worldSphereMesh = new THREE.Mesh(sphereGeo, worldMaterial);
+            scene.add(worldSphereMesh);
 
             const textureLoader = new THREE.TextureLoader();
             textureLoader.load(
                 '360.avif', 
                 (texture) => {
-                    const sphereMat = new THREE.MeshBasicMaterial({ map: texture });
-                    const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
-                    scene.add(worldSphere);
+                    worldMaterial.map = texture;
+                    worldMaterial.wireframe = false;
+                    worldMaterial.needsUpdate = true;
                 }, 
                 undefined, 
                 (err) => {
-                    console.log('360.avif loading fallback, loading alternate spatial grid background');
-                    textureLoader.load('8LcVA.jpg', (fallbackTex) => {
-                        const fallbackMat = new THREE.MeshBasicMaterial({ map: fallbackTex });
-                        const worldSphere = new THREE.Mesh(sphereGeo, fallbackMat);
-                        scene.add(worldSphere);
-                    }, undefined, () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 1024; canvas.height = 512;
-                        const ctx = canvas.getContext('2d');
-                        const grad = ctx.createLinearGradient(0,0,0,512);
-                        grad.addColorStop(0, '#080d0a'); grad.addColorStop(0.5, '#121f17'); grad.addColorStop(1, '#050806');
-                        ctx.fillStyle = grad; ctx.fillRect(0,0,1024,512);
-                        const proceduralMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });
-                        const worldSphere = new THREE.Mesh(sphereGeo, proceduralMat);
-                        scene.add(worldSphere);
-                    });
+                    console.log('360.avif loading fallback active');
                 }
             );
+
+            // Preload 360-SECRET.mp4 lazily in the background
+            setTimeout(() => {
+                const preloadVideo = document.createElement('video');
+                preloadVideo.src = '360-SECRET.mp4';
+                preloadVideo.preload = 'auto';
+            }, 3000);
 
             // 2. Add 3D Floating Interactive Spatial Marker Hotspots
             nodesData.forEach((node) => {
                 const markerGroup = new THREE.Group();
 
-                // Glowing Ring
                 const ringGeo = new THREE.RingGeometry(12, 16, 32);
                 const ringMat = new THREE.MeshBasicMaterial({ 
                     color: node.id === 1 ? 0xD4AF37 : (node.id === 3 ? 0xE53E3E : 0xA3E635), 
@@ -381,13 +444,11 @@
                 const ringMesh = new THREE.Mesh(ringGeo, ringMat);
                 markerGroup.add(ringMesh);
 
-                // Inner Core Sphere
                 const coreGeo = new THREE.SphereGeometry(6, 16, 16);
                 const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
                 const coreMesh = new THREE.Mesh(coreGeo, coreMat);
                 markerGroup.add(coreMesh);
 
-                // Convert Spherical to 3D Vector
                 const phiRad = THREE.MathUtils.degToRad(90 - node.lat);
                 const thetaRad = THREE.MathUtils.degToRad(node.lon);
                 const radius = 350;
@@ -402,10 +463,13 @@
                 spatialObjects.push(markerGroup);
             });
 
-            // Event Listeners for 360 Drag Interaction
+            // Event Listeners for 360 Drag Interaction & Keyboard
             container.addEventListener('pointerdown', onPointerDown);
             window.addEventListener('resize', onWindowResize);
             container.addEventListener('click', onCanvasClick);
+
+            window.addEventListener('keydown', (e) => { keysPressed[e.key] = true; });
+            window.addEventListener('keyup', (e) => { keysPressed[e.key] = false; });
 
             animate();
         }
@@ -431,6 +495,14 @@
             isUserInteracting = false;
             document.removeEventListener('pointermove', onPointerMove);
             document.removeEventListener('pointerup', onPointerUp);
+        }
+
+        function handleKeyboardInput() {
+            const step = 1.2;
+            if (keysPressed['ArrowLeft'] || keysPressed['a'] || keysPressed['A']) lon -= step;
+            if (keysPressed['ArrowRight'] || keysPressed['d'] || keysPressed['D']) lon += step;
+            if (keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W']) lat += step;
+            if (keysPressed['ArrowDown'] || keysPressed['s'] || keysPressed['S']) lat -= step;
         }
 
         function focusSpatialNode(index) {
@@ -478,6 +550,12 @@
         function animate() {
             requestAnimationFrame(animate);
 
+            // Handle keyboard arrow steering & auto-rotation
+            handleKeyboardInput();
+            if (autoRotateEnabled && !isUserInteracting) {
+                lon += 0.15;
+            }
+
             // Clamp Latitude
             lat = Math.max(-85, Math.min(85, lat));
 
@@ -492,12 +570,10 @@
 
             camera.lookAt(camera.target);
 
-            // Rotate Spatial Markers subtle rotation
             spatialObjects.forEach(obj => {
                 obj.rotation.z += 0.01;
             });
 
-            // Update Compass Bearing HUD
             const compassRing = document.getElementById('compassRing');
             const bearingAngle = document.getElementById('bearingAngle');
             if (compassRing && bearingAngle) {
