@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VEG ANNA — 360° SPATIAL ECOSYSTEM</title>
+    <!-- Pannellum 360 Library -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; color: #f3eee4; }
-        #viewer-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; overflow: hidden; }
-        .pano-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; will-change: transform; transition: opacity 0.4s ease; }
-        video.pano-bg { object-fit: cover; }
+        #panorama { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
         
         /* EXACT CRT Scanline & Vignette Overlay */
         .crt-overlay {
@@ -22,21 +23,24 @@
         .ui-overlay { position: relative; z-index: 10; pointer-events: none; }
         .interactive { pointer-events: auto; }
         .modal-backdrop { background: rgba(8, 13, 9, 0.85); backdrop-filter: blur(12px); }
+        
+        /* Custom Pannellum Hotspot Styling */
+        .pnlm-hotspot-base { background-color: #fbbf24 !important; border: 2px solid #000 !important; border-radius: 50%; box-shadow: 0 0 15px rgba(251, 191, 36, 0.8); }
     </style>
 </head>
 <body>
 
-    <!-- 360 Panoramic Background Container -->
-    <div id="viewer-container">
-        <div id="bg-layer" class="pano-bg" style="background-image: url('360.avif');"></div>
-        <video id="bg-video" class="pano-bg hidden" autoplay loop muted playsinline src="360-SECRET.mp4"></video>
-    </div>
+    <!-- True 360 Pannellum Viewer Container -->
+    <div id="panorama"></div>
+
+    <!-- Hidden Video Element for Secret Video Anti-Pop Mode -->
+    <video id="secret-video" class="hidden" autoplay loop muted playsinline src="360-SECRET.mp4"></video>
 
     <!-- CRT Retro Scanlines -->
     <div class="crt-overlay"></div>
 
     <!-- UI Overlay -->
-    <div class="ui-overlay absolute inset-0 flex flex-col justify-between p-6">
+    <div class="ui-overlay absolute inset-0 flex flex-col justify-between p-6 pointer-events-none">
         
         <!-- Top Header -->
         <header class="flex justify-between items-center bg-black/70 backdrop-blur-md px-6 py-4 rounded-2xl border border-amber-500/20 interactive shadow-2xl">
@@ -53,7 +57,7 @@
         </header>
 
         <!-- Bottom Footer & Hotspots -->
-        <div class="flex flex-col gap-4 interactive items-center">
+        <div class="flex flex-col gap-4 interactive items-center pointer-events-auto">
             <div class="flex justify-center gap-4">
                 <button onclick="openModal('modal-hotspot1')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 01<br><span class="text-white font-normal text-[11px]">8LCVA PORTRAIT</span></button>
                 <button onclick="openModal('modal-hotspot2')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 02<br><span class="text-white font-normal text-[11px]">WHO GIVES A SHI*</span></button>
@@ -66,14 +70,14 @@
                     <span class="w-2 h-2 rounded-full bg-amber-400"></span>
                     BEARING: <span id="bearing-val" class="text-emerald-400 font-mono font-bold">0° N</span>
                 </div>
-                <div class="text-stone-400 text-center">Use <span class="text-amber-400 font-bold">Arrow Keys / WASD</span> or drag mouse to pan.</div>
+                <div class="text-stone-400 text-center">Use <span class="text-amber-400 font-bold">Arrow Keys / WASD</span> or drag mouse to pan true 360 space.</div>
                 <div class="text-emerald-400 font-mono">NODE: AA01</div>
             </div>
         </div>
     </div>
 
     <!-- MODALS -->
-    <div id="modal-hotspot1" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive">
+    <div id="modal-hotspot1" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive pointer-events-auto">
         <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-lg w-full relative shadow-2xl">
             <button onclick="closeModal('modal-hotspot1')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
             <h2 class="text-amber-400 font-bold tracking-widest text-sm mb-4">HOTSPOT 01 — 8LCVA PORTRAIT</h2>
@@ -86,7 +90,7 @@
         </div>
     </div>
 
-    <div id="modal-hotspot2" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive">
+    <div id="modal-hotspot2" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive pointer-events-auto">
         <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-3xl w-full relative shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
             <button onclick="closeModal('modal-hotspot2')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
             <div>
@@ -104,7 +108,7 @@
         </div>
     </div>
 
-    <div id="modal-hotspot3" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive">
+    <div id="modal-hotspot3" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive pointer-events-auto">
         <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-lg w-full relative shadow-2xl">
             <button onclick="closeModal('modal-hotspot3')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
             <h2 class="text-amber-400 font-bold tracking-widest text-sm mb-4">HOTSPOT 03 — IDENTITY MATRIX</h2>
@@ -117,7 +121,7 @@
         </div>
     </div>
 
-    <div id="modal-wallet" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive">
+    <div id="modal-wallet" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive pointer-events-auto">
         <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full relative shadow-2xl text-center">
             <button onclick="closeModal('modal-wallet')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
             <h2 class="text-emerald-400 font-bold tracking-widest text-sm mb-2">P2P WALLET NODE SIMULATOR</h2>
@@ -133,95 +137,99 @@
 
     <!-- Script Engine -->
     <script>
-        const bgLayer = document.getElementById('bg-layer');
-        const bgVideo = document.getElementById('bg-video');
+        // Initialize True 360 Equirectangular Viewer via Pannellum
+        let viewer = pannellum.viewer('panorama', {
+            type: 'equirectangular',
+            panorama: '360.avif',
+            autoRotate: 2, // Default auto-rotate spinning
+            autoRotateInactivityDelay: 1000,
+            compass: true,
+            hfov: 100,
+            mouseZoom: true,
+            hotSpots: [
+                {
+                    pitch: -5,
+                    yaw: 30,
+                    type: "info",
+                    text: "Hotspot 01: 8LCVA Portrait",
+                    clickHandlerFunc: () => openModal('modal-hotspot1')
+                },
+                {
+                    pitch: 0,
+                    yaw: 120,
+                    type: "info",
+                    text: "Hotspot 02: Who Gives A Shi*",
+                    clickHandlerFunc: () => openModal('modal-hotspot2')
+                }
+            ]
+        });
+
+        const bearingVal = document.getElementById('bearing-val');
         const autorotateBtn = document.getElementById('toggle-autorotate');
         const antipopBtn = document.getElementById('toggle-antipop');
-        const bearingVal = document.getElementById('bearing-val');
 
-        let currentLon = 0;
-        let currentLat = 0;
-        let isAutoRotate = true; // Spinning by default
+        let isAutoRotate = true;
         let antiPopMode = 0; // 0: 360.avif, 1: 360.png, 2: 360-SECRET.mp4
-        let isDragging = false;
-        let startX = 0, startY = 0;
 
-        function updateView() {
-            if (isAutoRotate && !isDragging) {
-                currentLon += 0.04;
-                if (currentLon >= 360) currentLon = 0;
-                if (currentLon < 0) currentLon += 360;
+        // Update bearing live display from viewer yaw
+        setInterval(() => {
+            if(viewer) {
+                let yaw = Math.floor(viewer.getYaw() % 360);
+                if (yaw < 0) yaw += 360;
+                bearingVal.textContent = `${yaw}° N`;
             }
-            
-            const container = document.getElementById('viewer-container');
-            container.style.backgroundPosition = `${currentLon * 10}% ${50 + currentLat}%`;
-            bgLayer.style.transform = `scale(1.15) translate(${-currentLon * 3}px, ${-currentLat * 3}px)`;
-            bgVideo.style.transform = `scale(1.15) translate(${-currentLon * 3}px, ${-currentLat * 3}px)`;
+        }, 200);
 
-            bearingVal.textContent = `${Math.floor(currentLon)}° N`;
-            requestAnimationFrame(updateView);
-        }
-        requestAnimationFrame(updateView);
-
-        // Keyboard Arrow & WASD Navigation
+        // Keyboard Arrow & WASD Navigation for True 360 Steering
         window.addEventListener('keydown', (e) => {
-            const step = 4;
-            if (e.key === 'ArrowLeft' || e.key === 'a') currentLon -= step;
-            if (e.key === 'ArrowRight' || e.key === 'd') currentLon += step;
-            if (e.key === 'ArrowUp' || e.key === 'w') currentLat = Math.min(30, currentLat + step);
-            if (e.key === 'ArrowDown' || e.key === 's') currentLat = Math.max(-30, currentLat - step);
+            const hFov = viewer.getHfov();
+            const pitch = viewer.getPitch();
+            const yaw = viewer.getYaw();
+            const step = 5;
+
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
+                viewer.setYaw(yaw - step);
+            } else if (e.key === 'ArrowRight' || e.key === 'd') {
+                viewer.setYaw(yaw + step);
+            } else if (e.key === 'ArrowUp' || e.key === 'w') {
+                viewer.setPitch(Math.min(85, pitch + step));
+            } else if (e.key === 'ArrowDown' || e.key === 's') {
+                viewer.setPitch(Math.max(-85, pitch - step));
+            }
         });
 
-        // Mouse Drag Panning
-        window.addEventListener('mousedown', (e) => {
-            if(e.target.closest('header') || e.target.closest('footer') || e.target.closest('.fixed')) return;
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-        });
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            currentLon -= deltaX * 0.1;
-            currentLat = Math.max(-30, Math.min(30, currentLat + deltaY * 0.1));
-            startX = e.clientX;
-            startY = e.clientY;
-        });
-        window.addEventListener('mouseup', () => { isDragging = false; });
-
-        // Auto-Rotate Toggle
+        // Auto-Rotate Toggle Button
         autorotateBtn.addEventListener('click', () => {
             isAutoRotate = !isAutoRotate;
-            autorotateBtn.textContent = `AUTO-ROTATE: ${isAutoRotate ? 'ON' : 'OFF'}`;
-            autorotateBtn.className = isAutoRotate 
-                ? "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 px-3.5 py-1.5 rounded-xl text-xs font-bold transition"
-                : "bg-stone-900/80 hover:bg-stone-800 text-stone-400 border border-white/20 px-3.5 py-1.5 rounded-xl text-xs font-bold transition";
+            if (isAutoRotate) {
+                viewer.startAutoRotate(2);
+                autorotateBtn.textContent = "AUTO-ROTATE: ON";
+                autorotateBtn.className = "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 px-3.5 py-1.5 rounded-xl text-xs font-bold transition";
+            } else {
+                viewer.stopAutoRotate();
+                autorotateBtn.textContent = "AUTO-ROTATE: OFF";
+                autorotateBtn.className = "bg-stone-900/80 hover:bg-stone-800 text-stone-400 border border-white/20 px-3.5 py-1.5 rounded-xl text-xs font-bold transition";
+            }
         });
 
         // Anti-Pop Mode Switcher Toggle
         antipopBtn.addEventListener('click', () => {
             antiPopMode = (antiPopMode + 1) % 3;
             if (antiPopMode === 0) {
-                bgVideo.classList.add('hidden');
-                bgVideo.pause();
-                bgLayer.classList.remove('hidden');
-                bgLayer.style.backgroundImage = "url('360.avif')";
+                viewer.setPanorama('360.avif');
                 antipopBtn.textContent = "ANTI-POP: 360.AVIF";
             } else if (antiPopMode === 1) {
-                bgVideo.classList.add('hidden');
-                bgVideo.pause();
-                bgLayer.classList.remove('hidden');
-                bgLayer.style.backgroundImage = "url('360.png')";
+                viewer.setPanorama('360.png');
                 antipopBtn.textContent = "ANTI-POP: 360.PNG";
             } else if (antiPopMode === 2) {
-                bgLayer.classList.add('hidden');
-                bgVideo.classList.remove('hidden');
-                bgVideo.play().catch(err => console.log("Video autoplay restricted"));
+                // Switch panorama source to the video element stream
+                viewer.setPanorama('360-SECRET.mp4');
+                document.getElementById('secret-video').play().catch(e => console.log("Video play locked"));
                 antipopBtn.textContent = "ANTI-POP: SECRET.MP4";
             }
         });
 
+        // Modal Handlers
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         document.getElementById('btn-wallet').addEventListener('click', () => openModal('modal-wallet'));
