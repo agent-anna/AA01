@@ -24,9 +24,10 @@
         body { background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .glass-spatial { background: rgba(8, 13, 10, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #D4AF37; }
+        .nft-image-pixel { image-rendering: pixelated; }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6" onclick="unlockAudioContextOnce()">
+<body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6">
 
     <header class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-white/10">
         <div class="flex items-center gap-3 glass-spatial px-5 py-2.5 rounded-full">
@@ -55,7 +56,7 @@
                     </h2>
                     <span id="earnRateBadge" class="font-mono text-[10px] bg-momoLime/20 text-momoLime px-2 py-0.5 rounded-full border border-momoLime/40 animate-pulse">ACTIVE PARTY</span>
                 </div>
-                <p class="font-mono text-xs text-zinc-400">Escape doomscrolling. Stream Martin Strayd directly from git repository.</p>
+                <p class="font-mono text-xs text-zinc-400">Stream Martin Strayd directly from repository with zero friction.</p>
 
                 <!-- Track List -->
                 <div class="space-y-2">
@@ -108,7 +109,7 @@
                 <div class="p-3 bg-black/80 rounded-2xl border border-white/10 space-y-3">
                     <div class="flex items-center justify-between font-mono text-xs">
                         <span id="nowPlayingText" class="text-zinc-400">Click any track to party</span>
-                        <button onclick="toggleRepeatMode()" id="repeatBtn" class="bg-mooGold/20 text-momoGold px-2.5 py-1 rounded-lg border border-momoGold/40 hover:bg-momoGold hover:text-black transition-all text-[10px] font-bold">
+                        <button onclick="toggleRepeatMode()" id="repeatBtn" class="bg-momoGold/20 text-momoGold px-2.5 py-1 rounded-lg border border-momoGold/40 hover:bg-momoGold hover:text-black transition-all text-[10px] font-bold">
                             REPEAT: ALL
                         </button>
                     </div>
@@ -120,7 +121,7 @@
                 </div>
             </div>
 
-            <!-- THROW SHI* AT A FRIEND (REFERRAL DROP) -->
+            <!-- THROW SHI* AT A FRIEND -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -148,7 +149,7 @@
                     </span>
                     <span class="text-zinc-400 text-[10px]">baananna.ps1 Connected</span>
                 </div>
-                <p class="font-mono text-xs text-zinc-400">Only genuine educational SHI* originating from Vault Wallet (<code class="text-momoGold">DTzt4U...Bg2pYG</code>) is recognized[cite: 2]:</p>
+                <p class="font-mono text-xs text-zinc-400">Only genuine educational SHI* originating from Vault Wallet (<code class="text-momoGold">DTzt4U...Bg2pYG</code>) is recognized:</p>
                 <div class="flex gap-2">
                     <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoLime">
                     <button onclick="verifyVaultWallet(); syncWalletAssets();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">VERIFY VAULT</button>
@@ -156,7 +157,7 @@
                 <div id="verifyResult" class="font-mono text-xs text-momoLime pt-1">Connecting to core vault engine...</div>
             </div>
 
-            <!-- UNIFIED ASSET BALANCES & NFT GALLERY -->
+            <!-- UNIFIED ASSET BALANCES & LIVE DOGEBUDS NFT GALLERY -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-4">
                 <div class="flex items-center justify-between">
                     <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -178,18 +179,9 @@
                     </div>
                 </div>
 
-                <p class="font-mono text-[10px] text-zinc-400 pt-1">Connected Gallery (DogeBuds & Ordinals):</p>
-                <div id="nftGalleryGrid" class="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-1">
-                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                        <div class="w-full h-16 bg-momoGold/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoGold font-bold">DogeBud #7142</div>
-                        <div class="font-syne font-bold text-[10px] text-white">DogeBuds Sovereign</div>
-                        <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
-                    </div>
-                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                        <div class="w-full h-16 bg-momoLime/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoLime font-bold">Dogemap #365</div>
-                        <div class="font-syne font-bold text-[10px] text-white">Dogemap Asset</div>
-                        <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
-                    </div>
+                <p class="font-mono text-[10px] text-zinc-400 pt-1">Live Inscription Media Viewer (Synced to Doggy Market):</p>
+                <div id="nftGalleryGrid" class="grid grid-cols-2 gap-3 max-h-56 overflow-y-auto pr-1">
+                    <!-- Dynamic Live Inscription Image Previews -->
                 </div>
             </div>
 
@@ -217,11 +209,8 @@
         let chartInstance = null;
         let earnedShiCount = 0;
         let rewardTimer = null;
-        let audioUnlocked = false;
         const audio = document.getElementById('audioPlayer');
 
-        const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/";
-        
         const playlist = [
             { file: 'track1.mp3', title: 'Vegan Millionaire Dot Crypto' },
             { file: 'track2.mp3', title: 'Young and Dumb (Search Engine)' },
@@ -230,17 +219,7 @@
         ];
 
         let currentTrackIndex = 0;
-        let repeatMode = 2; // Repeat All for continuous party mode
-
-        function unlockAudioContextOnce() {
-            if (!audioUnlocked) {
-                audio.play().then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                    audioUnlocked = true;
-                }).catch(e => {});
-            }
-        }
+        let repeatMode = 2;
 
         function tapToEarnShi() {
             earnedShiCount += 1000;
@@ -294,9 +273,8 @@
             }
         });
 
-        function selectTrack(index, filename, title) {
+        async function selectTrack(index, filename, title) {
             currentTrackIndex = index;
-            audioUnlocked = true;
             document.getElementById('nowPlayingText').innerText = `Loading: ${title}...`;
             
             for(let i=0; i<4; i++) {
@@ -304,13 +282,23 @@
                 if(card) card.style.borderColor = (i === index) ? '#A3E635' : 'rgba(255,255,255,0.1)';
             }
 
-            audio.src = GITHUB_RAW_BASE + filename;
-            audio.load();
-            audio.play().then(() => {
+            const rawUrl = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/" + filename;
+            
+            try {
+                // Fetch direct blob to bypass local CORS playback restrictions
+                const resp = await fetch(rawUrl);
+                const blob = await resp.blob();
+                audio.src = URL.createObjectURL(blob);
+                audio.load();
+                audio.play();
                 document.getElementById('nowPlayingText').innerText = `Streaming: ${title}`;
-            }).catch(err => {
-                document.getElementById('nowPlayingText').innerText = `Ready: ${title} (Tap play bar)`;
-            });
+            } catch (err) {
+                audio.src = "./strayd/" + filename;
+                audio.load();
+                audio.play().catch(e => {
+                    document.getElementById('nowPlayingText').innerText = `Ready: ${title} (Tap play below)`;
+                });
+            }
         }
 
         async function verifyVaultWallet() {
@@ -329,10 +317,16 @@
             }
         }
 
+        // Live Inscription Media Renderer
         async function syncWalletAssets() {
             const addr = document.getElementById('walletInput').value.trim();
             const grid = document.getElementById('nftGalleryGrid');
-            grid.innerHTML = '<div class="col-span-2 text-center font-mono text-xs text-momoGold py-4 animate-pulse">Syncing Chain Inscriptions...</div>';
+            grid.innerHTML = '<div class="col-span-2 text-center font-mono text-xs text-momoGold py-4 animate-pulse">Syncing Live Inscription Pixel Media...</div>';
+
+            const dogeBuds = [
+                { id: '7142', img: 'https://ordinals.doggy.market/content/87499885i0', floor: '7.76 DOGE ($0.54)' },
+                { id: '4736', img: 'https://ordinals.doggy.market/content/87470878i0', floor: '7.76 DOGE ($0.54)' }
+            ];
 
             setTimeout(() => {
                 if(addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
@@ -345,18 +339,16 @@
                     document.getElementById('shiBal').innerText = "0 SHI*";
                 }
 
-                grid.innerHTML = `
-                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                        <div class="w-full h-16 bg-momoGold/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoGold font-bold">DogeBuds #7142</div>
-                        <div class="font-syne font-bold text-[10px] text-white">DogeBuds Sovereign</div>
-                        <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
+                grid.innerHTML = dogeBuds.map(item => `
+                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-2">
+                        <div class="w-full h-24 bg-zinc-900 rounded-lg overflow-hidden flex items-center justify-center border border-momoGold/30">
+                            <img src="${item.img}" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/agent-anna/AA01/main/365/veganna.png';" class="w-full h-full object-cover nft-image-pixel" alt="DogeBud #${item.id}">
+                        </div>
+                        <div class="font-syne font-bold text-xs text-white">DogeBuds #${item.id}</div>
+                        <div class="font-mono text-[9px] text-momoLime">${item.floor}</div>
                     </div>
-                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                        <div class="w-full h-16 bg-momoLime/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoLime font-bold">Dogemap #365</div>
-                        <div class="font-syne font-bold text-[10px] text-white">Dogemap Asset</div>
-                        <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
-                    </div>`;
-            }, 300);
+                `).join('');
+            }, 400);
         }
 
         function initChart() {
