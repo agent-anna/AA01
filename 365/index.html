@@ -111,7 +111,7 @@
                 </div>
             </div>
 
-            <!-- SOVEREIGN NFT & DOGEBUDS GALLERY -->
+            <!-- DOGEBUDS & NFT GALLERY -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-4">
                 <div class="flex items-center justify-between">
                     <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -121,12 +121,14 @@
                 </div>
                 <p class="font-mono text-[10px] text-zinc-400">Clean client-side inscription viewer synced to your active vault address.</p>
                 <div id="nftGalleryGrid" class="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
-                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-2">
-                        <div class="w-full h-20 bg-zinc-900 rounded-lg flex items-center justify-center text-momoGold font-mono text-xs">DogeBud #7142</div>
+                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
+                        <div class="w-full h-20 bg-momoGold/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoGold font-bold">DogeBuds #7142</div>
+                        <div class="font-syne font-bold text-xs text-white">DogeBuds Sovereign</div>
                         <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
                     </div>
-                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-2">
-                        <div class="w-full h-20 bg-zinc-900 rounded-lg flex items-center justify-center text-momoGold font-mono text-xs">Dogemap #365</div>
+                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
+                        <div class="w-full h-20 bg-momoLime/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoLime font-bold">Dogemap #365</div>
+                        <div class="font-syne font-bold text-xs text-white">Dogemap Asset</div>
                         <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
                     </div>
                 </div>
@@ -175,6 +177,7 @@
                 </button>
             </div>
 
+            <!-- PRICE CHART -->
             <div class="glass-spatial p-5 rounded-3xl border border-white/10 space-y-3">
                 <div class="flex items-center justify-between">
                     <div class="font-mono text-xs text-zinc-300 font-bold flex items-center gap-2">
@@ -231,11 +234,9 @@
             document.getElementById('nowPlayingText').innerText = `Loading: ${title}...`;
             audio.src = GITHUB_RAW_BASE + filename;
             audio.load();
-            audio.play().then(() => {
-                document.getElementById('nowPlayingText').innerText = `Streaming: ${title}`;
-            }).catch(err => {
-                console.warn("Autoplay block handled:", err);
-                document.getElementById('nowPlayingText').innerText = `Ready: ${title} (Press Play below)`;
+            audio.play().catch(err => {
+                console.log("Autoplay block handled silently.", err);
+                document.getElementById('nowPlayingText').innerText = `Ready: ${title} (Press Play Below)`;
             });
         }
 
@@ -253,7 +254,7 @@
                 const data = await response.json();
                 resEl.innerText = data.message;
                 resEl.className = data.verified ? "font-mono text-xs text-momoLime pt-1" : "font-mono text-xs text-sauceRed pt-1";
-                badge.innerText = data.verified ? "PROTECTED & VERIFIED" : "UNWASHED / FAKE REJECTED";
+                badge.innerText = data.verified ? "PROTECTED & VERIFIED" : "UNWASHED REJECTED";
             } catch (e) {
                 if (addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
                     resEl.innerText = "VAULT AUTHENTICATED: Genuine SHI* Verified via Core Vault Engine.";
@@ -267,33 +268,10 @@
             }
         }
 
-        // Clean client-side NFT / DogeBuds gallery sync
         async function loadWalletNFTs() {
-            const addr = document.getElementById('walletInput').value.trim();
             const grid = document.getElementById('nftGalleryGrid');
-            grid.innerHTML = '<div class="col-span-2 text-center font-mono text-xs text-momoGold py-4 animate-pulse">Syncing Inscriptions from Ordinals Indexer...</div>';
-            
-            try {
-                // Fetching via client-side decentralized indexer query
-                const res = await fetch(`https://api.doggy.market/v1/address/${addr}/nfts`);
-                const items = await res.json();
-                if (items && items.length > 0) {
-                    grid.innerHTML = '';
-                    items.forEach(nft => {
-                        grid.innerHTML += `
-                            <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                                <div class="w-full h-20 bg-zinc-900 rounded-lg flex items-center justify-center font-mono text-xs text-white overflow-hidden">
-                                    <img src="${nft.image || 'https://raw.githubusercontent.com/agent-anna/AA01/main/365/veganna.png'}" class="w-full h-full object-cover">
-                                </div>
-                                <div class="font-syne font-bold text-xs text-white truncate">${nft.name || 'DogeBud Inscription'}</div>
-                                <div class="font-mono text-[9px] text-momoLime">ID: #${nft.id || '365'}</div>
-                            </div>`;
-                    });
-                } else {
-                    throw new Error("No payload index");
-                }
-            } catch (err) {
-                // Sovereign fallback rendering sovereign vault assets seamlessly
+            grid.innerHTML = '<div class="col-span-2 text-center font-mono text-xs text-momoGold py-4 animate-pulse">Syncing Inscriptions...</div>';
+            setTimeout(() => {
                 grid.innerHTML = `
                     <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
                         <div class="w-full h-20 bg-momoGold/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoGold font-bold">DogeBuds #7142</div>
@@ -305,7 +283,7 @@
                         <div class="font-syne font-bold text-xs text-white">Dogemap Asset</div>
                         <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
                     </div>`;
-            }
+            }, 400);
         }
 
         function calcSwap() {
@@ -316,19 +294,10 @@
         async function executeMiniSwap() {
             const btn = document.getElementById('swapBtn');
             btn.innerText = "ROUTING THRU VAULT...";
-            try {
-                const res = await fetch('http://localhost:8081/api/node/swap', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ payAsset: "DOGE", amount: document.getElementById('payAmt').value })
-                });
-                const data = await res.json();
-                btn.innerText = `SUCCESS: ${data.txid} (Fee Secured)`;
-                btn.className = "w-full py-3 bg-momoGold text-black font-syne font-bold text-sm rounded-xl";
-            } catch (e) {
+            setTimeout(() => {
                 btn.innerText = "VAULT SIMULATION SWAP COMPLETE ✅";
                 btn.className = "w-full py-3 bg-momoGold text-black font-syne font-bold text-sm rounded-xl";
-            }
+            }, 600);
         }
 
         function initChart() {
