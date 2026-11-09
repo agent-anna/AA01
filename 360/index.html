@@ -8,14 +8,16 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonts -->
+    <!-- Fonts: Syne (Kinetic Bold Display), Cormorant Garamond (Casa Momo luxury serif), Space Grotesk (P2P Mono) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Icons & GSAP & Three.js -->
+    <!-- Icons & GSAP -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
@@ -43,16 +45,18 @@
     <style>
         * { user-select: none; -webkit-user-drag: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; }
-
+        
         #webgl-container { position: absolute; inset: 0; z-index: 1; cursor: grab; }
         #webgl-container:active { cursor: grabbing; }
 
+        /* Reticle & 360 Compass */
         .compass-ring {
             border: 1.5px dashed rgba(212, 175, 55, 0.4);
             border-radius: 50%;
             transition: transform 0.1s linear;
         }
 
+        /* Glassmorphic Spatial UI Cards */
         .glass-spatial {
             background: rgba(8, 13, 10, 0.75);
             backdrop-filter: blur(16px);
@@ -66,6 +70,7 @@
             box-shadow: 0 0 30px rgba(163, 230, 53, 0.2);
         }
 
+        /* Ocarina / Hotspot Note Button Effects */
         .ocarina-btn {
             background: rgba(18, 31, 23, 0.85);
             border: 1px solid rgba(212, 175, 55, 0.4);
@@ -78,15 +83,14 @@
             box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
         }
 
+        /* Scanlines Overlay */
         .scanlines {
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
             background-size: 100% 4px;
             pointer-events: none;
         }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #D4AF37; }
-        
+        /* Pulse Animation for Node Signals */
         @keyframes pulseGlow {
             0%, 100% { opacity: 0.4; transform: scale(1); }
             50% { opacity: 0.9; transform: scale(1.1); }
@@ -97,95 +101,95 @@
 <body class="antialiased">
 
     <!-- 360 WEBGL CANVAS CONTAINER -->
-    <div id="webgl-container"></div>
+    <div id="webgl-container" class="touch-none"></div>
     <div class="scanlines absolute inset-0 z-10"></div>
 
     <!-- TOP SPONSOR BAR -->
-    <header class="fixed top-0 left-0 w-full z-40 p-4 flex justify-between items-center pointer-events-none">
-        <div class="pointer-events-auto flex items-center gap-3 glass-spatial px-4 py-2 rounded-full">
+    <header class="fixed top-0 left-0 w-full z-40 p-3 sm:p-4 flex flex-wrap justify-between items-center gap-2 pointer-events-none">
+        <div class="pointer-events-auto flex items-center gap-2 sm:gap-3 glass-spatial px-3 sm:px-4 py-2 rounded-full">
             <span class="w-2.5 h-2.5 rounded-full bg-momoLime animate-ping"></span>
-            <span class="font-syne font-black text-lg tracking-wider text-white">VEG ANNA</span>
-            <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">360° SPATIAL ECOSYSTEM</span>
+            <span class="font-syne font-black text-sm sm:text-lg tracking-wider text-white">VEG ANNA</span>
+            <span class="font-mono text-[9px] sm:text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-2 sm:pl-3 hidden xs:inline">360° SPATIAL</span>
         </div>
 
-        <div class="pointer-events-auto flex items-center gap-3">
-            <button onclick="requestGyro()" id="gyroBtn" class="glass-spatial px-3 py-2 rounded-full font-mono text-xs text-momoGold font-bold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all hidden">
-                <i data-lucide="compass" class="w-4 h-4"></i> ENABLE GYRO
+        <div class="pointer-events-auto flex items-center gap-2">
+            <button onclick="requestGyro()" id="gyroBtn" class="glass-spatial px-3 py-2 rounded-full font-mono text-xs text-momoGold font-bold flex items-center gap-1.5 hover:bg-momoGold hover:text-black transition-all">
+                <i data-lucide="compass" class="w-4 h-4"></i> <span class="hidden sm:inline">ENABLE </span>GYRO
             </button>
-            <button onclick="openWalletModal()" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
-                <i data-lucide="wallet" class="w-4 h-4"></i> CONNECT P2P WALLET
+            <button onclick="openWalletModal()" class="glass-spatial px-3 sm:px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-momoLime hover:text-black transition-all">
+                <i data-lucide="wallet" class="w-4 h-4"></i> WALLET
             </button>
-            <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
-                <i data-lucide="flame" class="w-4 h-4"></i> SPONSORED BY 100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-3 sm:px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-sauceRed hover:text-white transition-all">
+                <i data-lucide="flame" class="w-4 h-4"></i> <span class="hidden md:inline">SPONSORED BY </span>HOTSAUCE <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             </a>
         </div>
     </header>
 
     <!-- OCARINA-INSPIRED SPATIAL HOTSPOT SELECTOR (BOTTOM DOCK) -->
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-3xl px-4 pointer-events-none">
-        <div class="pointer-events-auto glass-spatial p-3 rounded-2xl flex items-center justify-between gap-2 shadow-2xl">
-            <button onclick="focusSpatialNode(0)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
-                <span class="font-mono text-[10px] text-momoLime font-bold uppercase">HOTSPOT 01</span>
-                <span class="font-syne font-bold text-xs uppercase tracking-tight">8LcVA PORTRAIT</span>
+    <div class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-3xl px-3 sm:px-4 pointer-events-none">
+        <div class="pointer-events-auto glass-spatial p-2 sm:p-3 rounded-2xl grid grid-cols-2 sm:flex sm:justify-between gap-2 shadow-2xl">
+            <button onclick="focusSpatialNode(0)" class="ocarina-btn py-2.5 sm:py-3 px-2 rounded-xl text-center flex flex-col items-center gap-0.5">
+                <span class="font-mono text-[9px] sm:text-[10px] text-momoLime font-bold uppercase">HOTSPOT 01</span>
+                <span class="font-syne font-bold text-[11px] sm:text-xs uppercase tracking-tight">8LcVA PORTRAIT</span>
             </button>
 
-            <button onclick="focusSpatialNode(1)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
-                <span class="font-mono text-[10px] text-momoGold font-bold uppercase">HOTSPOT 02</span>
-                <span class="font-syne font-bold text-xs uppercase tracking-tight">WHO GIVES A SHI*</span>
+            <button onclick="focusSpatialNode(1)" class="ocarina-btn py-2.5 sm:py-3 px-2 rounded-xl text-center flex flex-col items-center gap-0.5">
+                <span class="font-mono text-[9px] sm:text-[10px] text-momoGold font-bold uppercase">HOTSPOT 02</span>
+                <span class="font-syne font-bold text-[11px] sm:text-xs uppercase tracking-tight">WHO GIVES A SHI*</span>
             </button>
 
-            <button onclick="focusSpatialNode(2)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
-                <span class="font-mono text-[10px] text-momoLime font-bold uppercase">HOTSPOT 03</span>
-                <span class="font-syne font-bold text-xs uppercase tracking-tight">IDENTITY MATRIX</span>
+            <button onclick="focusSpatialNode(2)" class="ocarina-btn py-2.5 sm:py-3 px-2 rounded-xl text-center flex flex-col items-center gap-0.5">
+                <span class="font-mono text-[9px] sm:text-[10px] text-momoLime font-bold uppercase">HOTSPOT 03</span>
+                <span class="font-syne font-bold text-[11px] sm:text-xs uppercase tracking-tight">IDENTITY MATRIX</span>
             </button>
 
-            <button onclick="focusSpatialNode(3)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
-                <span class="font-mono text-[10px] text-sauceRed font-bold uppercase">HOTSPOT 04</span>
-                <span class="font-syne font-bold text-xs uppercase tracking-tight">P2P WALLET NODE</span>
+            <button onclick="focusSpatialNode(3)" class="ocarina-btn py-2.5 sm:py-3 px-2 rounded-xl text-center flex flex-col items-center gap-0.5">
+                <span class="font-mono text-[9px] sm:text-[10px] text-sauceRed font-bold uppercase">HOTSPOT 04</span>
+                <span class="font-syne font-bold text-[11px] sm:text-xs uppercase tracking-tight">P2P WALLET NODE</span>
             </button>
         </div>
     </div>
 
     <!-- 360 RADIAL COMPASS BEARING HUD (BOTTOM LEFT) -->
-    <div class="fixed bottom-6 left-6 z-40 pointer-events-none hidden md:flex items-center gap-3 glass-spatial p-3 rounded-2xl">
-        <div class="w-10 h-10 relative flex items-center justify-center">
+    <div class="fixed bottom-24 sm:bottom-6 left-4 sm:left-6 z-40 pointer-events-none flex items-center gap-3 glass-spatial p-2.5 sm:p-3 rounded-2xl">
+        <div class="w-8 sm:w-10 h-8 sm:h-10 relative flex items-center justify-center">
             <div id="compassRing" class="compass-ring absolute inset-0"></div>
-            <i data-lucide="compass" class="w-5 h-5 text-momoGold"></i>
+            <i data-lucide="compass" class="w-4 sm:w-5 h-4 sm:h-5 text-momoGold"></i>
         </div>
-        <div class="font-mono text-xs">
-            <div class="text-zinc-400 text-[10px]">BEARING</div>
+        <div class="font-mono text-[11px] sm:text-xs">
+            <div class="text-zinc-400 text-[9px] sm:text-[10px]">BEARING</div>
             <div id="bearingAngle" class="text-momoLime font-bold">0° N</div>
         </div>
     </div>
 
     <!-- AUDIO HELPER HUD (TOP RIGHT) -->
-    <div class="fixed top-20 right-6 z-40 pointer-events-auto">
-        <button onclick="toggleAudioSynth()" id="synthBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoGold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all">
-            <i data-lucide="volume-2" class="w-4 h-4"></i> <span id="synthText">Synth Audio: ON</span>
+    <div class="fixed top-16 sm:top-20 right-4 sm:right-6 z-40 pointer-events-auto">
+        <button onclick="toggleAudioSynth()" id="synthBtn" class="glass-spatial px-3 py-1.5 sm:py-2 rounded-xl font-mono text-xs text-momoGold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all">
+            <i data-lucide="volume-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> <span id="synthText">Audio: ON</span>
         </button>
     </div>
 
     <!-- MODAL POPUP FOR WHO GIVES A SHI.MP4 VIDEO & TRANSCRIPT -->
-    <div id="videoModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 hidden">
-        <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-momoGold/40 animate-in fade-in zoom-in duration-300">
+    <div id="videoModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-momoGold/40 animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
             <button onclick="closeVideoModal()" class="absolute top-4 right-4 z-20 bg-black/70 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
 
             <div class="grid lg:grid-cols-12">
-                <div class="lg:col-span-7 bg-black flex items-center justify-center relative min-h-[320px]">
+                <div class="lg:col-span-7 bg-black flex items-center justify-center relative min-h-[260px] sm:min-h-[320px]">
                     <video id="modalVideo" controls playsinline preload="auto" class="w-full h-full object-cover">
                         <source src="WHO GIVES A SHI.mp4" type="video/mp4">
                         Your browser does not support playing this video file.
                     </video>
                 </div>
-                <div class="lg:col-span-5 p-6 sm:p-8 space-y-6 flex flex-col justify-between">
-                    <div class="space-y-4">
+                <div class="lg:col-span-5 p-5 sm:p-8 space-y-4 sm:space-y-6 flex flex-col justify-between">
+                    <div class="space-y-3 sm:space-y-4">
                         <span class="font-mono text-xs text-momoGold uppercase tracking-widest font-bold flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-momoLime animate-ping"></span> SPATIAL MEDIA BROADCAST
                         </span>
-                        <h3 class="font-syne font-black text-2xl text-white">WHO GIVES A SHI*</h3>
-                        <div class="p-4 rounded-xl bg-white/5 border border-white/10 font-serif italic text-lg text-emerald-200">
+                        <h3 class="font-syne font-black text-xl sm:text-2xl text-white">WHO GIVES A SHI*</h3>
+                        <div class="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 font-serif italic text-base sm:text-lg text-emerald-200">
                             "How do you trust a crypto wallet? Honestly, it's fun... it's funny money. Who gives a shi*?"
                         </div>
                         <p class="font-sans text-xs text-zinc-300 leading-relaxed">
@@ -195,7 +199,7 @@
 
                     <div class="pt-4 border-t border-white/10 flex items-center justify-between font-mono text-xs">
                         <span class="text-sauceRed font-bold">100MLCOOLHOTSAUCE.COM</span>
-                        <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="underline text-momoLime">VISIT SPONSOR</a>
+                        <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="underline text-momoLime flex items-center gap-1">VISIT SPONSOR <i data-lucide="external-link" class="w-3 h-3"></i></a>
                     </div>
                 </div>
             </div>
@@ -203,65 +207,78 @@
     </div>
 
     <!-- MODAL POPUP FOR PORTRAIT IMAGE (8LcVA.jpg) -->
-    <div id="portraitModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
-        <div class="glass-spatial w-full max-w-3xl rounded-3xl overflow-hidden relative p-6 space-y-4 border border-momoLime/40">
+    <div id="portraitModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="glass-spatial w-full max-w-3xl rounded-3xl overflow-hidden relative p-4 sm:p-6 space-y-4 border border-momoLime/40 max-h-[90vh] overflow-y-auto">
             <button onclick="closePortraitModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            <div class="font-mono text-xs text-momoLime font-bold uppercase tracking-widest">VEG ANNA — EDITORIAL PORTRAIT</div>
-            <img src="8LcVA.jpg" alt="Veg Anna Portrait" class="w-full h-auto max-h-[70vh] object-cover rounded-2xl border border-white/10">
-            <p class="font-serif italic text-center text-emerald-100 text-lg">"Building a sovereign plant-based empire on peer-to-peer infrastructure."</p>
+            <div class="font-mono text-xs text-momoLime font-bold uppercase tracking-widest flex justify-between items-center pr-10">
+                <span>VEG ANNA — PORTRAIT</span>
+                <a href="8LcVA.jpg" target="_blank" class="text-momoGold underline flex items-center gap-1 text-[10px]">RAW <i data-lucide="external-link" class="w-3 h-3"></i></a>
+            </div>
+            <img src="8LcVA.jpg" alt="Veg Anna Portrait" class="w-full h-auto max-h-[55vh] object-cover rounded-2xl border border-white/10">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2">
+                <p class="font-serif italic text-emerald-100 text-sm sm:text-base text-center sm:text-left">"Building a sovereign plant-based empire."</p>
+                <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="w-full sm:w-auto px-4 py-2.5 bg-momoLime text-black font-mono text-xs font-bold rounded-xl text-center hover:bg-momoGold transition-all">HOT SAUCE SPONSOR</a>
+            </div>
         </div>
     </div>
 
     <!-- MODAL POPUP FOR IDENTITY MATRIX IMAGE (image (2).jpg) -->
-    <div id="matrixModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
-        <div class="glass-spatial w-full max-w-3xl rounded-3xl overflow-hidden relative p-6 space-y-4 border border-momoLime/40">
+    <div id="matrixModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="glass-spatial w-full max-w-3xl rounded-3xl overflow-hidden relative p-4 sm:p-6 space-y-4 border border-momoLime/40 max-h-[90vh] overflow-y-auto">
             <button onclick="closeMatrixModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            <div class="font-mono text-xs text-momoLime font-bold">VEG ANNA 9-PANEL IDENTITY MATRIX</div>
-            <img src="image (2).jpg" alt="Veg Anna Model Identity Grid" class="w-full h-auto rounded-2xl border border-white/10">
+            <div class="font-mono text-xs text-momoLime font-bold flex justify-between items-center pr-10">
+                <span>IDENTITY MATRIX</span>
+                <a href="image (2).jpg" target="_blank" class="text-momoGold underline flex items-center gap-1 text-[10px]">RAW <i data-lucide="external-link" class="w-3 h-3"></i></a>
+            </div>
+            <img src="image (2).jpg" alt="Veg Anna Model Identity Grid" class="w-full h-auto max-h-[55vh] object-contain rounded-2xl border border-white/10">
+            <div class="flex justify-between items-center pt-2 font-mono text-xs text-zinc-300">
+                <span>MATRIX ID: AA02-AA08</span>
+                <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="text-sauceRed underline font-bold">100mlcoolhotsauce.com</a>
+            </div>
         </div>
     </div>
 
     <!-- MODAL POPUP FOR P2P WALLET NODE -->
-    <div id="walletModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
-        <div class="glass-spatial w-full max-w-2xl rounded-3xl overflow-hidden relative p-8 space-y-6 border border-momoGold/50">
+    <div id="walletModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="glass-spatial w-full max-w-2xl rounded-3xl overflow-hidden relative p-6 sm:p-8 space-y-5 border border-momoGold/50 max-h-[90vh] overflow-y-auto">
             <button onclick="closeWalletModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
             
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-momoLime/20 text-momoLime flex items-center justify-center">
+                <div class="w-10 h-10 rounded-2xl bg-momoLime/20 text-momoLime flex items-center justify-center flex-shrink-0">
                     <i data-lucide="network" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h3 class="font-syne font-bold text-xl text-white">DECENTRALIZED P2P NODE EXPERIMENT</h3>
-                    <p class="font-mono text-xs text-momoGold">Sovereign Plant Empire Infrastructure</p>
+                    <h3 class="font-syne font-bold text-lg sm:text-xl text-white">DECENTRALIZED P2P NODE</h3>
+                    <p class="font-mono text-xs text-momoGold">Sovereign Plant Infrastructure</p>
                 </div>
             </div>
 
-            <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3 font-mono text-xs">
+            <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5 font-mono text-xs">
                 <div class="flex justify-between text-zinc-400">
                     <span>NODE STATUS:</span>
-                    <span class="text-momoLime font-bold">ONLINE (P2P PEER 0x7F...9A)</span>
+                    <span class="text-momoLime font-bold">ONLINE (P2P PEER)</span>
                 </div>
                 <div class="flex justify-between text-zinc-400">
-                    <span>ECOSYSTEM PROTOCOL:</span>
-                    <span class="text-white">VEG ANNA P2P v1.0</span>
+                    <span>PROTOCOL:</span>
+                    <span class="text-white">VEG ANNA v1.0</span>
                 </div>
                 <div class="flex justify-between text-zinc-400">
-                    <span>TRUST METRIC:</span>
-                    <span class="text-momoGold font-bold">"WHO GIVES A SHI*" AUDITED</span>
+                    <span>GATEWAY:</span>
+                    <a href="http://100mlcoolhotsauce.com" target="_blank" class="text-sauceRed underline font-bold">100mlcoolhotsauce.com</a>
                 </div>
             </div>
 
             <p class="font-sans text-xs text-zinc-300 leading-relaxed">
-                How do you trust a crypto wallet? This peer-to-peer node experiment demonstrates decentralized token streaming and transparent plant-based governance directly inside WebGL spatial scenes.
+                Peer-to-peer node experiment demonstrating decentralized token streaming and transparent plant governance inside WebGL spatial views.
             </p>
 
-            <div class="pt-4 flex items-center gap-4">
+            <div class="pt-2">
                 <button onclick="simulateWalletConnect()" id="connectBtn" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">
                     SIMULATE WALLET CONNECTION
                 </button>
@@ -273,7 +290,7 @@
     <script>
         lucide.createIcons();
 
-        // Audio Synth Engine (Web Audio API - Hyrule Ocarina Tone Generator)
+        // Audio Synth Engine (Web Audio API)
         let audioCtx = null;
         let synthEnabled = true;
 
@@ -296,16 +313,18 @@
 
         function toggleAudioSynth() {
             synthEnabled = !synthEnabled;
-            document.getElementById('synthText').innerText = synthEnabled ? "Synth Audio: ON" : "Synth Audio: OFF";
+            document.getElementById('synthText').innerText = synthEnabled ? "Audio: ON" : "Audio: OFF";
         }
 
         // WebGL 360 Scene Variables
         let scene, camera, renderer;
         let isUserInteracting = false;
-        let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
-        let lon = 0, onPointerDownLon = 0;
-        let lat = 0, onPointerDownLat = 0;
+        let lon = 0, lat = 0;
         let phi = 0, theta = 0;
+        let touchStartX = 0, touchStartY = 0;
+        let touchStartLon = 0, touchStartLat = 0;
+        let initialPinchDistance = 0;
+        let currentFov = 75;
 
         // Keyboard & Gyro State Control
         let keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
@@ -316,7 +335,6 @@
         const mouse = new THREE.Vector2();
         const spatialObjects = [];
 
-        // Hotspot Spherical Coordinates
         const nodesData = [
             { id: 0, title: "8LcVA PORTRAIT", lon: 0, lat: 0, freq: 523.25, type: 'portrait' },
             { id: 1, title: "WHO GIVES A SHI*", lon: 90, lat: 10, freq: 659.25, type: 'video' },
@@ -327,17 +345,14 @@
         function init360Scene() {
             const container = document.getElementById('webgl-container');
 
-            // Scene & Camera
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
+            camera = new THREE.PerspectiveCamera(currentFov, window.innerWidth / window.innerHeight, 1, 1100);
 
-            // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
-            // 360 World Sphere using 360.avif equirectangular backdrop
             const sphereGeo = new THREE.SphereGeometry(500, 60, 40);
             sphereGeo.scale(-1, 1, 1);
 
@@ -359,7 +374,6 @@
                 }
             );
 
-            // Add 3D Floating Interactive Spatial Marker Hotspots
             nodesData.forEach((node) => {
                 const markerGroup = new THREE.Group();
 
@@ -392,8 +406,11 @@
                 spatialObjects.push(markerGroup);
             });
 
-            // Event Listeners for 360 Drag, Keyboard WASD & Touch Interaction
-            container.addEventListener('pointerdown', onPointerDown);
+            // Robust Touch & Pointer Event Listeners for Android/iOS
+            container.addEventListener('pointerdown', onPointerDown, { passive: true });
+            container.addEventListener('touchstart', onTouchStart, { passive: true });
+            container.addEventListener('touchmove', onTouchMove, { passive: false });
+            container.addEventListener('touchend', onTouchEnd, { passive: true });
             window.addEventListener('resize', onWindowResize);
             container.addEventListener('click', onCanvasClick);
 
@@ -413,7 +430,6 @@
                 setTimeout(() => { isUserInteracting = false; }, 2000);
             });
 
-            // Check Mobile Gyro Support & Show Button if Available
             if (typeof window.DeviceOrientationEvent !== 'undefined') {
                 if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                     document.getElementById('gyroBtn').classList.remove('hidden');
@@ -450,26 +466,67 @@
         }
 
         function onPointerDown(event) {
+            if (event.pointerType === 'touch') return; // Handled by touch events
             isUserInteracting = true;
-            onPointerDownPointerX = event.clientX;
-            onPointerDownPointerY = event.clientY;
-            onPointerDownLon = lon;
-            onPointerDownLat = lat;
+            touchStartX = event.clientX;
+            touchStartY = event.clientY;
+            touchStartLon = lon;
+            touchStartLat = lat;
 
-            document.addEventListener('pointermove', onPointerMove);
-            document.addEventListener('pointerup', onPointerUp);
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
         }
 
         function onPointerMove(event) {
             if (!isUserInteracting) return;
-            lon = (onPointerDownPointerX - event.clientX) * 0.2 + onPointerDownLon;
-            lat = (event.clientY - onPointerDownPointerY) * 0.2 + onPointerDownLat;
+            lon = (touchStartX - event.clientX) * 0.2 + touchStartLon;
+            lat = (event.clientY - touchStartY) * 0.2 + touchStartLat;
         }
 
         function onPointerUp() {
             isUserInteracting = false;
-            document.removeEventListener('pointermove', onPointerMove);
-            document.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+        }
+
+        function onTouchStart(e) {
+            isUserInteracting = true;
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchStartLon = lon;
+                touchStartLat = lat;
+            } else if (e.touches.length === 2) {
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        }
+
+        function onTouchMove(e) {
+            if (!isUserInteracting) return;
+            if (e.touches.length === 1) {
+                const deltaX = e.touches[0].clientX - touchStartX;
+                const deltaY = e.touches[0].clientY - touchStartY;
+                lon = touchStartLon - deltaX * 0.25;
+                lat = touchStartLat + deltaY * 0.25;
+            } else if (e.touches.length === 2) {
+                e.preventDefault();
+                const currentPinch = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const pinchDelta = initialPinchDistance - currentPinch;
+                currentFov = Math.max(45, Math.min(100, currentFov + pinchDelta * 0.05));
+                camera.fov = currentFov;
+                camera.updateProjectionMatrix();
+                initialPinchDistance = currentPinch;
+            }
+        }
+
+        function onTouchEnd() {
+            isUserInteracting = false;
         }
 
         function focusSpatialNode(index) {
@@ -517,14 +574,12 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Keyboard WASD & Arrow Key Movement Handling
             const moveSpeed = 1.5;
             if (keys['a'] || keys['A'] || keys['ArrowLeft']) { lon -= moveSpeed; isUserInteracting = true; }
             if (keys['d'] || keys['D'] || keys['ArrowRight']) { lon += moveSpeed; isUserInteracting = true; }
             if (keys['w'] || keys['W'] || keys['ArrowUp']) { lat = Math.min(85, lat + moveSpeed); isUserInteracting = true; }
             if (keys['s'] || keys['S'] || keys['ArrowDown']) { lat = Math.max(-85, lat - moveSpeed); isUserInteracting = true; }
 
-            // Slower, silky smooth auto-rotation speed (0.015) when inactive
             if (!isUserInteracting && !gyroActive) {
                 lon += 0.015;
             }
