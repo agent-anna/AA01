@@ -124,7 +124,7 @@
                 </div>
             </div>
 
-            <!-- THROW SHI* AT A FRIEND (100 SHI* TACTICAL PACKET) -->
+            <!-- THROW SHI* WITH ANTI-FAKE WALLET GUARD -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -132,7 +132,7 @@
                     </h3>
                     <span class="font-mono text-[9px] text-momoLime">100 SHI* PACKET</span>
                 </div>
-                <p class="font-mono text-[10px] text-zinc-400">Tactical Drop: Send 100 SHI* to any friend's sovereign vault address. (Robot-proof logic active!)</p>
+                <p class="font-mono text-[10px] text-zinc-400">Audited Drop: Wallet must pass the Anti-Fake Vault filter before throwing 100 SHI* packets!</p>
                 <div class="flex gap-2">
                     <input type="text" id="friendWallet" placeholder="Enter friend's wallet address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
                     <button onclick="throwShi()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
@@ -348,11 +348,20 @@
             document.getElementById('earnedShi').innerText = `SHI* Earned: ${earnedShiCount.toLocaleString()}`;
         }
 
+        // ANTI-FAKE THROW SHI* FILTER (Blocks unwashed tokens & penalizes fake wallets)
         function throwShi() {
             const friend = document.getElementById('friendWallet').value.trim();
+            const senderAddr = document.getElementById('walletInput').value.trim();
             const res = document.getElementById('throwResult');
+
+            if (senderAddr !== "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
+                res.innerText = "SECURITY ALERT: Unwashed / Fake SHI* detected in sender wallet! Throw rejected with penalty.";
+                res.className = "font-mono text-[10px] text-sauceRed";
+                return;
+            }
+
             if(friend.length > 5) {
-                res.innerText = `SUCCESS! 100 SHI* thrown to ${friend.substring(0,6)}... Packet delivered!`;
+                res.innerText = `SUCCESS! 100 SHI* tactical packet thrown to ${friend.substring(0,6)}... Verified clean!`;
                 res.className = "font-mono text-[10px] text-momoLime";
             } else {
                 res.innerText = "Please enter a valid friend wallet address.";
@@ -438,7 +447,7 @@
             const badge = document.getElementById('vaultBadge');
 
             if (addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
-                resEl.innerText = "VAULT AUDITED: Genuine Educational SHI* Verified.";
+                resEl.innerText = "VAULT AUDITED: Genuine Educational SHI* Verified[cite: 2].";
                 resEl.className = "font-mono text-xs text-momoLime pt-1";
                 badge.innerText = "AUDITED & SECURE";
             } else {
