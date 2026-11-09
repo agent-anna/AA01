@@ -100,7 +100,10 @@
     <div id="webgl-container"></div>
     <div class="scanlines absolute inset-0 z-10"></div>
 
-    <!-- TOP SPONSOR BAR -->
+    <!-- HIDDEN VIDEO ELEMENT FOR ANTI-POP 360-SECRET.MP4 TEXTURE MODE -->
+    <video id="secretVideo" src="360-SECRET.mp4" loop muted playsinline crossorigin="anonymous" class="hidden"></video>
+
+    <!-- TOP SPONSOR & CONTROLS BAR -->
     <header class="fixed top-0 left-0 w-full z-40 p-4 flex justify-between items-center pointer-events-none">
         <div class="pointer-events-auto flex items-center gap-3 glass-spatial px-4 py-2 rounded-full">
             <span class="w-2.5 h-2.5 rounded-full bg-momoLime animate-ping"></span>
@@ -109,11 +112,17 @@
         </div>
 
         <div class="pointer-events-auto flex items-center gap-3">
+            <button onclick="toggleAutoRotate()" id="autorotateBtn" class="glass-spatial px-3.5 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
+                AUTO-ROTATE: ON
+            </button>
+            <button onclick="toggleAntiPop()" id="antipopBtn" class="glass-spatial px-3.5 py-2 rounded-full font-mono text-xs text-momoGold font-bold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all">
+                ANTI-POP: 360.AVIF
+            </button>
             <button onclick="openWalletModal()" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
-                <i data-lucide="wallet" class="w-4 h-4"></i> CONNECT P2P WALLET
+                <i data-lucide="wallet" class="w-4 h-4"></i> P2P WALLET
             </button>
             <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
-                <i data-lucide="flame" class="w-4 h-4"></i> SPONSORED BY 100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <i data-lucide="flame" class="w-4 h-4"></i> 100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             </a>
         </div>
     </header>
@@ -155,14 +164,14 @@
         </div>
     </div>
 
-    <!-- AUDIO HELPER HUD (TOP RIGHT) -->
+    <!-- AUDIO SYNTH TOGGLE HUD (TOP RIGHT) -->
     <div class="fixed top-20 right-6 z-40 pointer-events-auto">
         <button onclick="toggleAudioSynth()" id="synthBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoGold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all">
             <i data-lucide="volume-2" class="w-4 h-4"></i> <span id="synthText">Synth Audio: ON</span>
         </button>
     </div>
 
-    <!-- MODAL POPUP FOR VIDEO & TRANSCRIPT -->
+    <!-- MODAL POPUP FOR WHO GIVES A SHI.MP4 -->
     <div id="videoModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 hidden">
         <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-momoGold/40 animate-in fade-in zoom-in duration-300">
             <button onclick="closeVideoModal()" class="absolute top-4 right-4 z-20 bg-black/75 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
@@ -186,7 +195,7 @@
                             "How do you trust a crypto wallet? Honestly, it's fun... it's funny money. Who gives a shi*?"
                         </div>
                         <p class="font-sans text-xs text-zinc-300 leading-relaxed">
-                            Veg Anna ecosystem educational experiment on a decentralized peer-to-peer network. We give a shi* coming soon.
+                            Veg Anna ecosystem educational experiment on a decentralized peer-to-peer network.
                         </p>
                     </div>
 
@@ -245,8 +254,8 @@
                     <span class="text-momoLime font-bold">ONLINE (P2P PEER 0x7F...9A)</span>
                 </div>
                 <div class="flex justify-between text-zinc-400">
-                    <span>ECOSYSTEM PROTOCOL:</span>
-                    <span class="text-white">VEG ANNA P2P v1.0</span>
+                    <span>DESTINATION ADDRESS:</span>
+                    <span class="text-momoGold">DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG</span>
                 </div>
                 <div class="flex justify-between text-zinc-400">
                     <span>TRUST METRIC:</span>
@@ -298,11 +307,17 @@
 
         // WebGL 360 Scene Variables
         let scene, camera, renderer;
+        let worldSphere, sphereGeo;
         let isUserInteracting = false;
         let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
         let lon = 0, onPointerDownLon = 0;
         let lat = 0, onPointerDownLat = 0;
         let phi = 0, theta = 0;
+
+        // Auto-Rotate and Anti-Pop States
+        let autoRotateActive = true;
+        let antiPopMode = 0; // 0: 360.avif, 1: 360.png, 2: 360-SECRET.mp4
+        let avifTexture = null, pngTexture = null, videoTexture = null;
 
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
@@ -329,43 +344,45 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
-            // 1. Create 360 World Sphere using 360.avif (with fallback)
-            const sphereGeo = new THREE.SphereGeometry(500, 60, 40);
+            // 360 World Sphere Geometry
+            sphereGeo = new THREE.SphereGeometry(500, 60, 40);
             sphereGeo.scale(-1, 1, 1);
 
             const textureLoader = new THREE.TextureLoader();
-            textureLoader.load(
-                '360.avif', 
-                (texture) => {
-                    const sphereMat = new THREE.MeshBasicMaterial({ map: texture });
-                    const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
-                    scene.add(worldSphere);
-                }, 
-                undefined, 
-                () => {
-                    textureLoader.load('8LcVA.jpg', (fallbackTex) => {
-                        const fallbackMat = new THREE.MeshBasicMaterial({ map: fallbackTex });
-                        const worldSphere = new THREE.Mesh(sphereGeo, fallbackMat);
-                        scene.add(worldSphere);
-                    }, undefined, () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 1024; canvas.height = 512;
-                        const ctx = canvas.getContext('2d');
-                        const grad = ctx.createLinearGradient(0,0,0,512);
-                        grad.addColorStop(0, '#080d0a'); grad.addColorStop(0.5, '#121f17'); grad.addColorStop(1, '#050806');
-                        ctx.fillStyle = grad; ctx.fillRect(0,0,1024,512);
-                        const proceduralMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });
-                        const worldSphere = new THREE.Mesh(sphereGeo, proceduralMat);
-                        scene.add(worldSphere);
-                    });
-                }
-            );
 
-            // 2. Add 3D Floating Interactive Spatial Marker Hotspots
+            // Load 360 Textures
+            textureLoader.load('360.avif', (tex) => {
+                avifTexture = tex;
+                if (antiPopMode === 0) setSphereTexture(avifTexture);
+            }, undefined, () => {
+                textureLoader.load('8LcVA.jpg', (fallbackTex) => {
+                    avifTexture = fallbackTex;
+                    if (antiPopMode === 0) setSphereTexture(avifTexture);
+                });
+            });
+
+            textureLoader.load('360.png', (tex) => {
+                pngTexture = tex;
+            }, undefined, () => {
+                // If 360.png fails, fallback to portrait
+                textureLoader.load('8LcVA.jpg', (tex) => { pngTexture = tex; });
+            });
+
+            // Setup Video Texture for Secret Video Mode
+            const secretVideo = document.getElementById('secretVideo');
+            videoTexture = new THREE.VideoTexture(secretVideo);
+            videoTexture.minFilter = THREE.LinearFilter;
+            videoTexture.magFilter = THREE.LinearFilter;
+
+            // Initial Sphere Creation with placeholder color until texture loads
+            const defaultMat = new THREE.MeshBasicMaterial({ color: 0x080d0a });
+            worldSphere = new THREE.Mesh(sphereGeo, defaultMat);
+            scene.add(worldSphere);
+
+            // Add 3D Floating Interactive Spatial Marker Hotspots
             nodesData.forEach((node) => {
                 const markerGroup = new THREE.Group();
 
-                // Glowing Ring
                 const ringGeo = new THREE.RingGeometry(12, 16, 32);
                 const ringMat = new THREE.MeshBasicMaterial({ 
                     color: node.id === 1 ? 0xD4AF37 : (node.id === 3 ? 0xE53E3E : 0xA3E635), 
@@ -376,13 +393,11 @@
                 const ringMesh = new THREE.Mesh(ringGeo, ringMat);
                 markerGroup.add(ringMesh);
 
-                // Inner Core Sphere
                 const coreGeo = new THREE.SphereGeometry(6, 16, 16);
                 const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
                 const coreMesh = new THREE.Mesh(coreGeo, coreMat);
                 markerGroup.add(coreMesh);
 
-                // Convert Spherical to 3D Vector
                 const phiRad = THREE.MathUtils.degToRad(90 - node.lat);
                 const thetaRad = THREE.MathUtils.degToRad(node.lon);
                 const radius = 350;
@@ -397,12 +412,78 @@
                 spatialObjects.push(markerGroup);
             });
 
-            // Event Listeners for 360 Drag Interaction
+            // Event Listeners for Interaction
             container.addEventListener('pointerdown', onPointerDown);
             window.addEventListener('resize', onWindowResize);
             container.addEventListener('click', onCanvasClick);
+            window.addEventListener('keydown', onKeyDown);
 
             animate();
+        }
+
+        function setSphereTexture(texture) {
+            if (worldSphere) {
+                worldSphere.material.map = texture;
+                worldSphere.material.needsUpdate = true;
+            }
+        }
+
+        // Auto-Rotate Toggle Function
+        function toggleAutoRotate() {
+            autoRotateActive = !autoRotateActive;
+            const btn = document.getElementById('autorotateBtn');
+            btn.innerText = `AUTO-ROTATE: ${autoRotateActive ? 'ON' : 'OFF'}`;
+            btn.className = autoRotateActive 
+                ? "glass-spatial px-3.5 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all"
+                : "glass-spatial px-3.5 py-2 rounded-full font-mono text-xs text-zinc-400 font-bold flex items-center gap-2 hover:bg-zinc-700 hover:text-white transition-all";
+        }
+
+        // Anti-Pop Toggle Function (Cycles 360.avif -> 360.png -> 360-SECRET.mp4)
+        function toggleAntiPop() {
+            antiPopMode = (antiPopMode + 1) % 3;
+            const btn = document.getElementById('antipopBtn');
+            const secretVideo = document.getElementById('secretVideo');
+
+            if (antiPopMode === 0) {
+                secretVideo.pause();
+                setSphereTexture(avifTexture || pngTexture);
+                btn.innerText = "ANTI-POP: 360.AVIF";
+            } else if (antiPopMode === 1) {
+                secretVideo.pause();
+                setSphereTexture(pngTexture || avifTexture);
+                btn.innerText = "ANTI-POP: 360.PNG";
+            } else if (antiPopMode === 2) {
+                secretVideo.play().catch(e => console.log("Video autoplay blocked:", e));
+                setSphereTexture(videoTexture);
+                btn.innerText = "ANTI-POP: SECRET.MP4";
+            }
+        }
+
+        // Keyboard Steering (WASD & Arrow Keys)
+        function onKeyDown(event) {
+            const step = 5;
+            switch(event.key) {
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    lon -= step;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    lon += step;
+                    break;
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    lat = Math.min(85, lat + step);
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    lat = Math.max(-85, lat - step);
+                    break;
+            }
         }
 
         function onPointerDown(event) {
@@ -473,9 +554,14 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Very slow, subtle continuous auto-rotation when not interacting
-            if (!isUserInteracting) {
-                lon += 0.012;
+            // Smooth slow auto-rotation when user is not actively interacting
+            if (!isUserInteracting && autoRotateActive) {
+                lon += 0.015;
+            }
+
+            // Update video texture frames if video mode is active
+            if (antiPopMode === 2 && videoTexture) {
+                videoTexture.needsUpdate = true;
             }
 
             // Clamp Latitude
