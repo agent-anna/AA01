@@ -3,15 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEG ANNA — 360 Spatial Ecosystem</title>
+    <title>VEG ANNA — 360° SPATIAL ECOSYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; color: #f3eee4; }
         #viewer-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; overflow: hidden; }
-        .pano-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; transition: background-image 0.5s ease; will-change: transform; }
+        .pano-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; will-change: transform; transition: opacity 0.4s ease; }
+        video.pano-bg { object-fit: cover; }
+        
+        /* EXACT CRT Scanline & Vignette Overlay */
+        .crt-overlay {
+            position: absolute; inset: 0; z-index: 5; pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 3px 100%;
+            box-shadow: inset 0 0 120px rgba(0,0,0,0.85);
+        }
+
         .ui-overlay { position: relative; z-index: 10; pointer-events: none; }
         .interactive { pointer-events: auto; }
-        video.pano-bg { object-fit: cover; width: 100%; height: 100%; }
+        .modal-backdrop { background: rgba(8, 13, 9, 0.85); backdrop-filter: blur(12px); }
     </style>
 </head>
 <body>
@@ -22,25 +32,103 @@
         <video id="bg-video" class="pano-bg hidden" autoplay loop muted playsinline src="360-SECRET.mp4"></video>
     </div>
 
+    <!-- CRT Retro Scanlines -->
+    <div class="crt-overlay"></div>
+
     <!-- UI Overlay -->
     <div class="ui-overlay absolute inset-0 flex flex-col justify-between p-6">
-        <header class="flex justify-between items-center bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/10 interactive">
-            <h1 class="text-xl font-bold tracking-widest text-emerald-400">VEG ANNA <span class="text-xs text-stone-400 font-normal">| 360° SPATIAL ECOSYSTEM</span></h1>
+        
+        <!-- Top Header -->
+        <header class="flex justify-between items-center bg-black/70 backdrop-blur-md px-6 py-4 rounded-2xl border border-amber-500/20 interactive shadow-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                <h1 class="text-xl font-bold tracking-widest text-white">VEG ANNA <span class="text-xs text-amber-400 font-normal ml-2">360° SPATIAL ECOSYSTEM</span></h1>
+            </div>
             <div class="flex items-center gap-4">
-                <button id="toggle-autorotate" class="bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-lg text-xs font-bold transition">AUTO-ROTATE: ON</button>
-                <button id="toggle-antipop" class="bg-stone-900/80 hover:bg-stone-800 text-stone-300 border border-white/20 px-3 py-1.5 rounded-lg text-xs font-bold transition">ANTI-POP: 360.AVIF</button>
-                <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:text-red-300 text-xs font-bold tracking-wider">SPONSORED BY 100MLCOOLHOTSAUCE.COM ↗</a>
+                <button id="toggle-autorotate" class="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">AUTO-ROTATE: ON</button>
+                <button id="toggle-antipop" class="bg-stone-900/90 hover:bg-stone-800 text-amber-300 border border-amber-500/30 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">ANTI-POP: 360.AVIF</button>
+                <button id="btn-wallet" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition shadow-lg">CONNECT P2P WALLET</button>
+                <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:text-red-300 text-xs font-bold tracking-wider ml-2">SPONSORED BY 100MLCOOLHOTSAUCE.COM ↗</a>
             </div>
         </header>
 
-        <footer class="flex justify-between items-end interactive">
-            <div class="bg-black/60 backdrop-blur-md p-3 rounded-xl border border-white/10 text-xs text-stone-300">
-                BEARING: <span id="bearing-val" class="text-emerald-400 font-mono">0° N</span>
+        <!-- Bottom Footer & Hotspots -->
+        <div class="flex flex-col gap-4 interactive items-center">
+            <div class="flex justify-center gap-4">
+                <button onclick="openModal('modal-hotspot1')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 01<br><span class="text-white font-normal text-[11px]">8LCVA PORTRAIT</span></button>
+                <button onclick="openModal('modal-hotspot2')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 02<br><span class="text-white font-normal text-[11px]">WHO GIVES A SHI*</span></button>
+                <button onclick="openModal('modal-hotspot3')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 03<br><span class="text-white font-normal text-[11px]">IDENTITY MATRIX</span></button>
+                <button onclick="openModal('modal-wallet')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 04<br><span class="text-white font-normal text-[11px]">P2P WALLET NODE</span></button>
             </div>
-            <div class="bg-black/60 backdrop-blur-md p-3 rounded-xl border border-white/10 text-xs text-stone-400">
-                Use <span class="text-emerald-400 font-bold">Arrow Keys</span> or drag to pan.
+
+            <div class="w-full flex justify-between items-center bg-black/70 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-xs text-stone-300">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    BEARING: <span id="bearing-val" class="text-emerald-400 font-mono font-bold">0° N</span>
+                </div>
+                <div class="text-stone-400 text-center">Use <span class="text-amber-400 font-bold">Arrow Keys / WASD</span> or drag mouse to pan.</div>
+                <div class="text-emerald-400 font-mono">NODE: AA01</div>
             </div>
-        </footer>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="modal-hotspot1" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive">
+        <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-lg w-full relative shadow-2xl">
+            <button onclick="closeModal('modal-hotspot1')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
+            <h2 class="text-amber-400 font-bold tracking-widest text-sm mb-4">HOTSPOT 01 — 8LCVA PORTRAIT</h2>
+            <img src="8LcVA.jpg" alt="8LcVA Portrait" class="w-full rounded-2xl border border-white/10 mb-4 object-cover max-h-72">
+            <p class="text-stone-300 text-xs mb-4">Direct editorial portrait asset integrated within the Veg Anna ecosystem narrative framework.</p>
+            <div class="flex justify-between items-center text-xs">
+                <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:underline">100MLCOOLHOTSAUCE.COM</a>
+                <button onclick="closeModal('modal-hotspot1')" class="bg-amber-600 hover:bg-amber-500 text-black px-4 py-2 rounded-xl font-bold">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-hotspot2" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive">
+        <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-3xl w-full relative shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <button onclick="closeModal('modal-hotspot2')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
+            <div>
+                <video controls playsinline preload="auto" class="w-full rounded-2xl border border-white/10 shadow-lg" src="WHO GIVES A SHI.mp4"></video>
+            </div>
+            <div>
+                <h2 class="text-amber-400 font-bold tracking-widest text-sm mb-2">WHO GIVES A SHI*</h2>
+                <blockquote class="text-emerald-400 italic text-xs border-l-2 border-emerald-500 pl-3 my-3">"How do you trust a crypto wallet? Honestly, it's fun... it's funny money. Who gives a shi*?"</blockquote>
+                <p class="text-stone-300 text-[11px] mb-6">Veg Anna ecosystem educational experiment on a decentralized peer-to-peer network.</p>
+                <div class="flex justify-between items-center text-xs">
+                    <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:underline">100MLCOOLHOTSAUCE.COM</a>
+                    <button onclick="closeModal('modal-hotspot2')" class="bg-amber-600 hover:bg-amber-500 text-black px-4 py-2 rounded-xl font-bold">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-hotspot3" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive">
+        <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-lg w-full relative shadow-2xl">
+            <button onclick="closeModal('modal-hotspot3')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
+            <h2 class="text-amber-400 font-bold tracking-widest text-sm mb-4">HOTSPOT 03 — IDENTITY MATRIX</h2>
+            <img src="image (2).jpg" alt="Identity Matrix" class="w-full rounded-2xl border border-white/10 mb-4 object-cover max-h-72">
+            <p class="text-stone-300 text-xs mb-4">Core persona identity distribution matrix and brand asset node.</p>
+            <div class="flex justify-between items-center text-xs">
+                <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:underline">100MLCOOLHOTSAUCE.COM</a>
+                <button onclick="closeModal('modal-hotspot3')" class="bg-amber-600 hover:bg-amber-500 text-black px-4 py-2 rounded-xl font-bold">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-wallet" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive">
+        <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full relative shadow-2xl text-center">
+            <button onclick="closeModal('modal-wallet')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
+            <h2 class="text-emerald-400 font-bold tracking-widest text-sm mb-2">P2P WALLET NODE SIMULATOR</h2>
+            <p class="text-stone-300 text-xs mb-4">Connected Destination: <code class="text-amber-300">DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG</code></p>
+            <div class="bg-stone-900 border border-white/10 p-4 rounded-2xl mb-4 text-left text-xs font-mono text-emerald-400">
+                &gt; Node AA01 synchronized...<br>
+                &gt; Micro-tax revenue loop active.<br>
+                &gt; Status: Connected to Kunda Network.
+            </div>
+            <button onclick="closeModal('modal-wallet')" class="bg-emerald-600 hover:bg-emerald-500 text-white w-full py-2.5 rounded-xl font-bold text-xs">DISCONNECT WALLET</button>
+        </div>
     </div>
 
     <!-- Script Engine -->
@@ -53,44 +141,40 @@
 
         let currentLon = 0;
         let currentLat = 0;
-        let isAutoRotate = true;
+        let isAutoRotate = true; // Spinning by default
         let antiPopMode = 0; // 0: 360.avif, 1: 360.png, 2: 360-SECRET.mp4
         let isDragging = false;
         let startX = 0, startY = 0;
 
-        // Auto-Rotate Loop
         function updateView() {
             if (isAutoRotate && !isDragging) {
-                currentLon += 0.05;
+                currentLon += 0.04;
                 if (currentLon >= 360) currentLon = 0;
                 if (currentLon < 0) currentLon += 360;
             }
             
-            // Apply transform for smooth panoramic panning
             const container = document.getElementById('viewer-container');
             container.style.backgroundPosition = `${currentLon * 10}% ${50 + currentLat}%`;
-            if(bgLayer.style.backgroundImage) {
-                bgLayer.style.transform = `scale(1.1) translate(${-currentLon * 2}px, ${-currentLat * 2}px)`;
-            }
-            bgVideo.style.transform = `scale(1.1) translate(${-currentLon * 2}px, ${-currentLat * 2}px)`;
+            bgLayer.style.transform = `scale(1.15) translate(${-currentLon * 3}px, ${-currentLat * 3}px)`;
+            bgVideo.style.transform = `scale(1.15) translate(${-currentLon * 3}px, ${-currentLat * 3}px)`;
 
             bearingVal.textContent = `${Math.floor(currentLon)}° N`;
             requestAnimationFrame(updateView);
         }
         requestAnimationFrame(updateView);
 
-        // Keyboard Arrow Keys
+        // Keyboard Arrow & WASD Navigation
         window.addEventListener('keydown', (e) => {
-            const step = 3;
+            const step = 4;
             if (e.key === 'ArrowLeft' || e.key === 'a') currentLon -= step;
             if (e.key === 'ArrowRight' || e.key === 'd') currentLon += step;
-            if (e.key === 'ArrowUp' || e.key === 'w') currentLat = Math.min(40, currentLat + step);
-            if (e.key === 'ArrowDown' || e.key === 's') currentLat = Math.max(-40, currentLat - step);
+            if (e.key === 'ArrowUp' || e.key === 'w') currentLat = Math.min(30, currentLat + step);
+            if (e.key === 'ArrowDown' || e.key === 's') currentLat = Math.max(-30, currentLat - step);
         });
 
         // Mouse Drag Panning
         window.addEventListener('mousedown', (e) => {
-            if(e.target.closest('header') || e.target.closest('footer')) return;
+            if(e.target.closest('header') || e.target.closest('footer') || e.target.closest('.fixed')) return;
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
@@ -100,7 +184,7 @@
             const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
             currentLon -= deltaX * 0.1;
-            currentLat = Math.max(-40, Math.min(40, currentLat + deltaY * 0.1));
+            currentLat = Math.max(-30, Math.min(30, currentLat + deltaY * 0.1));
             startX = e.clientX;
             startY = e.clientY;
         });
@@ -111,8 +195,8 @@
             isAutoRotate = !isAutoRotate;
             autorotateBtn.textContent = `AUTO-ROTATE: ${isAutoRotate ? 'ON' : 'OFF'}`;
             autorotateBtn.className = isAutoRotate 
-                ? "bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-lg text-xs font-bold transition"
-                : "bg-stone-900/80 hover:bg-stone-800 text-stone-400 border border-white/20 px-3 py-1.5 rounded-lg text-xs font-bold transition";
+                ? "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 px-3.5 py-1.5 rounded-xl text-xs font-bold transition"
+                : "bg-stone-900/80 hover:bg-stone-800 text-stone-400 border border-white/20 px-3.5 py-1.5 rounded-xl text-xs font-bold transition";
         });
 
         // Anti-Pop Mode Switcher Toggle
@@ -137,6 +221,10 @@
                 antipopBtn.textContent = "ANTI-POP: SECRET.MP4";
             }
         });
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        document.getElementById('btn-wallet').addEventListener('click', () => openModal('modal-wallet'));
     </script>
 </body>
 </html>
