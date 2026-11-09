@@ -433,9 +433,9 @@
                                 <i data-lucide="line-chart" class="w-4 h-4 text-momoLime"></i> LIVE SHI* / DOGE CHART
                             </div>
                             <div class="flex items-center gap-1 font-mono text-[10px]">
-                                <button class="px-2 py-1 rounded bg-momoLime/20 text-momoLime font-bold border border-momoLime/30">24H</button>
-                                <button class="px-2 py-1 rounded bg-black/40 text-zinc-400 hover:text-white">7D</button>
-                                <button class="px-2 py-1 rounded bg-black/40 text-zinc-400 hover:text-white">30D</button>
+                                <button onclick="switchChartTimeframe('24h')" id="btn24h" class="px-2 py-1 rounded bg-momoLime/20 text-momoLime font-bold border border-momoLime/30">24H</button>
+                                <button onclick="switchChartTimeframe('7d')" id="btn7d" class="px-2 py-1 rounded bg-black/40 text-zinc-400 hover:text-white">7D</button>
+                                <button onclick="switchChartTimeframe('30d')" id="btn30d" class="px-2 py-1 rounded bg-black/40 text-zinc-400 hover:text-white">30D</button>
                             </div>
                         </div>
 
@@ -460,13 +460,13 @@
                                 <label class="font-mono text-[10px] text-zinc-400">YOU PAY</label>
                                 <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
                                     <input type="number" id="payAmount" value="100" oninput="calculateSwap()" class="bg-transparent font-mono font-bold text-white w-full outline-none text-sm">
-                                    <span class="font-mono font-bold text-xs text-momoGold px-2 border-l border-white/10">DOGE</span>
+                                    <span id="payAssetLabel" class="font-mono font-bold text-xs text-momoGold px-2 border-l border-white/10">DOGE</span>
                                 </div>
                             </div>
 
                             <div class="flex justify-center -my-2">
-                                <button class="w-7 h-7 rounded-full bg-momoLime/20 text-momoLime border border-momoLime/40 flex items-center justify-center">
-                                    <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                                <button onclick="toggleSwapDirection()" class="w-7 h-7 rounded-full bg-momoLime/20 text-momoLime border border-momoLime/40 flex items-center justify-center hover:bg-momoLime hover:text-black transition-all">
+                                    <i data-lucide="arrow-down-up" class="w-3.5 h-3.5"></i>
                                 </button>
                             </div>
 
@@ -474,7 +474,7 @@
                                 <label class="font-mono text-[10px] text-zinc-400">YOU RECEIVE (ESTIMATED)</label>
                                 <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
                                     <input type="text" id="receiveAmount" value="100,000,000" readonly class="bg-transparent font-mono font-bold text-momoLime w-full outline-none text-sm">
-                                    <span class="font-mono font-bold text-xs text-momoLime px-2 border-l border-white/10">SHI*</span>
+                                    <span id="receiveAssetLabel" class="font-mono font-bold text-xs text-momoLime px-2 border-l border-white/10">SHI*</span>
                                 </div>
                             </div>
 
@@ -532,6 +532,8 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         const spatialObjects = [];
+        let shiChartInstance = null;
+        let isDogeToShi = true;
 
         const nodesData = [
             { id: 0, title: "GENESIS NEXUS", subtitle: "veganna01.mp4", lon: 90, lat: 0 },
@@ -643,7 +645,7 @@
             });
 
             animate();
-            initChart();
+            initChart('24h');
         }
 
         function onPointerDown(event) {
@@ -835,18 +837,63 @@
         function calculateSwap() {
             const payVal = parseFloat(document.getElementById('payAmount').value) || 0;
             const receiveInput = document.getElementById('receiveAmount');
-            receiveInput.value = (payVal * 1000000).toLocaleString();
+            if (isDogeToShi) {
+                receiveInput.value = (payVal * 1000000).toLocaleString();
+            } else {
+                receiveInput.value = (payVal / 1000000).toFixed(6);
+            }
         }
 
-        function initChart() {
+        function toggleSwapDirection() {
+            isDogeToShi = !isDogeToShi;
+            const payLabel = document.getElementById('payAssetLabel');
+            const recvLabel = document.getElementById('receiveAssetLabel');
+            const payInput = document.getElementById('payAmount');
+            
+            if (isDogeToShi) {
+                payLabel.innerText = "DOGE";
+                recvLabel.innerText = "SHI*";
+                payInput.value = "100";
+            } else {
+                payLabel.innerText = "SHI*";
+                recvLabel.innerText = "DOGE";
+                payInput.value = "100,000,000";
+            }
+            calculateSwap();
+        }
+
+        function switchChartTimeframe(tf) {
+            ['btn24h', 'btn7d', 'btn30d'].forEach(id => {
+                const b = document.getElementById(id);
+                b.className = "px-2 py-1 rounded bg-black/40 text-zinc-400 hover:text-white";
+            });
+            document.getElementById('btn' + tf).className = "px-2 py-1 rounded bg-momoLime/20 text-momoLime font-bold border border-momoLime/30";
+            initChart(tf);
+        }
+
+        function initChart(timeframe) {
             const ctx = document.getElementById('shiChart').getContext('2d');
-            new Chart(ctx, {
+            if (shiChartInstance) shiChartInstance.destroy();
+
+            let labels, dataVals;
+            if (timeframe === '24h') {
+                labels = ['12AM', '4AM', '8AM', '12PM', '4PM', '8PM', '11PM'];
+                dataVals = [0.0000008, 0.0000009, 0.00000085, 0.000001, 0.00000095, 0.000001, 0.00000105];
+            } else if (timeframe === '7d') {
+                labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                dataVals = [0.00000075, 0.00000082, 0.00000088, 0.00000092, 0.00000098, 0.00000102, 0.00000105];
+            } else {
+                labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+                dataVals = [0.00000060, 0.00000078, 0.00000090, 0.00000105];
+            }
+
+            shiChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['12AM', '4AM', '8AM', '12PM', '4PM', '8PM', '11PM'],
+                    labels: labels,
                     datasets: [{
                         label: 'SHI* / DOGE Price',
-                        data: [0.0000008, 0.0000009, 0.00000085, 0.000001, 0.00000095, 0.000001, 0.00000105],
+                        data: dataVals,
                         borderColor: '#A3E635',
                         backgroundColor: 'rgba(163, 230, 53, 0.1)',
                         borderWidth: 2,
@@ -866,7 +913,6 @@
             });
         }
 
-        // Live connection to baananna.ps1 master node backend
         async function fetchLiveWalletBalance() {
             const addr = document.getElementById('userDogeAddress').value.trim();
             if (!addr) {
