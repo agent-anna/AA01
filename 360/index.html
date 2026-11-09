@@ -1,225 +1,622 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEG ANNA — 360° SPATIAL ECOSYSTEM</title>
-    <!-- Pannellum 360 Library -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VEG ANNA — 360° Spatial P2P Ecosystem</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts: Syne (Kinetic Bold Display), Cormorant Garamond (Casa Momo luxury serif), Space Grotesk (P2P Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Icons & GSAP -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        momoDark: '#080d0a',
+                        momoMoss: '#121f17',
+                        momoGold: '#D4AF37',
+                        momoLime: '#A3E635',
+                        sauceRed: '#E53E3E',
+                    },
+                    fontFamily: {
+                        syne: ['Syne', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; color: #f3eee4; }
-        #panorama { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        * { user-select: none; -webkit-user-drag: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* CRT Scanline & Vignette Overlay */
-        .crt-overlay {
-            position: absolute; inset: 0; z-index: 5; pointer-events: none;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
-            box-shadow: inset 0 0 120px rgba(0,0,0,0.85);
+        #webgl-container { position: absolute; inset: 0; z-index: 1; cursor: grab; }
+        #webgl-container:active { cursor: grabbing; }
+
+        /* Reticle & 360 Compass */
+        .compass-ring {
+            border: 1.5px dashed rgba(212, 175, 55, 0.4);
+            border-radius: 50%;
+            transition: transform 0.1s linear;
         }
 
-        .ui-overlay { position: relative; z-index: 10; pointer-events: none; }
-        .interactive { pointer-events: auto; }
-        .modal-backdrop { background: rgba(8, 13, 9, 0.85); backdrop-filter: blur(12px); }
-        .pnlm-hotspot-base { background-color: #fbbf24 !important; border: 2px solid #000 !important; border-radius: 50%; box-shadow: 0 0 15px rgba(251, 191, 36, 0.8); }
+        /* Glassmorphic Spatial UI Cards */
+        .glass-spatial {
+            background: rgba(8, 13, 10, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        .glass-spatial:hover {
+            border-color: rgba(163, 230, 53, 0.6);
+            box-shadow: 0 0 30px rgba(163, 230, 53, 0.2);
+        }
+
+        /* Ocarina / Hotspot Note Button Effects */
+        .ocarina-btn {
+            background: rgba(18, 31, 23, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .ocarina-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            background: #D4AF37;
+            color: #080d0a;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        /* Scanlines Overlay */
+        .scanlines {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* Pulse Animation for Node Signals */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.1); }
+        }
+        .pulse-node { animation: pulseGlow 2s infinite ease-in-out; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <!-- True 360 Viewer Container -->
-    <div id="panorama"></div>
+    <!-- 360 WEBGL CANVAS CONTAINER -->
+    <div id="webgl-container"></div>
+    <div class="scanlines absolute inset-0 z-10"></div>
 
-    <!-- CRT Retro Scanlines -->
-    <div class="crt-overlay"></div>
+    <!-- TOP SPONSOR BAR -->
+    <header class="fixed top-0 left-0 w-full z-40 p-4 flex justify-between items-center pointer-events-none">
+        <div class="pointer-events-auto flex items-center gap-3 glass-spatial px-4 py-2 rounded-full">
+            <span class="w-2.5 h-2.5 rounded-full bg-momoLime animate-ping"></span>
+            <span class="font-syne font-black text-lg tracking-wider text-white">VEG ANNA</span>
+            <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">360° SPATIAL ECOSYSTEM</span>
+        </div>
 
-    <!-- UI Overlay -->
-    <div class="ui-overlay absolute inset-0 flex flex-col justify-between p-6 pointer-events-none">
-        
-        <!-- Top Header -->
-        <header class="flex justify-between items-center bg-black/70 backdrop-blur-md px-6 py-4 rounded-2xl border border-amber-500/25 interactive shadow-2xl">
-            <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
-                <h1 class="text-xl font-bold tracking-widest text-white">VEG ANNA <span class="text-xs text-amber-400 font-normal ml-2">360° SPATIAL ECOSYSTEM</span></h1>
-            </div>
-            <div class="flex items-center gap-3">
-                <button id="toggle-autorotate" class="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-xl text-xs font-bold transition">AUTO-ROTATE: ON</button>
-                <button id="toggle-antipop" class="bg-stone-900/90 hover:bg-stone-800 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-bold transition">ANTI-POP: 360.AVIF</button>
-                <button id="toggle-audio" class="bg-stone-900/90 hover:bg-stone-800 text-stone-300 border border-white/20 px-3 py-1.5 rounded-xl text-xs font-bold transition">🔊 Synth Audio: ON</button>
-                <button id="btn-wallet" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-lg">CONNECT P2P WALLET</button>
-                <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:text-red-300 text-xs font-bold tracking-wider ml-2">SPONSORED BY 100MLCOOLHOTSAUCE.COM ↗</a>
-            </div>
-        </header>
+        <div class="pointer-events-auto flex items-center gap-3">
+            <button onclick="openWalletModal()" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
+                <i data-lucide="wallet" class="w-4 h-4"></i> CONNECT P2P WALLET
+            </button>
+            <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
+                <i data-lucide="flame" class="w-4 h-4"></i> SPONSORED BY 100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+    </header>
 
-        <!-- Bottom Footer & Hotspots -->
-        <div class="flex flex-col gap-4 interactive items-center pointer-events-auto">
-            <div class="flex justify-center gap-4">
-                <button onclick="openModal('modal-hotspot1')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 01<br><span class="text-white font-normal text-[11px]">8LCVA PORTRAIT</span></button>
-                <button onclick="openModal('modal-hotspot2')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 02<br><span class="text-white font-normal text-[11px]">WHO GIVES A SHI*</span></button>
-                <button onclick="openModal('modal-hotspot3')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 03<br><span class="text-white font-normal text-[11px]">IDENTITY MATRIX</span></button>
-                <button onclick="openModal('modal-wallet')" class="bg-black/80 hover:bg-black border border-amber-500/30 text-amber-300 px-6 py-3 rounded-2xl text-xs font-bold tracking-wider backdrop-blur-md transition shadow-2xl">HOTSPOT 04<br><span class="text-white font-normal text-[11px]">P2P WALLET NODE</span></button>
-            </div>
+    <!-- OCARINA-INSPIRED HYRULE SONG / SPATIAL HOTSPOT SELECTOR (BOTTOM DOCK) -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-3xl px-4 pointer-events-none">
+        <div class="pointer-events-auto glass-spatial p-3 rounded-2xl flex items-center justify-between gap-2 shadow-2xl">
+            <button onclick="focusSpatialNode(0)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
+                <span class="font-mono text-[10px] text-momoLime font-bold uppercase">HOTSPOT 01</span>
+                <span class="font-syne font-bold text-xs uppercase tracking-tight">8LcVA PORTRAIT</span>
+            </button>
 
-            <div class="w-full flex justify-between items-center bg-black/70 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-xs text-stone-300">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    BEARING: <span id="bearing-val" class="text-emerald-400 font-mono font-bold">0° N</span>
+            <button onclick="focusSpatialNode(1)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
+                <span class="font-mono text-[10px] text-momoGold font-bold uppercase">HOTSPOT 02</span>
+                <span class="font-syne font-bold text-xs uppercase tracking-tight">WHO GIVES A SHI*</span>
+            </button>
+
+            <button onclick="focusSpatialNode(2)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
+                <span class="font-mono text-[10px] text-momoLime font-bold uppercase">HOTSPOT 03</span>
+                <span class="font-syne font-bold text-xs uppercase tracking-tight">IDENTITY MATRIX</span>
+            </button>
+
+            <button onclick="focusSpatialNode(3)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
+                <span class="font-mono text-[10px] text-sauceRed font-bold uppercase">HOTSPOT 04</span>
+                <span class="font-syne font-bold text-xs uppercase tracking-tight">P2P WALLET NODE</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 360 RADIAL COMPASS BEARING HUD (BOTTOM LEFT) -->
+    <div class="fixed bottom-6 left-6 z-40 pointer-events-none hidden md:flex items-center gap-3 glass-spatial p-3 rounded-2xl">
+        <div class="w-10 h-10 relative flex items-center justify-center">
+            <div id="compassRing" class="compass-ring absolute inset-0"></div>
+            <i data-lucide="compass" class="w-5 h-5 text-momoGold"></i>
+        </div>
+        <div class="font-mono text-xs">
+            <div class="text-zinc-400 text-[10px]">BEARING</div>
+            <div id="bearingAngle" class="text-momoLime font-bold">0° N</div>
+        </div>
+    </div>
+
+    <!-- AUDIO HELPER HUD (TOP RIGHT) -->
+    <div class="fixed top-20 right-6 z-40 pointer-events-auto flex flex-col gap-2 items-end">
+        <button onclick="toggleAutoRotate()" id="rotateBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoLime flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span id="rotateText">Auto-Rotate: OFF</span>
+        </button>
+        <button onclick="cycleAntiPopMode()" id="antiPopBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoGold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all">
+            <i data-lucide="layers" class="w-4 h-4"></i> <span id="antiPopText">Anti-Pop: MODE 1 (360.AVIF)</span>
+        </button>
+        <button onclick="toggleAudioSynth()" id="synthBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoGold flex items-center gap-2 hover:bg-momoGold hover:text-black transition-all">
+            <i data-lucide="volume-2" class="w-4 h-4"></i> <span id="synthText">Synth Audio: ON</span>
+        </button>
+    </div>
+
+    <!-- ON-SCREEN D-PAD NAVIGATION CLUSTER (BOTTOM RIGHT) -->
+    <div class="fixed bottom-6 right-6 z-40 pointer-events-auto flex flex-col items-center gap-1 glass-spatial p-2 rounded-2xl">
+        <button onclick="manualPan(0, 15)" class="p-2.5 rounded-xl hover:bg-momoLime hover:text-black text-momoGold transition"><i data-lucide="chevron-up" class="w-5 h-5"></i></button>
+        <div class="flex gap-1">
+            <button onclick="manualPan(-15, 0)" class="p-2.5 rounded-xl hover:bg-momoLime hover:text-black text-momoGold transition"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+            <button onclick="manualPan(15, 0)" class="p-2.5 rounded-xl hover:bg-momoLime hover:text-black text-momoGold transition"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+        </div>
+        <button onclick="manualPan(0, -15)" class="p-2.5 rounded-xl hover:bg-momoLime hover:text-black text-momoGold transition"><i data-lucide="chevron-down" class="w-5 h-5"></i></button>
+    </div>
+
+    <!-- MODAL POPUP FOR WHO GIVES A SHI.MP4 VIDEO & TRANSCRIPT -->
+    <div id="videoModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-momoGold/40 animate-in fade-in zoom-in duration-300">
+            <button onclick="closeVideoModal()" class="absolute top-4 right-4 z-20 bg-black/70 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="grid lg:grid-cols-12">
+                <div class="lg:col-span-7 bg-black flex items-center justify-center relative min-h-[320px]">
+                    <video id="modalVideo" controls playsinline preload="auto" class="w-full h-full object-cover">
+                        <source src="WHO GIVES A SHI.mp4" type="video/mp4">
+                        Your browser does not support playing this video file.
+                    </video>
                 </div>
-                <div class="text-stone-400 text-center">Use <span class="text-amber-400 font-bold">Arrow Keys / WASD</span> or drag mouse to pan true 360 space.</div>
-                <div class="text-emerald-400 font-mono">NODE: AA01</div>
-            </div>
-        </div>
-    </div>
+                <div class="lg:col-span-5 p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <span class="font-mono text-xs text-momoGold uppercase tracking-widest font-bold flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-momoLime animate-ping"></span> SPATIAL MEDIA BROADCAST
+                        </span>
+                        <h3 class="font-syne font-black text-2xl text-white">WHO GIVES A SHI*</h3>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/10 font-serif italic text-lg text-emerald-200">
+                            "How do you trust a crypto wallet? Honestly, it's fun... it's funny money. Who gives a shi*?"
+                        </div>
+                        <p class="font-sans text-xs text-zinc-300 leading-relaxed">
+                            Veg Anna ecosystem educational experiment on a decentralized peer-to-peer network. We give a shi* coming soon.
+                        </p>
+                    </div>
 
-    <!-- MODALS -->
-    <div id="modal-hotspot1" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive pointer-events-auto">
-        <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-lg w-full relative shadow-2xl">
-            <button onclick="closeModal('modal-hotspot1')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
-            <h2 class="text-amber-400 font-bold tracking-widest text-sm mb-4">HOTSPOT 01 — 8LCVA PORTRAIT</h2>
-            <img src="8LcVA.jpg" alt="8LcVA Portrait" class="w-full rounded-2xl border border-white/10 mb-4 object-cover max-h-72">
-            <p class="text-stone-300 text-xs mb-4">Direct editorial portrait asset integrated within the Veg Anna ecosystem narrative framework.</p>
-            <div class="flex justify-between items-center text-xs">
-                <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:underline">100MLCOOLHOTSAUCE.COM</a>
-                <button onclick="closeModal('modal-hotspot1')" class="bg-amber-600 hover:bg-amber-500 text-black px-4 py-2 rounded-xl font-bold">CLOSE</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-hotspot2" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive pointer-events-auto">
-        <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-3xl w-full relative shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <button onclick="closeModal('modal-hotspot2')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
-            <div>
-                <video controls playsinline preload="auto" class="w-full rounded-2xl border border-white/10 shadow-lg" src="WHO GIVES A SHI.mp4"></video>
-            </div>
-            <div>
-                <h2 class="text-amber-400 font-bold tracking-widest text-sm mb-2">WHO GIVES A SHI*</h2>
-                <blockquote class="text-emerald-400 italic text-xs border-l-2 border-emerald-500 pl-3 my-3">"How do you trust a crypto wallet? Honestly, it's fun... it's funny money. Who gives a shi*?"</blockquote>
-                <p class="text-stone-300 text-[11px] mb-6">Veg Anna ecosystem educational experiment on a decentralized peer-to-peer network.</p>
-                <div class="flex justify-between items-center text-xs">
-                    <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:underline">100MLCOOLHOTSAUCE.COM</a>
-                    <button onclick="closeModal('modal-hotspot2')" class="bg-amber-600 hover:bg-amber-500 text-black px-4 py-2 rounded-xl font-bold">CLOSE</button>
+                    <div class="pt-4 border-t border-white/10 flex items-center justify-between font-mono text-xs">
+                        <span class="text-sauceRed font-bold">100MLCOOLHOTSAUCE.COM</span>
+                        <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="underline text-momoLime">VISIT SPONSOR</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="modal-hotspot3" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive pointer-events-auto">
-        <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-lg w-full relative shadow-2xl">
-            <button onclick="closeModal('modal-hotspot3')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
-            <h2 class="text-amber-400 font-bold tracking-widest text-sm mb-4">HOTSPOT 03 — IDENTITY MATRIX</h2>
-            <img src="image (2).jpg" alt="Identity Matrix" class="w-full rounded-2xl border border-white/10 mb-4 object-cover max-h-72">
-            <p class="text-stone-300 text-xs mb-4">Core persona identity distribution matrix and brand asset node.</p>
-            <div class="flex justify-between items-center text-xs">
-                <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:underline">100MLCOOLHOTSAUCE.COM</a>
-                <button onclick="closeModal('modal-hotspot3')" class="bg-amber-600 hover:bg-amber-500 text-black px-4 py-2 rounded-xl font-bold">CLOSE</button>
+    <!-- MODAL POPUP FOR PORTRAIT IMAGE (8LcVA.jpg) -->
+    <div id="portraitModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="glass-spatial w-full max-w-3xl rounded-3xl overflow-hidden relative p-6 space-y-4 border border-momoLime/40">
+            <button onclick="closePortraitModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="font-mono text-xs text-momoLime font-bold uppercase tracking-widest">VEG ANNA — EDITORIAL PORTRAIT</div>
+            <img src="8LcVA.jpg" alt="Veg Anna Portrait" class="w-full h-auto max-h-[70vh] object-cover rounded-2xl border border-white/10">
+            <p class="font-serif italic text-center text-emerald-100 text-lg">"Building a sovereign plant-based empire on peer-to-peer infrastructure."</p>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP FOR IDENTITY MATRIX IMAGE (image (2).jpg) -->
+    <div id="matrixModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="glass-spatial w-full max-w-3xl rounded-3xl overflow-hidden relative p-6 space-y-4 border border-momoLime/40">
+            <button onclick="closeMatrixModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="font-mono text-xs text-momoLime font-bold">VEG ANNA 9-PANEL IDENTITY MATRIX</div>
+            <img src="image (2).jpg" alt="Veg Anna Model Identity Grid" class="w-full h-auto rounded-2xl border border-white/10">
+        </div>
+    </div>
+
+    <!-- MODAL POPUP FOR P2P WALLET & NODE EDUCATIONAL EXPERIMENT -->
+    <div id="walletModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="glass-spatial w-full max-w-2xl rounded-3xl overflow-hidden relative p-8 space-y-6 border border-momoGold/50">
+            <button onclick="closeWalletModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-momoLime/20 text-momoLime flex items-center justify-center">
+                    <i data-lucide="network" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-syne font-bold text-xl text-white">DECENTRALIZED P2P NODE EXPERIMENT</h3>
+                    <p class="font-mono text-xs text-momoGold">Sovereign Plant Empire Infrastructure</p>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3 font-mono text-xs">
+                <div class="flex justify-between text-zinc-400">
+                    <span>NODE STATUS:</span>
+                    <span class="text-momoLime font-bold">ONLINE (P2P PEER 0x7F...9A)</span>
+                </div>
+                <div class="flex justify-between text-zinc-400">
+                    <span>ECOSYSTEM PROTOCOL:</span>
+                    <span class="text-white">VEG ANNA P2P v1.0</span>
+                </div>
+                <div class="flex justify-between text-zinc-400">
+                    <span>TRUST METRIC:</span>
+                    <span class="text-momoGold font-bold">"WHO GIVES A SHI*" AUDITED</span>
+                </div>
+            </div>
+
+            <p class="font-sans text-xs text-zinc-300 leading-relaxed">
+                How do you trust a crypto wallet? This peer-to-peer node experiment demonstrates decentralized token streaming and transparent plant-based governance directly inside WebGL spatial scenes.
+            </p>
+
+            <div class="pt-4 flex items-center gap-4">
+                <button onclick="simulateWalletConnect()" id="connectBtn" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">
+                    SIMULATE WALLET CONNECTION
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="modal-wallet" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-6 interactive pointer-events-auto">
-        <div class="bg-black/95 border border-amber-500/40 rounded-3xl p-6 max-w-md w-full relative shadow-2xl text-center">
-            <button onclick="closeModal('modal-wallet')" class="absolute top-4 right-4 text-stone-400 hover:text-white text-lg font-bold">✕</button>
-            <h2 class="text-emerald-400 font-bold tracking-widest text-sm mb-2">P2P WALLET NODE SIMULATOR</h2>
-            <p class="text-stone-300 text-xs mb-4">Connected Destination: <code class="text-amber-300">DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG</code></p>
-            <div class="bg-stone-900 border border-white/10 p-4 rounded-2xl mb-4 text-left text-xs font-mono text-emerald-400">
-                &gt; Node AA01 synchronized...<br>
-                &gt; Micro-tax revenue loop active.<br>
-                &gt; Status: Connected to Kunda Network.
-            </div>
-            <button onclick="closeModal('modal-wallet')" class="bg-emerald-600 hover:bg-emerald-500 text-white w-full py-2.5 rounded-xl font-bold text-xs">DISCONNECT WALLET</button>
-        </div>
-    </div>
-
-    <!-- Script Engine -->
+    <!-- THREE.JS 360 SPATIAL SYSTEM SCRIPT -->
     <script>
-        // Initialize True 360 Equirectangular Viewer
-        let viewer = pannellum.viewer('panorama', {
-            type: 'equirectangular',
-            panorama: '360.avif',
-            autoRotate: 2, // Auto-rotate spinning by default
-            autoRotateInactivityDelay: 1000,
-            compass: true,
-            hfov: 100,
-            mouseZoom: true,
-            hotSpots: [
-                { pitch: -5, yaw: 30, type: "info", text: "Hotspot 01: 8LCVA Portrait", clickHandlerFunc: () => openModal('modal-hotspot1') },
-                { pitch: 0, yaw: 120, type: "info", text: "Hotspot 02: Who Gives A Shi*", clickHandlerFunc: () => openModal('modal-hotspot2') }
-            ]
-        });
+        lucide.createIcons();
 
-        const bearingVal = document.getElementById('bearing-val');
-        const autorotateBtn = document.getElementById('toggle-autorotate');
-        const antipopBtn = document.getElementById('toggle-antipop');
-        const audioBtn = document.getElementById('toggle-audio');
+        // Audio Synth Engine (Web Audio API - Hyrule Ocarina Tone Generator)
+        let audioCtx = null;
+        let synthEnabled = true;
+        let autoRotateEnabled = false;
+        let antiPopMode = 1; // 1: 360.avif, 2: 360.png, 3: 360-SECRET.mp4
+        let secretVideoElem = null;
+        let secretVideoTexture = null;
+        let worldSphereMesh = null;
+        let worldMaterial = null;
 
-        let isAutoRotate = true;
-        let antiPopMode = 0; // 0: 360.avif, 1: 360.png, 2: 360-SECRET.mp4
-        let audioActive = true;
+        // Key states for smooth keyboard movement
+        const keysPressed = {};
 
-        // Live Bearing Tracking
-        setInterval(() => {
-            if(viewer) {
-                let yaw = Math.floor(viewer.getYaw() % 360);
-                if (yaw < 0) yaw += 360;
-                bearingVal.textContent = `${yaw}° N`;
-            }
-        }, 200);
+        function playOcarinaNote(freq = 440) {
+            if (!synthEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.45);
+            } catch (e) {}
+        }
 
-        // Keyboard Arrow & WASD Navigation
-        window.addEventListener('keydown', (e) => {
-            const pitch = viewer.getPitch();
-            const yaw = viewer.getYaw();
-            const step = 5;
+        function toggleAudioSynth() {
+            synthEnabled = !synthEnabled;
+            document.getElementById('synthText').innerText = synthEnabled ? "Synth Audio: ON" : "Synth Audio: OFF";
+        }
 
-            if (e.key === 'ArrowLeft' || e.key === 'a') viewer.setYaw(yaw - step);
-            if (e.key === 'ArrowRight' || e.key === 'd') viewer.setYaw(yaw + step);
-            if (e.key === 'ArrowUp' || e.key === 'w') viewer.setPitch(Math.min(85, pitch + step));
-            if (e.key === 'ArrowDown' || e.key === 's') viewer.setPitch(Math.max(-85, pitch - step));
-        });
+        function toggleAutoRotate() {
+            autoRotateEnabled = !autoRotateEnabled;
+            document.getElementById('rotateText').innerText = autoRotateEnabled ? "Auto-Rotate: ON" : "Auto-Rotate: OFF";
+        }
 
-        // Auto-Rotate Toggle
-        autorotateBtn.addEventListener('click', () => {
-            isAutoRotate = !isAutoRotate;
-            if (isAutoRotate) {
-                viewer.startAutoRotate(2);
-                autorotateBtn.textContent = "AUTO-ROTATE: ON";
-                autorotateBtn.className = "bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-xl text-xs font-bold transition";
-            } else {
-                viewer.stopAutoRotate();
-                autorotateBtn.textContent = "AUTO-ROTATE: OFF";
-                autorotateBtn.className = "bg-stone-900/80 hover:bg-stone-800 text-stone-400 border border-white/20 px-3 py-1.5 rounded-xl text-xs font-bold transition";
-            }
-        });
+        function manualPan(deltaLon, deltaLat) {
+            lon += deltaLon;
+            lat += deltaLat;
+        }
 
-        // Anti-Pop Mode Switcher Toggle
-        antipopBtn.addEventListener('click', () => {
-            antiPopMode = (antiPopMode + 1) % 3;
-            if (antiPopMode === 0) {
-                viewer.setPanorama('360.avif');
-                antipopBtn.textContent = "ANTI-POP: 360.AVIF";
-            } else if (antiPopMode === 1) {
-                viewer.setPanorama('360.png');
-                antipopBtn.textContent = "ANTI-POP: 360.PNG";
+        function cycleAntiPopMode() {
+            antiPopMode = (antiPopMode % 3) + 1;
+            const btnText = document.getElementById('antiPopText');
+            const textureLoader = new THREE.TextureLoader();
+
+            if (antiPopMode === 1) {
+                btnText.innerText = "Anti-Pop: MODE 1 (360.AVIF)";
+                textureLoader.load('360.avif', (tex) => {
+                    worldMaterial.map = tex;
+                    worldMaterial.needsUpdate = true;
+                });
             } else if (antiPopMode === 2) {
-                viewer.setPanorama('360-SECRET.mp4');
-                antipopBtn.textContent = "ANTI-POP: SECRET.MP4";
+                btnText.innerText = "Anti-Pop: MODE 2 (360.PNG)";
+                textureLoader.load('360.png', (tex) => {
+                    worldMaterial.map = tex;
+                    worldMaterial.needsUpdate = true;
+                });
+            } else if (antiPopMode === 3) {
+                btnText.innerText = "Anti-Pop: MODE 3 (SECRET VIDEO)";
+                if (!secretVideoElem) {
+                    secretVideoElem = document.createElement('video');
+                    secretVideoElem.src = '360-SECRET.mp4';
+                    secretVideoElem.loop = true;
+                    secretVideoElem.muted = true;
+                    secretVideoElem.playsInline = true;
+                    secretVideoElem.play().catch(e => console.log('Secret video play state:', e));
+                    secretVideoTexture = new THREE.VideoTexture(secretVideoElem);
+                }
+                worldMaterial.map = secretVideoTexture;
+                worldMaterial.needsUpdate = true;
             }
-        });
+        }
 
-        // Synth Audio Toggle
-        audioBtn.addEventListener('click', () => {
-            audioActive = !audioActive;
-            audioBtn.textContent = audioActive ? "🔊 Synth Audio: ON" : "🔇 Synth Audio: OFF";
-            audioBtn.className = audioActive 
-                ? "bg-stone-900/90 hover:bg-stone-800 text-stone-300 border border-white/20 px-3 py-1.5 rounded-xl text-xs font-bold transition"
-                : "bg-stone-900/90 hover:bg-stone-800 text-stone-500 border border-white/10 px-3 py-1.5 rounded-xl text-xs font-bold transition";
-        });
+        // WebGL 360 Scene Variables
+        let scene, camera, renderer;
+        let isUserInteracting = false;
+        let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+        let lon = 0, onPointerDownLon = 0;
+        let lat = 0, onPointerDownLat = 0;
+        let phi = 0, theta = 0;
 
-        // Modal Handlers
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        document.getElementById('btn-wallet').addEventListener('click', () => openModal('modal-wallet'));
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const spatialObjects = [];
+
+        // Hotspot Spherical Coordinates
+        const nodesData = [
+            { id: 0, title: "8LcVA PORTRAIT", lon: 0, lat: 0, freq: 523.25, type: 'portrait' },
+            { id: 1, title: "WHO GIVES A SHI*", lon: 90, lat: 10, freq: 659.25, type: 'video' },
+            { id: 2, title: "IDENTITY MATRIX", lon: 180, lat: -5, freq: 783.99, type: 'matrix' },
+            { id: 3, title: "P2P WALLET NODE", lon: 270, lat: 5, freq: 1046.50, type: 'wallet' }
+        ];
+
+        function init360Scene() {
+            const container = document.getElementById('webgl-container');
+
+            // Scene & Camera
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // 1. Create 360 World Sphere using 360.avif
+            const sphereGeo = new THREE.SphereGeometry(500, 60, 40);
+            sphereGeo.scale(-1, 1, 1);
+
+            worldMaterial = new THREE.MeshBasicMaterial({ color: 0x121f17, wireframe: true });
+            worldSphereMesh = new THREE.Mesh(sphereGeo, worldMaterial);
+            scene.add(worldSphereMesh);
+
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load(
+                '360.avif', 
+                (texture) => {
+                    worldMaterial.map = texture;
+                    worldMaterial.wireframe = false;
+                    worldMaterial.needsUpdate = true;
+                }, 
+                undefined, 
+                (err) => {
+                    console.log('360.avif loading fallback active');
+                }
+            );
+
+            // Preload 360-SECRET.mp4 lazily in the background
+            setTimeout(() => {
+                const preloadVideo = document.createElement('video');
+                preloadVideo.src = '360-SECRET.mp4';
+                preloadVideo.preload = 'auto';
+            }, 3000);
+
+            // 2. Add 3D Floating Interactive Spatial Marker Hotspots
+            nodesData.forEach((node) => {
+                const markerGroup = new THREE.Group();
+
+                const ringGeo = new THREE.RingGeometry(12, 16, 32);
+                const ringMat = new THREE.MeshBasicMaterial({ 
+                    color: node.id === 1 ? 0xD4AF37 : (node.id === 3 ? 0xE53E3E : 0xA3E635), 
+                    side: THREE.DoubleSide, 
+                    transparent: true, 
+                    opacity: 0.85 
+                });
+                const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+                markerGroup.add(ringMesh);
+
+                const coreGeo = new THREE.SphereGeometry(6, 16, 16);
+                const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+                markerGroup.add(coreMesh);
+
+                const phiRad = THREE.MathUtils.degToRad(90 - node.lat);
+                const thetaRad = THREE.MathUtils.degToRad(node.lon);
+                const radius = 350;
+
+                markerGroup.position.x = radius * Math.sin(phiRad) * Math.cos(thetaRad);
+                markerGroup.position.y = radius * Math.cos(phiRad);
+                markerGroup.position.z = radius * Math.sin(phiRad) * Math.sin(thetaRad);
+                markerGroup.lookAt(0, 0, 0);
+
+                markerGroup.userData = node;
+                scene.add(markerGroup);
+                spatialObjects.push(markerGroup);
+            });
+
+            // Event Listeners for 360 Drag Interaction & Keyboard
+            container.addEventListener('pointerdown', onPointerDown);
+            window.addEventListener('resize', onWindowResize);
+            container.addEventListener('click', onCanvasClick);
+
+            window.addEventListener('keydown', (e) => { keysPressed[e.key] = true; });
+            window.addEventListener('keyup', (e) => { keysPressed[e.key] = false; });
+
+            animate();
+        }
+
+        function onPointerDown(event) {
+            isUserInteracting = true;
+            onPointerDownPointerX = event.clientX;
+            onPointerDownPointerY = event.clientY;
+            onPointerDownLon = lon;
+            onPointerDownLat = lat;
+
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+        }
+
+        function onPointerMove(event) {
+            if (!isUserInteracting) return;
+            lon = (onPointerDownPointerX - event.clientX) * 0.2 + onPointerDownLon;
+            lat = (event.clientY - onPointerDownPointerY) * 0.2 + onPointerDownLat;
+        }
+
+        function onPointerUp() {
+            isUserInteracting = false;
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+        }
+
+        function handleKeyboardInput() {
+            const step = 1.2;
+            if (keysPressed['ArrowLeft'] || keysPressed['a'] || keysPressed['A']) lon -= step;
+            if (keysPressed['ArrowRight'] || keysPressed['d'] || keysPressed['D']) lon += step;
+            if (keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W']) lat += step;
+            if (keysPressed['ArrowDown'] || keysPressed['s'] || keysPressed['S']) lat -= step;
+        }
+
+        function focusSpatialNode(index) {
+            const target = nodesData[index];
+            if (!target) return;
+            playOcarinaNote(target.freq);
+
+            gsap.to(window, {
+                duration: 1.5,
+                lon: target.lon,
+                lat: target.lat,
+                ease: "power2.inOut"
+            });
+
+            if (target.type === 'portrait') openPortraitModal();
+            if (target.type === 'video') openVideoModal();
+            if (target.type === 'matrix') openMatrixModal();
+            if (target.type === 'wallet') openWalletModal();
+        }
+
+        function onCanvasClick(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(spatialObjects, true);
+
+            if (intersects.length > 0) {
+                let obj = intersects[0].object;
+                while (obj.parent && !obj.userData.type) {
+                    obj = obj.parent;
+                }
+                if (obj.userData && obj.userData.id !== undefined) {
+                    focusSpatialNode(obj.userData.id);
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Handle keyboard arrow steering & auto-rotation
+            handleKeyboardInput();
+            if (autoRotateEnabled && !isUserInteracting) {
+                lon += 0.15;
+            }
+
+            // Clamp Latitude
+            lat = Math.max(-85, Math.min(85, lat));
+
+            phi = THREE.MathUtils.degToRad(90 - lat);
+            theta = THREE.MathUtils.degToRad(lon);
+
+            camera.target = new THREE.Vector3(
+                500 * Math.sin(phi) * Math.cos(theta),
+                500 * Math.cos(phi),
+                500 * Math.sin(phi) * Math.sin(theta)
+            );
+
+            camera.lookAt(camera.target);
+
+            spatialObjects.forEach(obj => {
+                obj.rotation.z += 0.01;
+            });
+
+            const compassRing = document.getElementById('compassRing');
+            const bearingAngle = document.getElementById('bearingAngle');
+            if (compassRing && bearingAngle) {
+                const normLon = Math.round((lon % 360 + 360) % 360);
+                compassRing.style.transform = `rotate(${normLon}deg)`;
+                bearingAngle.innerText = `${normLon}° N`;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Modals & Wallet Logic
+        function openVideoModal() {
+            document.getElementById('videoModal').classList.remove('hidden');
+            const v = document.getElementById('modalVideo');
+            if (v) v.play().catch(e => console.log('Video autoplay prevented:', e));
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').classList.add('hidden');
+            const v = document.getElementById('modalVideo');
+            if (v) v.pause();
+        }
+
+        function openPortraitModal() { document.getElementById('portraitModal').classList.remove('hidden'); }
+        function closePortraitModal() { document.getElementById('portraitModal').classList.add('hidden'); }
+        function openMatrixModal() { document.getElementById('matrixModal').classList.remove('hidden'); }
+        function closeMatrixModal() { document.getElementById('matrixModal').classList.add('hidden'); }
+        function openWalletModal() { document.getElementById('walletModal').classList.remove('hidden'); }
+        function closeWalletModal() { document.getElementById('walletModal').classList.add('hidden'); }
+
+        function simulateWalletConnect() {
+            const btn = document.getElementById('connectBtn');
+            btn.innerText = "CONNECTING TO P2P NODE...";
+            setTimeout(() => {
+                btn.innerText = "CONNECTED: 0xVEG...ANNA";
+                btn.className = "w-full py-3 bg-momoGold text-black font-syne font-bold text-sm rounded-xl";
+            }, 1200);
+        }
+
+        window.onload = function() {
+            init360Scene();
+        };
     </script>
 </body>
 </html>
