@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VEG ANNA — 360° Spatial P2P Ecosystem</title>
 
     <!-- Tailwind CSS -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEG ANNA — 360 Spatial Ecosystem</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Fonts: Syne (Kinetic Bold Display), Cormorant Garamond (Casa Momo luxury serif), Space Grotesk (P2P Mono) -->
@@ -48,7 +45,7 @@
     <style>
         * { user-select: none; -webkit-user-drag: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; }
-        
+
         #webgl-container { position: absolute; inset: 0; z-index: 1; cursor: grab; }
         #webgl-container:active { cursor: grabbing; }
 
@@ -99,12 +96,6 @@
             50% { opacity: 0.9; transform: scale(1.1); }
         }
         .pulse-node { animation: pulseGlow 2s infinite ease-in-out; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; color: #f3eee4; }
-        #viewer-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; overflow: hidden; }
-        .pano-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; transition: background-image 0.5s ease; will-change: transform; }
-        .ui-overlay { position: relative; z-index: 10; pointer-events: none; }
-        .interactive { pointer-events: auto; }
-        video.pano-bg { object-fit: cover; width: 100%; height: 100%; }
     </style>
 </head>
 <body class="antialiased">
@@ -155,7 +146,6 @@
             </button>
         </div>
     </div>
-<body>
 
     <!-- 360 RADIAL COMPASS BEARING HUD (BOTTOM LEFT) -->
     <div class="fixed bottom-6 left-6 z-40 pointer-events-none hidden md:flex items-center gap-3 glass-spatial p-3 rounded-2xl">
@@ -167,13 +157,10 @@
             <div class="text-zinc-400 text-[10px]">BEARING</div>
             <div id="bearingAngle" class="text-momoLime font-bold">0° N</div>
         </div>
-    <!-- 360 Panoramic Background Container -->
-    <div id="viewer-container">
-        <div id="bg-layer" class="pano-bg" style="background-image: url('360.avif');"></div>
-        <video id="bg-video" class="pano-bg hidden" autoplay loop muted playsinline src="360-SECRET.mp4"></video>
     </div>
 
     <!-- AUDIO HELPER HUD (TOP RIGHT) -->
+    <div class="fixed top-20 right-6 z-40 pointer-events-auto">
     <div class="fixed top-20 right-6 z-40 pointer-events-auto flex flex-col gap-2 items-end">
         <button onclick="toggleAutoRotate()" id="rotateBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoLime flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span id="rotateText">Auto-Rotate: OFF</span>
@@ -229,18 +216,9 @@
                         <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="underline text-momoLime">VISIT SPONSOR</a>
                     </div>
                 </div>
-    <!-- UI Overlay -->
-    <div class="ui-overlay absolute inset-0 flex flex-col justify-between p-6">
-        <header class="flex justify-between items-center bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/10 interactive">
-            <h1 class="text-xl font-bold tracking-widest text-emerald-400">VEG ANNA <span class="text-xs text-stone-400 font-normal">| 360° SPATIAL ECOSYSTEM</span></h1>
-            <div class="flex items-center gap-4">
-                <button id="toggle-autorotate" class="bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-lg text-xs font-bold transition">AUTO-ROTATE: ON</button>
-                <button id="toggle-antipop" class="bg-stone-900/80 hover:bg-stone-800 text-stone-300 border border-white/20 px-3 py-1.5 rounded-lg text-xs font-bold transition">ANTI-POP: 360.AVIF</button>
-                <a href="https://100mlcoolhotsauce.com" target="_blank" class="text-red-400 hover:text-red-300 text-xs font-bold tracking-wider">SPONSORED BY 100MLCOOLHOTSAUCE.COM ↗</a>
             </div>
         </div>
     </div>
-        </header>
 
     <!-- MODAL POPUP FOR PORTRAIT IMAGE (8LcVA.jpg) -->
     <div id="portraitModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
@@ -271,7 +249,7 @@
             <button onclick="closeWalletModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            
+
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-2xl bg-momoLime/20 text-momoLime flex items-center justify-center">
                     <i data-lucide="network" class="w-6 h-6"></i>
@@ -280,9 +258,6 @@
                     <h3 class="font-syne font-bold text-xl text-white">DECENTRALIZED P2P NODE EXPERIMENT</h3>
                     <p class="font-mono text-xs text-momoGold">Sovereign Plant Empire Infrastructure</p>
                 </div>
-        <footer class="flex justify-between items-end interactive">
-            <div class="bg-black/60 backdrop-blur-md p-3 rounded-xl border border-white/10 text-xs text-stone-300">
-                BEARING: <span id="bearing-val" class="text-emerald-400 font-mono">0° N</span>
             </div>
 
             <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3 font-mono text-xs">
@@ -308,15 +283,11 @@
                 <button onclick="simulateWalletConnect()" id="connectBtn" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">
                     SIMULATE WALLET CONNECTION
                 </button>
-            <div class="bg-black/60 backdrop-blur-md p-3 rounded-xl border border-white/10 text-xs text-stone-400">
-                Use <span class="text-emerald-400 font-bold">Arrow Keys</span> or drag to pan.
             </div>
         </div>
-        </footer>
     </div>
 
     <!-- THREE.JS 360 SPATIAL SYSTEM SCRIPT -->
-    <!-- Script Engine -->
     <script>
         lucide.createIcons();
 
@@ -395,25 +366,6 @@
                 }
                 worldMaterial.map = secretVideoTexture;
                 worldMaterial.needsUpdate = true;
-        const bgLayer = document.getElementById('bg-layer');
-        const bgVideo = document.getElementById('bg-video');
-        const autorotateBtn = document.getElementById('toggle-autorotate');
-        const antipopBtn = document.getElementById('toggle-antipop');
-        const bearingVal = document.getElementById('bearing-val');
-
-        let currentLon = 0;
-        let currentLat = 0;
-        let isAutoRotate = true;
-        let antiPopMode = 0; // 0: 360.avif, 1: 360.png, 2: 360-SECRET.mp4
-        let isDragging = false;
-        let startX = 0, startY = 0;
-
-        // Auto-Rotate Loop
-        function updateView() {
-            if (isAutoRotate && !isDragging) {
-                currentLon += 0.05;
-                if (currentLon >= 360) currentLon = 0;
-                if (currentLon < 0) currentLon += 360;
             }
         }
 
@@ -450,6 +402,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
+            // 1. Create 360 World Sphere using 360.avif (or fallback procedure grid)
             // 1. Create 360 World Sphere using 360.avif
             const sphereGeo = new THREE.SphereGeometry(500, 60, 40);
             sphereGeo.scale(-1, 1, 1);
@@ -462,12 +415,31 @@
             textureLoader.load(
                 '360.avif', 
                 (texture) => {
+                    const sphereMat = new THREE.MeshBasicMaterial({ map: texture });
+                    const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
+                    scene.add(worldSphere);
                     worldMaterial.map = texture;
                     worldMaterial.wireframe = false;
                     worldMaterial.needsUpdate = true;
                 }, 
                 undefined, 
                 (err) => {
+                    console.log('360.avif loading fallback, loading alternate spatial grid background');
+                    textureLoader.load('8LcVA.jpg', (fallbackTex) => {
+                        const fallbackMat = new THREE.MeshBasicMaterial({ map: fallbackTex });
+                        const worldSphere = new THREE.Mesh(sphereGeo, fallbackMat);
+                        scene.add(worldSphere);
+                    }, undefined, () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 1024; canvas.height = 512;
+                        const ctx = canvas.getContext('2d');
+                        const grad = ctx.createLinearGradient(0,0,0,512);
+                        grad.addColorStop(0, '#080d0a'); grad.addColorStop(0.5, '#121f17'); grad.addColorStop(1, '#050806');
+                        ctx.fillStyle = grad; ctx.fillRect(0,0,1024,512);
+                        const proceduralMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });
+                        const worldSphere = new THREE.Mesh(sphereGeo, proceduralMat);
+                        scene.add(worldSphere);
+                    });
                     console.log('360.avif loading fallback active');
                 }
             );
@@ -483,6 +455,7 @@
             nodesData.forEach((node) => {
                 const markerGroup = new THREE.Group();
 
+                // Glowing Ring
                 const ringGeo = new THREE.RingGeometry(12, 16, 32);
                 const ringMat = new THREE.MeshBasicMaterial({ 
                     color: node.id === 1 ? 0xD4AF37 : (node.id === 3 ? 0xE53E3E : 0xA3E635), 
@@ -493,11 +466,13 @@
                 const ringMesh = new THREE.Mesh(ringGeo, ringMat);
                 markerGroup.add(ringMesh);
 
+                // Inner Core Sphere
                 const coreGeo = new THREE.SphereGeometry(6, 16, 16);
                 const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
                 const coreMesh = new THREE.Mesh(coreGeo, coreMat);
                 markerGroup.add(coreMesh);
 
+                // Convert Spherical to 3D Vector
                 const phiRad = THREE.MathUtils.degToRad(90 - node.lat);
                 const thetaRad = THREE.MathUtils.degToRad(node.lon);
                 const radius = 350;
@@ -512,6 +487,7 @@
                 spatialObjects.push(markerGroup);
             });
 
+            // Event Listeners for 360 Drag Interaction
             // Event Listeners for 360 Drag Interaction & Keyboard
             container.addEventListener('pointerdown', onPointerDown);
             window.addEventListener('resize', onWindowResize);
@@ -603,12 +579,6 @@
             handleKeyboardInput();
             if (autoRotateEnabled && !isUserInteracting) {
                 lon += 0.15;
-            
-            // Apply transform for smooth panoramic panning
-            const container = document.getElementById('viewer-container');
-            container.style.backgroundPosition = `${currentLon * 10}% ${50 + currentLat}%`;
-            if(bgLayer.style.backgroundImage) {
-                bgLayer.style.transform = `scale(1.1) translate(${-currentLon * 2}px, ${-currentLat * 2}px)`;
             }
 
             // Clamp Latitude
@@ -625,79 +595,18 @@
 
             camera.lookAt(camera.target);
 
+            // Rotate Spatial Markers subtle rotation
             spatialObjects.forEach(obj => {
                 obj.rotation.z += 0.01;
             });
 
+            // Update Compass Bearing HUD
             const compassRing = document.getElementById('compassRing');
             const bearingAngle = document.getElementById('bearingAngle');
             if (compassRing && bearingAngle) {
                 const normLon = Math.round((lon % 360 + 360) % 360);
                 compassRing.style.transform = `rotate(${normLon}deg)`;
                 bearingAngle.innerText = `${normLon}° N`;
-            bgVideo.style.transform = `scale(1.1) translate(${-currentLon * 2}px, ${-currentLat * 2}px)`;
-
-            bearingVal.textContent = `${Math.floor(currentLon)}° N`;
-            requestAnimationFrame(updateView);
-        }
-        requestAnimationFrame(updateView);
-
-        // Keyboard Arrow Keys
-        window.addEventListener('keydown', (e) => {
-            const step = 3;
-            if (e.key === 'ArrowLeft' || e.key === 'a') currentLon -= step;
-            if (e.key === 'ArrowRight' || e.key === 'd') currentLon += step;
-            if (e.key === 'ArrowUp' || e.key === 'w') currentLat = Math.min(40, currentLat + step);
-            if (e.key === 'ArrowDown' || e.key === 's') currentLat = Math.max(-40, currentLat - step);
-        });
-
-        // Mouse Drag Panning
-        window.addEventListener('mousedown', (e) => {
-            if(e.target.closest('header') || e.target.closest('footer')) return;
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-        });
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            currentLon -= deltaX * 0.1;
-            currentLat = Math.max(-40, Math.min(40, currentLat + deltaY * 0.1));
-            startX = e.clientX;
-            startY = e.clientY;
-        });
-        window.addEventListener('mouseup', () => { isDragging = false; });
-
-        // Auto-Rotate Toggle
-        autorotateBtn.addEventListener('click', () => {
-            isAutoRotate = !isAutoRotate;
-            autorotateBtn.textContent = `AUTO-ROTATE: ${isAutoRotate ? 'ON' : 'OFF'}`;
-            autorotateBtn.className = isAutoRotate 
-                ? "bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-lg text-xs font-bold transition"
-                : "bg-stone-900/80 hover:bg-stone-800 text-stone-400 border border-white/20 px-3 py-1.5 rounded-lg text-xs font-bold transition";
-        });
-
-        // Anti-Pop Mode Switcher Toggle
-        antipopBtn.addEventListener('click', () => {
-            antiPopMode = (antiPopMode + 1) % 3;
-            if (antiPopMode === 0) {
-                bgVideo.classList.add('hidden');
-                bgVideo.pause();
-                bgLayer.classList.remove('hidden');
-                bgLayer.style.backgroundImage = "url('360.avif')";
-                antipopBtn.textContent = "ANTI-POP: 360.AVIF";
-            } else if (antiPopMode === 1) {
-                bgVideo.classList.add('hidden');
-                bgVideo.pause();
-                bgLayer.classList.remove('hidden');
-                bgLayer.style.backgroundImage = "url('360.png')";
-                antipopBtn.textContent = "ANTI-POP: 360.PNG";
-            } else if (antiPopMode === 2) {
-                bgLayer.classList.add('hidden');
-                bgVideo.classList.remove('hidden');
-                bgVideo.play().catch(err => console.log("Video autoplay restricted"));
-                antipopBtn.textContent = "ANTI-POP: SECRET.MP4";
             }
 
             renderer.render(scene, camera);
@@ -735,7 +644,6 @@
         window.onload = function() {
             init360Scene();
         };
-        });
     </script>
 </body>
 </html>
