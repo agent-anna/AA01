@@ -473,9 +473,9 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Slow slow continuous auto rotation when not dragging
+            // Very slow, subtle continuous auto-rotation when not interacting
             if (!isUserInteracting) {
-                lon += 0.03;
+                lon += 0.012;
             }
 
             // Clamp Latitude
