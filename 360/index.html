@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -71,7 +70,7 @@
             box-shadow: 0 0 30px rgba(163, 230, 53, 0.2);
         }
 
-        /* Ocarina Note Button Effects */
+        /* Ocarina / Hotspot Note Button Effects */
         .ocarina-btn {
             background: rgba(18, 31, 23, 0.85);
             border: 1px solid rgba(212, 175, 55, 0.4);
@@ -91,9 +90,12 @@
             pointer-events: none;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #D4AF37; }
+        /* Pulse Animation for Node Signals */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.1); }
+        }
+        .pulse-node { animation: pulseGlow 2s infinite ease-in-out; }
     </style>
 </head>
 <body class="antialiased">
@@ -111,14 +113,17 @@
         </div>
 
         <div class="pointer-events-auto flex items-center gap-3">
+            <button onclick="openWalletModal()" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
+                <i data-lucide="wallet" class="w-4 h-4"></i> CONNECT P2P WALLET
+            </button>
             <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
-                <i class="fa-solid fa-pepper-hot"></i> SPONSORED BY 100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <i data-lucide="flame" class="w-4 h-4"></i> SPONSORED BY 100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             </a>
         </div>
     </header>
 
     <!-- OCARINA-INSPIRED HYRULE SONG / SPATIAL HOTSPOT SELECTOR (BOTTOM DOCK) -->
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-2xl px-4 pointer-events-none">
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-3xl px-4 pointer-events-none">
         <div class="pointer-events-auto glass-spatial p-3 rounded-2xl flex items-center justify-between gap-2 shadow-2xl">
             <button onclick="focusSpatialNode(0)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
                 <span class="font-mono text-[10px] text-momoLime font-bold uppercase">HOTSPOT 01</span>
@@ -137,7 +142,7 @@
 
             <button onclick="focusSpatialNode(3)" class="ocarina-btn flex-1 py-3 px-2 rounded-xl text-center flex flex-col items-center gap-1">
                 <span class="font-mono text-[10px] text-sauceRed font-bold uppercase">HOTSPOT 04</span>
-                <span class="font-syne font-bold text-xs uppercase tracking-tight">P2P NODE GRAPH</span>
+                <span class="font-syne font-bold text-xs uppercase tracking-tight">P2P WALLET NODE</span>
             </button>
         </div>
     </div>
@@ -162,21 +167,24 @@
     </div>
 
     <!-- MODAL POPUP FOR WHO GIVES A SHI.MP4 VIDEO & TRANSCRIPT -->
-    <div id="videoModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+    <div id="videoModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 hidden">
         <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-momoGold/40 animate-in fade-in zoom-in duration-300">
-            <button onclick="closeVideoModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+            <button onclick="closeVideoModal()" class="absolute top-4 right-4 z-20 bg-black/70 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
 
             <div class="grid lg:grid-cols-12">
-                <div class="lg:col-span-7 bg-black flex items-center justify-center relative min-h-[300px]">
-                    <video id="modalVideo" controls class="w-full h-full object-cover">
+                <div class="lg:col-span-7 bg-black flex items-center justify-center relative min-h-[320px]">
+                    <video id="modalVideo" controls playsinline preload="auto" class="w-full h-full object-cover">
                         <source src="WHO GIVES A SHI.mp4" type="video/mp4">
+                        Your browser does not support playing this video file.
                     </video>
                 </div>
                 <div class="lg:col-span-5 p-6 sm:p-8 space-y-6 flex flex-col justify-between">
                     <div class="space-y-4">
-                        <span class="font-mono text-xs text-momoGold uppercase tracking-widest font-bold">SPATIAL MEDIA NODE</span>
+                        <span class="font-mono text-xs text-momoGold uppercase tracking-widest font-bold flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-momoLime animate-ping"></span> SPATIAL MEDIA BROADCAST
+                        </span>
                         <h3 class="font-syne font-black text-2xl text-white">WHO GIVES A SHI*</h3>
                         <div class="p-4 rounded-xl bg-white/5 border border-white/10 font-serif italic text-lg text-emerald-200">
                             "How do you trust a crypto wallet? Honestly, it's fun... it's funny money. Who gives a shi*?"
@@ -195,7 +203,19 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP FOR IDENTITY MATRIX IMAGE (2).JPG -->
+    <!-- MODAL POPUP FOR PORTRAIT IMAGE (8LcVA.jpg) -->
+    <div id="portraitModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="glass-spatial w-full max-w-3xl rounded-3xl overflow-hidden relative p-6 space-y-4 border border-momoLime/40">
+            <button onclick="closePortraitModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="font-mono text-xs text-momoLime font-bold uppercase tracking-widest">VEG ANNA — EDITORIAL PORTRAIT</div>
+            <img src="8LcVA.jpg" alt="Veg Anna Portrait" class="w-full h-auto max-h-[70vh] object-cover rounded-2xl border border-white/10">
+            <p class="font-serif italic text-center text-emerald-100 text-lg">"Building a sovereign plant-based empire on peer-to-peer infrastructure."</p>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP FOR IDENTITY MATRIX IMAGE (image (2).jpg) -->
     <div id="matrixModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
         <div class="glass-spatial w-full max-w-3xl rounded-3xl overflow-hidden relative p-6 space-y-4 border border-momoLime/40">
             <button onclick="closeMatrixModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
@@ -203,6 +223,50 @@
             </button>
             <div class="font-mono text-xs text-momoLime font-bold">VEG ANNA 9-PANEL IDENTITY MATRIX</div>
             <img src="image (2).jpg" alt="Veg Anna Model Identity Grid" class="w-full h-auto rounded-2xl border border-white/10">
+        </div>
+    </div>
+
+    <!-- MODAL POPUP FOR P2P WALLET & NODE EDUCATIONAL EXPERIMENT -->
+    <div id="walletModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 hidden">
+        <div class="glass-spatial w-full max-w-2xl rounded-3xl overflow-hidden relative p-8 space-y-6 border border-momoGold/50">
+            <button onclick="closeWalletModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-momoLime/20 text-momoLime flex items-center justify-center">
+                    <i data-lucide="network" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-syne font-bold text-xl text-white">DECENTRALIZED P2P NODE EXPERIMENT</h3>
+                    <p class="font-mono text-xs text-momoGold">Sovereign Plant Empire Infrastructure</p>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3 font-mono text-xs">
+                <div class="flex justify-between text-zinc-400">
+                    <span>NODE STATUS:</span>
+                    <span class="text-momoLime font-bold">ONLINE (P2P PEER 0x7F...9A)</span>
+                </div>
+                <div class="flex justify-between text-zinc-400">
+                    <span>ECOSYSTEM PROTOCOL:</span>
+                    <span class="text-white">VEG ANNA P2P v1.0</span>
+                </div>
+                <div class="flex justify-between text-zinc-400">
+                    <span>TRUST METRIC:</span>
+                    <span class="text-momoGold font-bold">"WHO GIVES A SHI*" AUDITED</span>
+                </div>
+            </div>
+
+            <p class="font-sans text-xs text-zinc-300 leading-relaxed">
+                How do you trust a crypto wallet? This peer-to-peer node experiment demonstrates decentralized token streaming and transparent plant-based governance directly inside WebGL spatial scenes.
+            </p>
+
+            <div class="pt-4 flex items-center gap-4">
+                <button onclick="simulateWalletConnect()" id="connectBtn" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">
+                    SIMULATE WALLET CONNECTION
+                </button>
+            </div>
         </div>
     </div>
 
@@ -243,7 +307,6 @@
         let lon = 0, onPointerDownLon = 0;
         let lat = 0, onPointerDownLat = 0;
         let phi = 0, theta = 0;
-        let targetLon = 0, targetLat = 0;
 
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
@@ -251,10 +314,10 @@
 
         // Hotspot Spherical Coordinates
         const nodesData = [
-            { id: 0, title: "8LcVA PORTRAIT", lon: 0, lat: 0, freq: 523.25, type: 'image', img: '8LcVA.jpg' },
+            { id: 0, title: "8LcVA PORTRAIT", lon: 0, lat: 0, freq: 523.25, type: 'portrait' },
             { id: 1, title: "WHO GIVES A SHI*", lon: 90, lat: 10, freq: 659.25, type: 'video' },
             { id: 2, title: "IDENTITY MATRIX", lon: 180, lat: -5, freq: 783.99, type: 'matrix' },
-            { id: 3, title: "P2P NODE GRAPH", lon: 270, lat: 5, freq: 1046.50, type: 'p2p' }
+            { id: 3, title: "P2P WALLET NODE", lon: 270, lat: 5, freq: 1046.50, type: 'wallet' }
         ];
 
         function init360Scene() {
@@ -270,27 +333,38 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
-            // 1. Create 360 World Sphere using 8LcVA.jpg equirectangular / textured backdrop
+            // 1. Create 360 World Sphere using 360.avif (or fallback procedure grid)
             const sphereGeo = new THREE.SphereGeometry(500, 60, 40);
             sphereGeo.scale(-1, 1, 1);
 
             const textureLoader = new THREE.TextureLoader();
-            textureLoader.load('8LcVA.jpg', (texture) => {
-                const sphereMat = new THREE.MeshBasicMaterial({ map: texture });
-                const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
-                scene.add(worldSphere);
-            }, undefined, () => {
-                // Fallback lush gradient texture canvas if image loading fails
-                const canvas = document.createElement('canvas');
-                canvas.width = 1024; canvas.height = 512;
-                const ctx = canvas.getContext('2d');
-                const grad = ctx.createLinearGradient(0,0,0,512);
-                grad.addColorStop(0, '#080d0a'); grad.addColorStop(0.5, '#121f17'); grad.addColorStop(1, '#050806');
-                ctx.fillStyle = grad; ctx.fillRect(0,0,1024,512);
-                const fallbackMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });
-                const worldSphere = new THREE.Mesh(sphereGeo, fallbackMat);
-                scene.add(worldSphere);
-            });
+            textureLoader.load(
+                '360.avif', 
+                (texture) => {
+                    const sphereMat = new THREE.MeshBasicMaterial({ map: texture });
+                    const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
+                    scene.add(worldSphere);
+                }, 
+                undefined, 
+                (err) => {
+                    console.log('360.avif loading fallback, loading alternate spatial grid background');
+                    textureLoader.load('8LcVA.jpg', (fallbackTex) => {
+                        const fallbackMat = new THREE.MeshBasicMaterial({ map: fallbackTex });
+                        const worldSphere = new THREE.Mesh(sphereGeo, fallbackMat);
+                        scene.add(worldSphere);
+                    }, undefined, () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 1024; canvas.height = 512;
+                        const ctx = canvas.getContext('2d');
+                        const grad = ctx.createLinearGradient(0,0,0,512);
+                        grad.addColorStop(0, '#080d0a'); grad.addColorStop(0.5, '#121f17'); grad.addColorStop(1, '#050806');
+                        ctx.fillStyle = grad; ctx.fillRect(0,0,1024,512);
+                        const proceduralMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });
+                        const worldSphere = new THREE.Mesh(sphereGeo, proceduralMat);
+                        scene.add(worldSphere);
+                    });
+                }
+            );
 
             // 2. Add 3D Floating Interactive Spatial Marker Hotspots
             nodesData.forEach((node) => {
@@ -302,7 +376,7 @@
                     color: node.id === 1 ? 0xD4AF37 : (node.id === 3 ? 0xE53E3E : 0xA3E635), 
                     side: THREE.DoubleSide, 
                     transparent: true, 
-                    opacity: 0.8 
+                    opacity: 0.85 
                 });
                 const ringMesh = new THREE.Mesh(ringGeo, ringMat);
                 markerGroup.add(ringMesh);
@@ -368,15 +442,13 @@
                 duration: 1.5,
                 lon: target.lon,
                 lat: target.lat,
-                ease: "power2.inOut",
-                onUpdate: () => {
-                    targetLon = lon;
-                    targetLat = lat;
-                }
+                ease: "power2.inOut"
             });
 
+            if (target.type === 'portrait') openPortraitModal();
             if (target.type === 'video') openVideoModal();
             if (target.type === 'matrix') openMatrixModal();
+            if (target.type === 'wallet') openWalletModal();
         }
 
         function onCanvasClick(event) {
@@ -437,11 +509,11 @@
             renderer.render(scene, camera);
         }
 
-        // Modals Logic
+        // Modals & Wallet Logic
         function openVideoModal() {
             document.getElementById('videoModal').classList.remove('hidden');
             const v = document.getElementById('modalVideo');
-            if (v) v.play();
+            if (v) v.play().catch(e => console.log('Video autoplay prevented:', e));
         }
 
         function closeVideoModal() {
@@ -450,12 +522,20 @@
             if (v) v.pause();
         }
 
-        function openMatrixModal() {
-            document.getElementById('matrixModal').classList.remove('hidden');
-        }
+        function openPortraitModal() { document.getElementById('portraitModal').classList.remove('hidden'); }
+        function closePortraitModal() { document.getElementById('portraitModal').classList.add('hidden'); }
+        function openMatrixModal() { document.getElementById('matrixModal').classList.remove('hidden'); }
+        function closeMatrixModal() { document.getElementById('matrixModal').classList.add('hidden'); }
+        function openWalletModal() { document.getElementById('walletModal').classList.remove('hidden'); }
+        function closeWalletModal() { document.getElementById('walletModal').classList.add('hidden'); }
 
-        function closeMatrixModal() {
-            document.getElementById('matrixModal').classList.add('hidden');
+        function simulateWalletConnect() {
+            const btn = document.getElementById('connectBtn');
+            btn.innerText = "CONNECTING TO P2P NODE...";
+            setTimeout(() => {
+                btn.innerText = "CONNECTED: 0xVEG...ANNA";
+                btn.className = "w-full py-3 bg-momoGold text-black font-syne font-bold text-sm rounded-xl";
+            }, 1200);
         }
 
         window.onload = function() {
