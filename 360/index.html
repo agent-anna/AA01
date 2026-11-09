@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>VEG ANNA — 360° Spatial P2P Ecosystem</title>
 
+    <!-- Pannellum 360 Library & Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -43,10 +47,7 @@
         * { user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        #viewer-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; overflow: hidden; cursor: grab; }
-        #viewer-container:active { cursor: grabbing; }
-        .pano-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: cover; background-position: center 50%; will-change: transform; transition: opacity 0.4s ease; }
-        video.pano-bg { object-fit: cover; }
+        #panorama { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
 
         .compass-ring {
             border: 1.5px dashed rgba(212, 175, 55, 0.4);
@@ -93,11 +94,8 @@
 </head>
 <body class="antialiased">
 
-    <!-- 360 PANORAMIC VIEWPORT CONTAINER -->
-    <div id="viewer-container">
-        <div id="bg-layer" class="pano-bg" style="background-image: url('360.avif');"></div>
-        <video id="bg-video" class="pano-bg hidden" autoplay loop muted playsinline src="360-SECRET.mp4"></video>
-    </div>
+    <!-- TRUE 360 PANELLUM VIEWER CONTAINER -->
+    <div id="panorama"></div>
     
     <div class="scanlines absolute inset-0 z-10"></div>
 
@@ -176,9 +174,7 @@
             <button onclick="closeVideoModal()" class="absolute top-4 right-4 z-20 bg-black/75 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
             <div class="grid lg:grid-cols-12">
                 <div class="lg:col-span-7 bg-black flex items-center justify-center relative min-h-[260px] sm:min-h-[320px]">
-                    <video id="modalVideo" controls playsinline preload="auto" class="w-full h-full object-cover">
-                        <source src="WHO GIVES A SHI.mp4" type="video/mp4">
-                    </video>
+                    <video id="modalVideo" controls playsinline preload="auto" class="w-full h-full object-cover" src="WHO GIVES A SHI.mp4"></video>
                 </div>
                 <div class="lg:col-span-5 p-5 sm:p-8 space-y-4 flex flex-col justify-between">
                     <div class="space-y-3">
@@ -254,98 +250,72 @@
             document.getElementById('synthText').innerText = synthEnabled ? "Synth Audio: ON" : "Synth Audio: OFF";
         }
 
-        const bgLayer = document.getElementById('bg-layer');
-        const bgVideo = document.getElementById('bg-video');
+        // Initialize True 360 Pannellum Equirectangular Viewer
+        let viewer = pannellum.viewer('panorama', {
+            type: 'equirectangular',
+            panorama: '360.avif',
+            autoRotate: 1.2, // Slower, silky smooth spin speed
+            autoRotateInactivityDelay: 1000,
+            compass: false,
+            hfov: 100,
+            mouseZoom: true
+        });
+
         const autorotateBtn = document.getElementById('autorotateBtn');
         const antipopBtn = document.getElementById('antipopBtn');
         const bearingAngle = document.getElementById('bearingAngle');
         const compassRing = document.getElementById('compassRing');
 
-        let currentLon = 0;
-        let currentLat = 0;
         let isAutoRotate = true;
         let antiPopMode = 0; // 0: 360.avif, 1: 360.png, 2: 360-SECRET.mp4
-        let isDragging = false;
-        let startX = 0, startY = 0;
 
-        // Auto-Rotate Loop & Seamless Position Wrapping
-        function updateView() {
-            if (isAutoRotate && !isDragging) {
-                currentLon += 0.015; // Slower, silky smooth spin speed
-                if (currentLon >= 360) currentLon = 0;
-                if (currentLon < 0) currentLon += 360;
+        // Live Bearing Tracking Loop
+        setInterval(() => {
+            if (viewer) {
+                let yaw = Math.floor(viewer.getYaw() % 360);
+                if (yaw < 0) yaw += 360;
+                bearingAngle.innerText = `${yaw}° N`;
+                if (compassRing) compassRing.style.transform = `rotate(${yaw}deg)`;
             }
+        }, 150);
 
-            // Corrected seamless looping formula so image never scrolls off-screen into black
-            const bgPositionPercent = (currentLon / 360) * 100;
-            const container = document.getElementById('viewer-container');
-            container.style.backgroundPosition = `${bgPositionPercent}% ${50 + currentLat}%`;
-            bgLayer.style.transform = `scale(1.1) translate(${-currentLon * 0.5}px, ${-currentLat * 2}px)`;
-            bgVideo.style.transform = `scale(1.1) translate(${-currentLon * 0.5}px, ${-currentLat * 2}px)`;
-
-            const normLon = Math.floor(currentLon);
-            bearingAngle.innerText = `${normLon}° N`;
-            if (compassRing) compassRing.style.transform = `rotate(${normLon}deg)`;
-
-            requestAnimationFrame(updateView);
-        }
-        requestAnimationFrame(updateView);
-
-        // Keyboard Arrow Keys & WASD Steering
+        // Keyboard Arrow Keys & WASD True 360 Steering
         window.addEventListener('keydown', (e) => {
-            const step = 4;
-            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') currentLon -= step;
-            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') currentLon += step;
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') currentLat = Math.min(30, currentLat + step);
-            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') currentLat = Math.max(-30, currentLat - step);
-        });
+            const pitch = viewer.getPitch();
+            const yaw = viewer.getYaw();
+            const step = 6;
 
-        // Mouse & Touch Drag Panning
-        const viewerContainer = document.getElementById('viewer-container');
-        viewerContainer.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') viewer.setYaw(yaw - step);
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') viewer.setYaw(yaw + step);
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') viewer.setPitch(Math.min(85, pitch + step));
+            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') viewer.setPitch(Math.max(-85, pitch - step));
         });
-        window.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            currentLon -= deltaX * 0.05;
-            currentLat = Math.max(-30, Math.min(30, currentLat + deltaY * 0.05));
-            startX = e.clientX;
-            startY = e.clientY;
-        });
-        window.addEventListener('pointerup', () => { isDragging = false; });
 
         // Auto-Rotate Toggle
         function toggleAutoRotate() {
             isAutoRotate = !isAutoRotate;
-            autorotateBtn.innerText = `AUTO-ROTATE: ${isAutoRotate ? 'ON' : 'OFF'}`;
-            autorotateBtn.className = isAutoRotate 
-                ? "glass-spatial px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-mono text-[10px] sm:text-xs text-momoLime font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-momoLime hover:text-black transition-all"
-                : "glass-spatial px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-mono text-[10px] sm:text-xs text-zinc-400 font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-zinc-700 hover:text-white transition-all";
+            if (isAutoRotate) {
+                viewer.startAutoRotate(1.2);
+                autorotateBtn.innerText = "AUTO-ROTATE: ON";
+                autorotateBtn.className = "glass-spatial px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-mono text-[10px] sm:text-xs text-momoLime font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-momoLime hover:text-black transition-all";
+            } else {
+                viewer.stopAutoRotate();
+                autorotateBtn.innerText = "AUTO-ROTATE: OFF";
+                autorotateBtn.className = "glass-spatial px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-mono text-[10px] sm:text-xs text-zinc-400 font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-zinc-700 hover:text-white transition-all";
+            }
         }
 
         // Anti-Pop Mode Switcher (360.avif -> 360.png -> 360-SECRET.mp4)
         function toggleAntiPop() {
             antiPopMode = (antiPopMode + 1) % 3;
             if (antiPopMode === 0) {
-                bgVideo.classList.add('hidden');
-                bgVideo.pause();
-                bgLayer.classList.remove('hidden');
-                bgLayer.style.backgroundImage = "url('360.avif')";
+                viewer.setPanorama('360.avif');
                 antipopBtn.innerText = "ANTI-POP: 360.AVIF";
             } else if (antiPopMode === 1) {
-                bgVideo.classList.add('hidden');
-                bgVideo.pause();
-                bgLayer.classList.remove('hidden');
-                bgLayer.style.backgroundImage = "url('360.png')";
+                viewer.setPanorama('360.png');
                 antipopBtn.innerText = "ANTI-POP: 360.PNG";
             } else if (antiPopMode === 2) {
-                bgLayer.classList.add('hidden');
-                bgVideo.classList.remove('hidden');
-                bgVideo.play().catch(e => console.log("Video autoplay restricted"));
+                viewer.setPanorama('360-SECRET.mp4');
                 antipopBtn.innerText = "ANTI-POP: SECRET.MP4";
             }
         }
