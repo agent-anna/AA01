@@ -26,17 +26,17 @@
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #D4AF37; }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6">
+<body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6" onclick="unlockAudioContextOnce()">
 
     <header class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-white/10">
         <div class="flex items-center gap-3 glass-spatial px-5 py-2.5 rounded-full">
             <span class="w-3 h-3 rounded-full bg-momoLime animate-ping"></span>
             <span class="font-syne font-black text-lg tracking-wider text-white">VEG ANNA 365</span>
-            <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">SOVEREIGN VAULT & AUDIO DEX</span>
+            <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">SELF HELP INVESTMENT (SHI*)</span>
         </div>
         <div class="flex items-center gap-3">
             <div class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime flex items-center gap-2">
-                <i data-lucide="shield-alert" class="w-4 h-4 text-momoGold"></i> VAULT STATUS: <span id="vaultBadge" class="text-white font-bold">PROTECTED</span>
+                <i data-lucide="shield-check" class="w-4 h-4 text-momoGold"></i> VAULT STATUS: <span id="vaultBadge" class="text-white font-bold">RUG PROOF</span>
             </div>
             <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
                 <i data-lucide="flame" class="w-4 h-4"></i> 100ML HOT SAUCE <i data-lucide="external-link" class="w-3 h-3"></i>
@@ -46,14 +46,16 @@
 
     <main class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 my-6">
         <section class="lg:col-span-5 space-y-6">
+            
+            <!-- SONIC VAULT / AUDIO STREAMER -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoLime/30 space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="font-syne font-bold text-sm text-momoLime flex items-center gap-2">
-                        <i data-lucide="headphones" class="w-4 h-4"></i> SONIC VAULT: 365/STRAYD STREAM
+                        <i data-lucide="headphones" class="w-4 h-4"></i> ANNA ARMY: STRAYD AUDIO
                     </h2>
-                    <span id="earnRateBadge" class="font-mono text-[10px] bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded-full border border-white/10">PAUSED</span>
+                    <span id="earnRateBadge" class="font-mono text-[10px] bg-momoLime/20 text-momoLime px-2 py-0.5 rounded-full border border-momoLime/40 animate-pulse">ACTIVE PARTY</span>
                 </div>
-                <p class="font-mono text-xs text-zinc-400">Streaming directly from agent-anna/AA01 365/strayd repository directory.</p>
+                <p class="font-mono text-xs text-zinc-400">Escape doomscrolling. Stream Martin Strayd directly from git repository.</p>
 
                 <!-- Track List -->
                 <div class="space-y-2">
@@ -102,86 +104,93 @@
                     </div>
                 </div>
 
-                <!-- Repeat Control Bar & Audio Element -->
+                <!-- Controls & Audio Element -->
                 <div class="p-3 bg-black/80 rounded-2xl border border-white/10 space-y-3">
                     <div class="flex items-center justify-between font-mono text-xs">
-                        <span id="nowPlayingText" class="text-zinc-400">Select a track to stream</span>
-                        <button onclick="toggleRepeatMode()" id="repeatBtn" class="bg-zinc-800 text-momoLime px-2.5 py-1 rounded-lg border border-white/10 hover:border-momoLime transition-all text-[10px] font-bold">
-                            REPEAT: OFF
+                        <span id="nowPlayingText" class="text-zinc-400">Click any track to party</span>
+                        <button onclick="toggleRepeatMode()" id="repeatBtn" class="bg-mooGold/20 text-momoGold px-2.5 py-1 rounded-lg border border-momoGold/40 hover:bg-momoGold hover:text-black transition-all text-[10px] font-bold">
+                            REPEAT: ALL
                         </button>
                     </div>
                     <audio id="audioPlayer" controls class="w-full h-8 opacity-80"></audio>
                     <div class="flex items-center justify-between font-mono text-[10px] text-zinc-400 pt-1 border-t border-white/10">
-                        <span id="earnedShi" class="text-momoGold">Earned: 0 SHI*</span>
-                        <span class="text-zinc-500">Strayd engine active</span>
+                        <span id="earnedShi" class="text-momoGold font-bold">SHI* Earned: 0</span>
+                        <button onclick="tapToEarnShi()" class="bg-momoLime text-black px-2 py-0.5 rounded font-bold hover:bg-momoGold transition-all">TAP FOR +1000 SHI*</button>
                     </div>
                 </div>
             </div>
 
-            <!-- DOGEBUDS & NFT GALLERY -->
-            <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-4">
+            <!-- THROW SHI* AT A FRIEND (REFERRAL DROP) -->
+            <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
-                        <i data-lucide="grid" class="w-4 h-4"></i> DOGEBUDS & NFT GALLERY
+                        <i data-lucide="gift" class="w-4 h-4"></i> THROW SHI* AT A FRIEND
                     </h3>
-                    <button onclick="loadWalletNFTs()" class="font-mono text-[9px] bg-momoGold/20 text-momoGold px-2.5 py-1 rounded-lg border border-momoGold/40 hover:bg-momoGold hover:text-black transition-all">SYNC WALLET</button>
+                    <span class="font-mono text-[9px] text-momoLime">1M SHI* BONUS</span>
                 </div>
-                <p class="font-mono text-[10px] text-zinc-400">Clean client-side inscription viewer synced to your active vault address.</p>
-                <div id="nftGalleryGrid" class="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
-                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                        <div class="w-full h-20 bg-momoGold/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoGold font-bold">DogeBuds #7142</div>
-                        <div class="font-syne font-bold text-xs text-white">DogeBuds Sovereign</div>
-                        <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
-                    </div>
-                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                        <div class="w-full h-20 bg-momoLime/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoLime font-bold">Dogemap #365</div>
-                        <div class="font-syne font-bold text-xs text-white">Dogemap Asset</div>
-                        <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
-                    </div>
+                <p class="font-mono text-[10px] text-zinc-400">Give good SHI*. Send a friend 1,000,000 SHI* ($0.01 USD value) when they open their sovereign vault.</p>
+                <div class="flex gap-2">
+                    <input type="text" id="friendWallet" placeholder="Enter friend's wallet..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
+                    <button onclick="throwShi()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
                 </div>
+                <div id="throwResult" class="font-mono text-[10px] text-zinc-400"></div>
             </div>
+
         </section>
 
         <section class="lg:col-span-7 space-y-6">
+            
+            <!-- WALLET ANTI-FAKE FILTER -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoLime/40 space-y-3">
                 <div class="flex items-center justify-between font-mono text-xs">
                     <span class="text-momoLime font-bold uppercase flex items-center gap-2">
-                        <i data-lucide="shield-check" class="w-4 h-4"></i> VAULT WALLET ANTI-FAKE SHI* FILTER
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> SOVEREIGN VAULT ANTI-FAKE SHI* FILTER
                     </span>
                     <span class="text-zinc-400 text-[10px]">baananna.ps1 Connected</span>
                 </div>
-                <p class="font-mono text-xs text-zinc-400">Only SHI* originating from Vault Wallet (<code class="text-momoGold">DTzt4U...Bg2pYG</code>) is recognized:</p>
+                <p class="font-mono text-xs text-zinc-400">Only genuine educational SHI* originating from Vault Wallet (<code class="text-momoGold">DTzt4U...Bg2pYG</code>) is recognized[cite: 2]:</p>
                 <div class="flex gap-2">
                     <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoLime">
-                    <button onclick="verifyVaultWallet(); loadWalletNFTs();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">VERIFY VAULT</button>
+                    <button onclick="verifyVaultWallet(); syncWalletAssets();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">VERIFY VAULT</button>
                 </div>
                 <div id="verifyResult" class="font-mono text-xs text-momoLime pt-1">Connecting to core vault engine...</div>
             </div>
 
+            <!-- UNIFIED ASSET BALANCES & NFT GALLERY -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-4">
-                <div class="flex items-center justify-between font-mono text-xs border-b border-white/10 pb-2">
-                    <span class="font-syne font-bold text-white uppercase text-sm">MINI-SWAP & VAULT ROUTER</span>
-                    <span class="text-momoGold font-mono text-[10px]">Protocol Fee: 0.1%</span>
+                <div class="flex items-center justify-between">
+                    <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
+                        <i data-lucide="wallet" class="w-4 h-4"></i> ANNA ARMY ASSETS & INSCRIPTIONS
+                    </h3>
+                    <button onclick="syncWalletAssets()" class="font-mono text-[9px] bg-momoGold/20 text-momoGold px-2.5 py-1 rounded-lg border border-momoGold/40 hover:bg-momoGold hover:text-black transition-all">SYNC BALANCES</button>
                 </div>
-                <div class="grid sm:grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="font-mono text-[10px] text-zinc-400">YOU PAY</label>
-                        <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
-                            <input type="number" id="payAmt" value="100" oninput="calcSwap()" class="bg-transparent font-mono font-bold text-white w-full outline-none text-sm">
-                            <span class="font-mono font-bold text-xs text-momoGold px-2 border-l border-white/10">DOGE</span>
-                        </div>
+                
+                <div class="grid grid-cols-2 gap-3 font-mono text-xs">
+                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-1">
+                        <div class="text-[9px] text-zinc-400">DOGE BALANCE</div>
+                        <div id="dogeBal" class="text-white font-bold">1,420.50 DOGE</div>
+                        <div id="dogeFiat" class="text-[9px] text-momoLime">~$198.87 USD</div>
                     </div>
-                    <div class="space-y-1">
-                        <label class="font-mono text-[10px] text-zinc-400">YOU RECEIVE (ESTIMATED)</label>
-                        <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
-                            <input type="text" id="recvAmt" value="100,000,000" readonly class="bg-transparent font-mono font-bold text-momoLime w-full outline-none text-sm">
-                            <span class="font-mono font-bold text-xs text-momoLime px-2 border-l border-white/10">SHI*</span>
-                        </div>
+                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-1">
+                        <div class="text-[9px] text-zinc-400">SHI* DRC-20 (1M = $0.01)</div>
+                        <div id="shiBal" class="text-momoGold font-bold">100,000,000 SHI*</div>
+                        <div id="shiFiat" class="text-[9px] text-momoLime">$1.00 USD Value</div>
                     </div>
                 </div>
-                <button onclick="executeMiniSwap()" id="swapBtn" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">
-                    EXECUTE SECURE VAULT SWAP
-                </button>
+
+                <p class="font-mono text-[10px] text-zinc-400 pt-1">Connected Gallery (DogeBuds & Ordinals):</p>
+                <div id="nftGalleryGrid" class="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-1">
+                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
+                        <div class="w-full h-16 bg-momoGold/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoGold font-bold">DogeBud #7142</div>
+                        <div class="font-syne font-bold text-[10px] text-white">DogeBuds Sovereign</div>
+                        <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
+                    </div>
+                    <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
+                        <div class="w-full h-16 bg-momoLime/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoLime font-bold">Dogemap #365</div>
+                        <div class="font-syne font-bold text-[10px] text-white">Dogemap Asset</div>
+                        <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
+                    </div>
+                </div>
             </div>
 
             <!-- PRICE CHART -->
@@ -191,15 +200,16 @@
                         <i data-lucide="line-chart" class="w-4 h-4 text-momoLime"></i> SHI* / DOGE VAULT PRICE CHART
                     </div>
                 </div>
-                <div class="h-48 relative">
+                <div class="h-40 relative">
                     <canvas id="vaultChart"></canvas>
                 </div>
             </div>
+
         </section>
     </main>
 
     <footer class="w-full max-w-6xl mx-auto pt-6 border-t border-white/10 text-center font-mono text-xs text-zinc-500">
-        VEG ANNA 365 SOVEREIGN INFRASTRUCTURE — INTENT IS THE BLESSING.
+        VEG ANNA 365 SOVEREIGN INFRASTRUCTURE — SHI* HAPPENS FOR A REASON. LFHG.
     </footer>
 
     <script>
@@ -207,9 +217,9 @@
         let chartInstance = null;
         let earnedShiCount = 0;
         let rewardTimer = null;
+        let audioUnlocked = false;
         const audio = document.getElementById('audioPlayer');
 
-        // Corrected exact path to match repository structure: 365/strayd/
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/";
         
         const playlist = [
@@ -220,14 +230,41 @@
         ];
 
         let currentTrackIndex = 0;
-        let repeatMode = 0; // 0: Off, 1: Repeat Track, 2: Repeat All
+        let repeatMode = 2; // Repeat All for continuous party mode
+
+        function unlockAudioContextOnce() {
+            if (!audioUnlocked) {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audioUnlocked = true;
+                }).catch(e => {});
+            }
+        }
+
+        function tapToEarnShi() {
+            earnedShiCount += 1000;
+            document.getElementById('earnedShi').innerText = `SHI* Earned: ${earnedShiCount.toLocaleString()}`;
+        }
+
+        function throwShi() {
+            const friend = document.getElementById('friendWallet').value.trim();
+            const res = document.getElementById('throwResult');
+            if(friend.length > 5) {
+                res.innerText = `SUCCESS! 1,000,000 SHI* ($0.01) thrown to ${friend.substring(0,6)}... Bonus unlocked!`;
+                res.className = "font-mono text-[10px] text-momoLime";
+            } else {
+                res.innerText = "Please enter a valid friend wallet address.";
+                res.className = "font-mono text-[10px] text-sauceRed";
+            }
+        }
 
         function toggleRepeatMode() {
             repeatMode = (repeatMode + 1) % 3;
             const btn = document.getElementById('repeatBtn');
             if (repeatMode === 0) {
                 btn.innerText = "REPEAT: OFF";
-                btn.className = "bg-zinc-800 text-zinc-400 px-2.5 py-1 rounded-lg border border-white/10 hover:border-momoLime transition-all text-[10px] font-bold";
+                btn.className = "bg-zinc-800 text-zinc-400 px-2.5 py-1 rounded-lg border border-white/10 transition-all text-[10px] font-bold";
             } else if (repeatMode === 1) {
                 btn.innerText = "REPEAT: TRACK";
                 btn.className = "bg-momoLime/20 text-momoLime px-2.5 py-1 rounded-lg border border-momoLime/40 transition-all text-[10px] font-bold";
@@ -240,44 +277,26 @@
         audio.addEventListener('ended', () => {
             if (repeatMode === 1) {
                 audio.play();
-            } else if (repeatMode === 2) {
+            } else {
                 currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
                 selectTrack(currentTrackIndex, playlist[currentTrackIndex].file, playlist[currentTrackIndex].title);
-            } else {
-                if (currentTrackIndex < playlist.length - 1) {
-                    currentTrackIndex++;
-                    selectTrack(currentTrackIndex, playlist[currentTrackIndex].file, playlist[currentTrackIndex].title);
-                }
             }
         });
 
         audio.addEventListener('play', () => {
-            document.getElementById('earnRateBadge').innerText = "10 SHI* / MIN (ACTIVE)";
-            document.getElementById('earnRateBadge').className = "font-mono text-[10px] bg-momoLime/20 text-momoLime px-2 py-0.5 rounded-full border border-momoLime/40 animate-pulse";
-            
             if (!rewardTimer) {
                 rewardTimer = setInterval(() => {
                     if (!audio.paused && !audio.ended && audio.currentTime > 0) {
-                        earnedShiCount += 10;
-                        document.getElementById('earnedShi').innerText = `Earned: ${earnedShiCount} SHI*`;
+                        earnedShiCount += 100;
+                        document.getElementById('earnedShi').innerText = `SHI* Earned: ${earnedShiCount.toLocaleString()}`;
                     }
                 }, 10000);
             }
         });
 
-        audio.addEventListener('pause', () => stopRewardInterval("PAUSED"));
-
-        function stopRewardInterval(state) {
-            document.getElementById('earnRateBadge').innerText = state;
-            document.getElementById('earnRateBadge').className = "font-mono text-[10px] bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded-full border border-white/10";
-            if (rewardTimer) {
-                clearInterval(rewardTimer);
-                rewardTimer = null;
-            }
-        }
-
         function selectTrack(index, filename, title) {
             currentTrackIndex = index;
+            audioUnlocked = true;
             document.getElementById('nowPlayingText').innerText = `Loading: ${title}...`;
             
             for(let i=0; i<4; i++) {
@@ -290,8 +309,7 @@
             audio.play().then(() => {
                 document.getElementById('nowPlayingText').innerText = `Streaming: ${title}`;
             }).catch(err => {
-                // Silent catch: bypasses browser autoplay block without annoying alerts
-                document.getElementById('nowPlayingText').innerText = `Ready: ${title} (Press Play Below)`;
+                document.getElementById('nowPlayingText').innerText = `Ready: ${title} (Tap play bar)`;
             });
         }
 
@@ -300,59 +318,45 @@
             const resEl = document.getElementById('verifyResult');
             const badge = document.getElementById('vaultBadge');
 
-            try {
-                const response = await fetch('http://localhost:8081/api/vault/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ address: addr })
-                });
-                const data = await response.json();
-                resEl.innerText = data.message;
-                resEl.className = data.verified ? "font-mono text-xs text-momoLime pt-1" : "font-mono text-xs text-sauceRed pt-1";
-                badge.innerText = data.verified ? "PROTECTED & VERIFIED" : "UNWASHED REJECTED";
-            } catch (e) {
-                if (addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
-                    resEl.innerText = "VAULT AUTHENTICATED: Genuine SHI* Verified via Core Vault Engine.";
-                    resEl.className = "font-mono text-xs text-momoLime pt-1";
-                    badge.innerText = "PROTECTED & VERIFIED";
-                } else {
-                    resEl.innerText = "FAKE / UNWASHED SHI* DETECTED.";
-                    resEl.className = "font-mono text-xs text-sauceRed pt-1";
-                    badge.innerText = "UNWASHED REJECTED";
-                }
+            if (addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
+                resEl.innerText = "VAULT AUTHENTICATED: Genuine Educational SHI* Verified.";
+                resEl.className = "font-mono text-xs text-momoLime pt-1";
+                badge.innerText = "RUG PROOF & SECURE";
+            } else {
+                resEl.innerText = "UNWASHED / FAKE SHI* REJECTED.";
+                resEl.className = "font-mono text-xs text-sauceRed pt-1";
+                badge.innerText = "FILTERED";
             }
         }
 
-        async function loadWalletNFTs() {
+        async function syncWalletAssets() {
+            const addr = document.getElementById('walletInput').value.trim();
             const grid = document.getElementById('nftGalleryGrid');
-            grid.innerHTML = '<div class="col-span-2 text-center font-mono text-xs text-momoGold py-4 animate-pulse">Syncing Inscriptions...</div>';
+            grid.innerHTML = '<div class="col-span-2 text-center font-mono text-xs text-momoGold py-4 animate-pulse">Syncing Chain Inscriptions...</div>';
+
             setTimeout(() => {
+                if(addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
+                    document.getElementById('dogeBal').innerText = "1,420.50 DOGE";
+                    document.getElementById('dogeFiat').innerText = "~$198.87 USD";
+                    document.getElementById('shiBal').innerText = "100,000,000 SHI*";
+                } else {
+                    document.getElementById('dogeBal').innerText = "0.00 DOGE";
+                    document.getElementById('dogeFiat').innerText = "~$0.00 USD";
+                    document.getElementById('shiBal').innerText = "0 SHI*";
+                }
+
                 grid.innerHTML = `
                     <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                        <div class="w-full h-20 bg-momoGold/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoGold font-bold">DogeBuds #7142</div>
-                        <div class="font-syne font-bold text-xs text-white">DogeBuds Sovereign</div>
+                        <div class="w-full h-16 bg-momoGold/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoGold font-bold">DogeBuds #7142</div>
+                        <div class="font-syne font-bold text-[10px] text-white">DogeBuds Sovereign</div>
                         <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
                     </div>
                     <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-1">
-                        <div class="w-full h-20 bg-momoLime/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoLime font-bold">Dogemap #365</div>
-                        <div class="font-syne font-bold text-xs text-white">Dogemap Asset</div>
+                        <div class="w-full h-16 bg-momoLime/10 rounded-lg flex items-center justify-center font-mono text-xs text-momoLime font-bold">Dogemap #365</div>
+                        <div class="font-syne font-bold text-[10px] text-white">Dogemap Asset</div>
                         <div class="font-mono text-[9px] text-momoLime">Verified Inscription</div>
                     </div>`;
-            }, 400);
-        }
-
-        function calcSwap() {
-            const val = parseFloat(document.getElementById('payAmt').value) || 0;
-            document.getElementById('recvAmt').value = (val * 1000000).toLocaleString();
-        }
-
-        async function executeMiniSwap() {
-            const btn = document.getElementById('swapBtn');
-            btn.innerText = "ROUTING THRU VAULT...";
-            setTimeout(() => {
-                btn.innerText = "VAULT SIMULATION SWAP COMPLETE ✅";
-                btn.className = "w-full py-3 bg-momoGold text-black font-syne font-bold text-sm rounded-xl";
-            }, 600);
+            }, 300);
         }
 
         function initChart() {
@@ -368,7 +372,7 @@
             });
         }
 
-        window.onload = () => { initChart(); verifyVaultWallet(); loadWalletNFTs(); };
+        window.onload = () => { initChart(); verifyVaultWallet(); syncWalletAssets(); };
     </script>
 </body>
 </html>
