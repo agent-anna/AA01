@@ -49,11 +49,11 @@
             <div class="glass-spatial p-5 rounded-3xl border border-momoLime/30 space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="font-syne font-bold text-sm text-momoLime flex items-center gap-2">
-                        <i data-lucide="headphones" class="w-4 h-4"></i> SONIC VAULT: 365STRAYD STREAM
+                        <i data-lucide="headphones" class="w-4 h-4"></i> SONIC VAULT: 365/STRAYD STREAM
                     </h2>
                     <span id="earnRateBadge" class="font-mono text-[10px] bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded-full border border-white/10">PAUSED</span>
                 </div>
-                <p class="font-mono text-xs text-zinc-400">Streaming directly from agent-anna/AA01 365strayd infrastructure.</p>
+                <p class="font-mono text-xs text-zinc-400">Streaming directly from agent-anna/AA01 365/strayd repository directory.</p>
 
                 <!-- Track List -->
                 <div class="space-y-2">
@@ -113,7 +113,7 @@
                     <audio id="audioPlayer" controls class="w-full h-8 opacity-80"></audio>
                     <div class="flex items-center justify-between font-mono text-[10px] text-zinc-400 pt-1 border-t border-white/10">
                         <span id="earnedShi" class="text-momoGold">Earned: 0 SHI*</span>
-                        <span class="text-zinc-500">365strayd engine active</span>
+                        <span class="text-zinc-500">Strayd engine active</span>
                     </div>
                 </div>
             </div>
@@ -209,7 +209,8 @@
         let rewardTimer = null;
         const audio = document.getElementById('audioPlayer');
 
-        const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/agent-anna/AA01/main/365strayd/";
+        // Corrected exact path to match repository structure: 365/strayd/
+        const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/";
         
         const playlist = [
             { file: 'track1.mp3', title: 'Vegan Millionaire Dot Crypto' },
@@ -279,7 +280,6 @@
             currentTrackIndex = index;
             document.getElementById('nowPlayingText').innerText = `Loading: ${title}...`;
             
-            // Highlight active track card
             for(let i=0; i<4; i++) {
                 const card = document.getElementById('trackCard' + i);
                 if(card) card.style.borderColor = (i === index) ? '#A3E635' : 'rgba(255,255,255,0.1)';
@@ -290,7 +290,7 @@
             audio.play().then(() => {
                 document.getElementById('nowPlayingText').innerText = `Streaming: ${title}`;
             }).catch(err => {
-                console.log("Autoplay blocked by browser policy. Click play on control bar.", err);
+                // Silent catch: bypasses browser autoplay block without annoying alerts
                 document.getElementById('nowPlayingText').innerText = `Ready: ${title} (Press Play Below)`;
             });
         }
