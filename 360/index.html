@@ -84,6 +84,19 @@
             pointer-events: none;
         }
 
+        /* Hotspot HTML Tooltip Labels */
+        .hotspot-label {
+            position: absolute;
+            transform: translate(-50%, -120%);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            white-space: nowrap;
+        }
+        .hotspot-label:hover {
+            transform: translate(-50%, -125%) scale(1.05);
+        }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #D4AF37; }
         
@@ -98,6 +111,7 @@
 
     <!-- 360 WEBGL CANVAS CONTAINER -->
     <div id="webgl-container"></div>
+    <div id="hotspotLabelsContainer" class="absolute inset-0 z-20 pointer-events-none"></div>
     <div class="scanlines absolute inset-0 z-10"></div>
 
     <!-- TOP SPONSOR BAR -->
@@ -105,13 +119,10 @@
         <div class="pointer-events-auto flex items-center gap-2 sm:gap-3 glass-spatial px-3 sm:px-4 py-2 rounded-full">
             <span class="w-2.5 h-2.5 rounded-full bg-momoLime animate-ping"></span>
             <span class="font-syne font-black text-sm sm:text-lg tracking-wider text-white">VEG ANNA</span>
-            <span class="font-mono text-[9px] sm:text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-2 sm:pl-3 hidden xs:inline">360° SPATIAL ECOSYSTEM</span>
+            <span class="font-mono text-[9px] sm:text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-2 sm:pl-3">360° SPATIAL ECOSYSTEM</span>
         </div>
 
         <div class="pointer-events-auto flex items-center gap-2 sm:gap-3">
-            <button onclick="requestGyro()" id="gyroBtn" class="glass-spatial px-3 py-2 rounded-full font-mono text-xs text-momoGold font-bold flex items-center gap-1.5 hover:bg-momoGold hover:text-black transition-all hidden">
-                <i data-lucide="compass" class="w-4 h-4"></i> <span class="hidden sm:inline">ENABLE</span> GYRO
-            </button>
             <button onclick="openModal('walletModal')" class="glass-spatial px-3 sm:px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-momoLime hover:text-black transition-all">
                 <i data-lucide="wallet" class="w-4 h-4"></i> <span class="hidden xs:inline">P2P</span> WALLET
             </button>
@@ -379,11 +390,11 @@
             document.getElementById('synthText').innerText = synthEnabled ? "Synth: ON" : "Synth: OFF";
         }
 
-        // WebGL 360 Scene Variables
+        // WebGL 360 Scene Variables (Initialized at lon: 180 so starting view aligns dead center with the image midpoint)
         let scene, camera, renderer;
         let isUserInteracting = false;
         let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
-        let lon = 0, onPointerDownLon = 0;
+        let lon = 180, onPointerDownLon = 180;
         let lat = 0, onPointerDownLat = 0;
         let phi = 0, theta = 0;
 
@@ -391,21 +402,19 @@
         let previousTouchDistance = 0;
         let touchStartX = 0, touchStartY = 0;
 
-        // Keyboard & Gyro State Control
+        // Keyboard State Control
         let keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
-        let gyroActive = false;
-        let gyroAlphaOffset = 0;
 
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         const spatialObjects = [];
 
-        // Hotspots with precise 360 spherical coordinates
+        // Hotspots with precise 360 spherical coordinates & visual labels
         const nodesData = [
-            { id: 0, title: "VEGANNA 01", lon: 0, lat: 0, freq: 523.25 },
-            { id: 1, title: "VEGANNA 02", lon: 90, lat: 10, freq: 659.25 },
-            { id: 2, title: "VEGANNA 03", lon: 180, lat: -5, freq: 783.99 },
-            { id: 3, title: "VEGANNA 04", lon: 270, lat: 5, freq: 1046.50 }
+            { id: 0, title: "VEGANNA 01", subtitle: "Video 01 + Img 01", lon: 0, lat: 0, freq: 523.25 },
+            { id: 1, title: "VEGANNA 02", subtitle: "Video 02 + Img 02", lon: 90, lat: 10, freq: 659.25 },
+            { id: 2, title: "VEGANNA 03", subtitle: "Video 03 + Img 03", lon: 180, lat: -5, freq: 783.99 },
+            { id: 3, title: "VEGANNA 04", subtitle: "Video 04 (Wallet Node)", lon: 270, lat: 5, freq: 1046.50 }
         ];
 
         function init360Scene() {
@@ -435,7 +444,6 @@
                 }, 
                 undefined, 
                 () => {
-                    // Fallback to veganna-img01.png if 360.avif is absent
                     textureLoader.load('veganna-img01.png', (fallbackTex) => {
                         const fallbackMat = new THREE.MeshBasicMaterial({ map: fallbackTex });
                         const worldSphere = new THREE.Mesh(sphereGeo, fallbackMat);
@@ -444,7 +452,10 @@
                 }
             );
 
-            // Add 3D Floating Interactive Spatial Marker Hotspots
+            // Add 3D Floating Interactive Spatial Marker Hotspots & DOM Labels
+            const labelsContainer = document.getElementById('hotspotLabelsContainer');
+            labelsContainer.innerHTML = '';
+
             nodesData.forEach((node) => {
                 const markerGroup = new THREE.Group();
 
@@ -475,9 +486,20 @@
                 markerGroup.userData = node;
                 scene.add(markerGroup);
                 spatialObjects.push(markerGroup);
+
+                // Create HTML Pop-up Label floating above each circle in 3D space
+                const labelEl = document.createElement('div');
+                labelEl.className = 'hotspot-label glass-spatial px-3 py-1.5 rounded-xl border border-mogoGold/40 text-center shadow-xl';
+                labelEl.innerHTML = `
+                    <div class="font-syne font-bold text-xs text-white uppercase">${node.title}</div>
+                    <div class="font-mono text-[9px] text-momoLime">${node.subtitle}</div>
+                `;
+                labelEl.onclick = () => focusSpatialNode(node.id);
+                labelsContainer.appendChild(labelEl);
+                node.domElement = labelEl;
             });
 
-            // Robust Event Listeners (Mouse, Touch, Pinch-Zoom & Keyboard)
+            // Robust Event Listeners
             container.addEventListener('pointerdown', onPointerDown);
             container.addEventListener('touchstart', onTouchStart, { passive: false });
             container.addEventListener('touchmove', onTouchMove, { passive: false });
@@ -501,39 +523,7 @@
                 setTimeout(() => { isUserInteracting = false; }, 2000);
             });
 
-            if (typeof window.DeviceOrientationEvent !== 'undefined') {
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    document.getElementById('gyroBtn').classList.remove('hidden');
-                } else {
-                    window.addEventListener('deviceorientation', handleOrientation);
-                }
-            }
-
             animate();
-        }
-
-        function requestGyro() {
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission().then(response => {
-                    if (response === 'granted') {
-                        window.addEventListener('deviceorientation', handleOrientation);
-                        gyroActive = true;
-                        document.getElementById('gyroBtn').classList.add('hidden');
-                    }
-                }).catch(console.error);
-            }
-        }
-
-        function handleOrientation(e) {
-            if (e.alpha !== null && e.beta !== null) {
-                if (!gyroActive) {
-                    gyroActive = true;
-                    gyroAlphaOffset = e.alpha;
-                }
-                isUserInteracting = true;
-                lon = (e.alpha - gyroAlphaOffset) * 1.5;
-                lat = Math.max(-85, Math.min(85, (e.beta - 90) * 1.5));
-            }
         }
 
         function onPointerDown(event) {
@@ -559,7 +549,6 @@
             document.removeEventListener('pointerup', onPointerUp);
         }
 
-        // Mobile Touch Handlers (Inertial Pan & Pinch-to-Zoom FOV)
         function onTouchStart(e) {
             isUserInteracting = true;
             if (e.touches.length === 1) {
@@ -664,7 +653,7 @@
             if (keys['w'] || keys['W'] || keys['ArrowUp']) { lat = Math.min(85, lat + moveSpeed); isUserInteracting = true; }
             if (keys['s'] || keys['S'] || keys['ArrowDown']) { lat = Math.max(-85, lat - moveSpeed); isUserInteracting = true; }
 
-            if (!isUserInteracting && !gyroActive) {
+            if (!isUserInteracting) {
                 lon += 0.015;
             }
 
@@ -681,8 +670,26 @@
 
             camera.lookAt(camera.target);
 
-            spatialObjects.forEach(obj => {
+            // Project 3D Hotspot positions to 2D screen coordinates for label pop-ups
+            spatialObjects.forEach((obj, idx) => {
                 obj.rotation.z += 0.01;
+                const node = nodesData[idx];
+                if (node && node.domElement) {
+                    const tempV = obj.position.clone();
+                    tempV.project(camera);
+
+                    // Check if object is in front of camera view
+                    if (tempV.z < 1) {
+                        const x = (tempV.x *  .5 + .5) * window.innerWidth;
+                        const y = (tempV.y * -.5 + .5) * window.innerHeight;
+                        node.domElement.style.transform = `translate(-50%, -120%) translate(${x}px, ${y}px)`;
+                        node.domElement.style.opacity = '1';
+                        node.domElement.style.pointerEvents = 'auto';
+                    } else {
+                        node.domElement.style.opacity = '0';
+                        node.domElement.style.pointerEvents = 'none';
+                    }
+                }
             });
 
             const compassRing = document.getElementById('compassRing');
