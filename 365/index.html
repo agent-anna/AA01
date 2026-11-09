@@ -119,7 +119,7 @@
                     <audio id="audioPlayer" controls class="w-full h-8 opacity-80"></audio>
                     <div class="flex items-center justify-between font-mono text-[10px] text-zinc-400 pt-1 border-t border-white/10">
                         <span id="earnedShi" class="text-momoGold font-bold">SHI* Earned: 0</span>
-                        <button onclick="tapToEarnShi()" class="bg-momoLime text-black px-2 py-0.5 rounded font-bold hover:bg-momoGold transition-all">TAP FOR +1000 SHI*</button>
+                        <button onclick="tapToEarnShi()" class="bg-momoLime text-black px-2 py-0.5 rounded font-bold hover:bg-momoGold transition-all">TAP FOR +1 SHI*</button>
                     </div>
                 </div>
             </div>
@@ -265,7 +265,7 @@
         let earnedShiCount = 0;
         let rewardTimer = null;
         let audioUnlocked = false;
-        let swapDirection = 'DOGE_TO_SHI'; // DOGE_TO_SHI or SHI_TO_DOGE
+        let swapDirection = 'DOGE_TO_SHI';
         const audio = document.getElementById('audioPlayer');
 
         const playlist = [
@@ -319,7 +319,6 @@
         function calcSwap() {
             const val = parseFloat(document.getElementById('payAmt').value) || 0;
             if(swapDirection === 'DOGE_TO_SHI') {
-                // Apply 3% fee deduction for tech & security vault
                 const netVal = val * 0.97;
                 document.getElementById('recvAmt').value = Math.floor(netVal * 1000000).toLocaleString();
             } else {
@@ -339,7 +338,7 @@
         }
 
         function tapToEarnShi() {
-            earnedShiCount += 1000;
+            earnedShiCount += 1; // Updated to +1 SHI* per tap
             document.getElementById('earnedShi').innerText = `SHI* Earned: ${earnedShiCount.toLocaleString()}`;
         }
 
@@ -383,7 +382,7 @@
             if (!rewardTimer) {
                 rewardTimer = setInterval(() => {
                     if (!audio.paused && !audio.ended && audio.currentTime > 0) {
-                        earnedShiCount += 100;
+                        earnedShiCount += 10;
                         document.getElementById('earnedShi').innerText = `SHI* Earned: ${earnedShiCount.toLocaleString()}`;
                     }
                 }, 10000);
