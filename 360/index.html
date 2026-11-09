@@ -45,7 +45,7 @@
 
         #viewer-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; overflow: hidden; cursor: grab; }
         #viewer-container:active { cursor: grabbing; }
-        .pano-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; will-change: transform; transition: opacity 0.4s ease; }
+        .pano-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: cover; background-position: center 50%; will-change: transform; transition: opacity 0.4s ease; }
         video.pano-bg { object-fit: cover; }
 
         .compass-ring {
@@ -268,18 +268,20 @@
         let isDragging = false;
         let startX = 0, startY = 0;
 
-        // Auto-Rotate Loop & Smooth Pan
+        // Auto-Rotate Loop & Seamless Position Wrapping
         function updateView() {
             if (isAutoRotate && !isDragging) {
-                currentLon += 0.03; // Gentle slow rotation speed
+                currentLon += 0.015; // Slower, silky smooth spin speed
                 if (currentLon >= 360) currentLon = 0;
                 if (currentLon < 0) currentLon += 360;
             }
 
+            // Corrected seamless looping formula so image never scrolls off-screen into black
+            const bgPositionPercent = (currentLon / 360) * 100;
             const container = document.getElementById('viewer-container');
-            container.style.backgroundPosition = `${currentLon * 10}% ${50 + currentLat}%`;
-            bgLayer.style.transform = `scale(1.1) translate(${-currentLon * 2}px, ${-currentLat * 2}px)`;
-            bgVideo.style.transform = `scale(1.1) translate(${-currentLon * 2}px, ${-currentLat * 2}px)`;
+            container.style.backgroundPosition = `${bgPositionPercent}% ${50 + currentLat}%`;
+            bgLayer.style.transform = `scale(1.1) translate(${-currentLon * 0.5}px, ${-currentLat * 2}px)`;
+            bgVideo.style.transform = `scale(1.1) translate(${-currentLon * 0.5}px, ${-currentLat * 2}px)`;
 
             const normLon = Math.floor(currentLon);
             bearingAngle.innerText = `${normLon}° N`;
@@ -309,8 +311,8 @@
             if (!isDragging) return;
             const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
-            currentLon -= deltaX * 0.08;
-            currentLat = Math.max(-30, Math.min(30, currentLat + deltaY * 0.08));
+            currentLon -= deltaX * 0.05;
+            currentLat = Math.max(-30, Math.min(30, currentLat + deltaY * 0.05));
             startX = e.clientX;
             startY = e.clientY;
         });
