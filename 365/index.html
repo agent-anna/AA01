@@ -124,7 +124,7 @@
                 </div>
             </div>
 
-            <!-- THROW SHI* WITH HARD-LOCKED REAL-TIME ORIGIN CHECK -->
+            <!-- THROW SHI* WITH STRICT ENFORCED AUDIT CHECK -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -132,7 +132,7 @@
                     </h3>
                     <span class="font-mono text-[9px] text-momoLime">100 SHI* PACKET</span>
                 </div>
-                <p class="font-mono text-[10px] text-zinc-400">Strict Ledger Guard: Real-time origin inspection enforced on every throw.</p>
+                <p class="font-mono text-[10px] text-zinc-400">Strict Guard: Unaudited or dirty wallets are automatically blocked from throwing.</p>
                 <div class="flex gap-2">
                     <input type="text" id="friendWallet" placeholder="Enter friend's wallet address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
                     <button onclick="throwShi()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
@@ -171,7 +171,7 @@
                     <span class="text-momoGold font-mono text-[10px]">Protocol Fee: 3.0% (Tech & .ps1 Vault Security)</span>
                 </div>
 
-                <!-- VIEW 1: SWAP ROUTER -->
+                <!-- VIEW 1: SWAP ROUTER WITH EMBEDDED PIXEL DOGE ICON -->
                 <div id="viewSwap" class="space-y-4">
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div class="space-y-1">
@@ -182,7 +182,8 @@
                             <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
                                 <input type="number" id="payAmt" value="100" oninput="calcSwap()" class="bg-transparent font-mono font-bold text-white w-full outline-none text-sm">
                                 <div class="flex items-center gap-1.5 px-2 border-l border-white/10 shrink-0">
-                                    <img src="https://doggy.market/favicon.ico" class="w-4 h-4 nft-image-pixel" alt="DOGE Icon">
+                                    <!-- Embedded Bulletproof Pixel Doge Icon -->
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="#D4AF37"><circle cx="12" cy="12" r="10" fill="#121f17" stroke="#D4AF37" stroke-width="2"/><text x="12" y="15" font-size="10" font-family="monospace" text-anchor="middle" fill="#D4AF37">🐕</text></svg>
                                     <span id="paySymbol" class="font-mono font-bold text-xs text-momoGold">DOGE</span>
                                 </div>
                             </div>
@@ -208,7 +209,7 @@
                     <div class="grid grid-cols-2 gap-3 font-mono text-xs">
                         <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-1">
                             <div class="text-[9px] text-zinc-400 flex items-center gap-1">
-                                <img src="https://doggy.market/favicon.ico" class="w-3 h-3 nft-image-pixel" alt="Doge">
+                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="#D4AF37"><circle cx="12" cy="12" r="10" fill="#121f17" stroke="#D4AF37" stroke-width="2"/><text x="12" y="15" font-size="10" font-family="monospace" text-anchor="middle" fill="#D4AF37">🐕</text></svg>
                                 DOGE BALANCE
                             </div>
                             <div id="dogeBal" class="text-white font-bold">1,420.50 DOGE</div>
@@ -271,6 +272,7 @@
         let earnedShiCount = 0;
         let rewardTimer = null;
         let audioUnlocked = false;
+        let isWalletVerified = false; // Strict audit state guard
         let swapDirection = 'DOGE_TO_SHI';
         const audio = document.getElementById('audioPlayer');
 
@@ -303,7 +305,7 @@
                 viewGallery.classList.add('hidden');
             } else {
                 btnGallery.className = "tab-btn active font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all";
-                viewSwap.className = "tab-btn font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all";
+                btnSwap.className = "tab-btn font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all";
                 viewGallery.classList.remove('hidden');
                 viewSwap.classList.add('hidden');
             }
@@ -348,15 +350,16 @@
             document.getElementById('earnedShi').innerText = `SHI* Earned: ${earnedShiCount.toLocaleString()}`;
         }
 
-        // UNBREAKABLE REAL-TIME THROW SHI* ORIGIN GUARD
+        // UNBREAKABLE THROW SHI* GUARD: Re-inspects wallet address live on every throw click
         function throwShi() {
             const friend = document.getElementById('friendWallet').value.trim();
             const senderAddr = document.getElementById('walletInput').value.trim();
             const res = document.getElementById('throwResult');
 
-            // Hard check: Directly inspects the wallet input at the moment of throwing
-            if (senderAddr !== "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
-                res.innerText = "SECURITY REJECTION: Dirty / Unwashed wallet origin detected! Only tokens rooted in Vault DTzt4U...Bg2pYG can throw SHI*[cite: 2]. Blocked!";
+            // Force live validation check: Must match audited master vault root and be explicitly verified
+            if (!isWalletVerified || senderAddr !== "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
+                isWalletVerified = false;
+                res.innerText = "SECURITY REJECTION: Wallet NOT audited or contains unwashed / fake tokens! Throw blocked with penalty.";
                 res.className = "font-mono text-[10px] text-sauceRed";
                 return;
             }
@@ -448,11 +451,13 @@
             const badge = document.getElementById('vaultBadge');
 
             if (addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
+                isWalletVerified = true;
                 resEl.innerText = "VAULT AUDITED: Genuine Educational SHI* Verified[cite: 2].";
                 resEl.className = "font-mono text-xs text-momoLime pt-1";
                 badge.innerText = "AUDITED & SECURE";
             } else {
-                resEl.innerText = "UNWASHED / FAKE SHI* REJECTED.";
+                isWalletVerified = false;
+                resEl.innerText = "UNWASHED / FAKE SHI* REJECTED. THROW BLOCKED.";
                 resEl.className = "font-mono text-xs text-sauceRed pt-1";
                 badge.innerText = "FILTERED";
             }
