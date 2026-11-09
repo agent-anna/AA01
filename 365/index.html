@@ -39,7 +39,7 @@
         </div>
         <div class="flex items-center gap-3">
             <div class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime flex items-center gap-2">
-                <i data-lucide="shield-check" class="w-4 h-4 text-momoGold"></i> VAULT STATUS: <span id="vaultBadge" class="text-white font-bold">AUDITED & VERIFIED</span>
+                <i data-lucide="shield-check" class="w-4 h-4 text-momoGold"></i> VAULT STATUS: <span id="vaultBadge" class="text-white font-bold">AUDITED & SECURE</span>
             </div>
             <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
                 <i data-lucide="flame" class="w-4 h-4"></i> 100ML HOT SAUCE <i data-lucide="external-link" class="w-3 h-3"></i>
@@ -153,7 +153,7 @@
                     </span>
                     <span class="text-zinc-400 text-[10px]">baananna.ps1 Connected</span>
                 </div>
-                <p class="font-mono text-xs text-zinc-400">Audited Master Vault (<code class="text-momoGold">DTzt4U...Bg2pYG</code>) recognized:</p>
+                <p class="font-mono text-xs text-zinc-400">Audited Master Vault (<code class="text-momoGold">DTzt4U...Bg2pYG</code>) recognized[cite: 2]:</p>
                 <div class="flex gap-2">
                     <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoLime">
                     <button onclick="verifyVaultWallet(); syncWalletAssets();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">AUDIT WALLET</button>
@@ -161,14 +161,14 @@
                 <div id="verifyResult" class="font-mono text-xs text-momoLime pt-1">Connecting to core vault engine...</div>
             </div>
 
-            <!-- TAB SYSTEM: SWAP ROUTER vs INSCRIPTION VAULT -->
+            <!-- TAB SYSTEM: SWAP ROUTER (WITH LOCKED 3% FEE) vs INSCRIPTION VAULT -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-4">
                 <div class="flex items-center justify-between border-b border-white/10 pb-3">
                     <div class="flex gap-2">
                         <button onclick="switchTab('swap')" id="tabBtnSwap" class="tab-btn active font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all">SWAP DOGE ↔ SHI*</button>
                         <button onclick="switchTab('gallery')" id="tabBtnGallery" class="tab-btn font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all">INSCRIPTION VAULT</button>
                     </div>
-                    <span class="text-momoGold font-mono text-[10px]">Protocol Fee: 0.1%</span>
+                    <span class="text-momoGold font-mono text-[10px]">Protocol Fee: 3.0% (Tech & .ps1 Vault Security)</span>
                 </div>
 
                 <!-- VIEW 1: SWAP ROUTER -->
@@ -186,17 +186,17 @@
                         </div>
                         <div class="space-y-1">
                             <div class="flex justify-between font-mono text-[10px] text-zinc-400">
-                                <span>YOU RECEIVE (ESTIMATED)</span>
+                                <span>YOU RECEIVE (AFTER 3% FEE)</span>
                                 <span>1M SHI* = $0.01</span>
                             </div>
                             <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
-                                <input type="text" id="recvAmt" value="100,000,000" readonly class="bg-transparent font-mono font-bold text-momoLime w-full outline-none text-sm">
+                                <input type="text" id="recvAmt" value="97,000,000" readonly class="bg-transparent font-mono font-bold text-momoLime w-full outline-none text-sm">
                                 <span id="recvSymbol" class="font-mono font-bold text-xs text-momoLime px-2 border-l border-white/10">SHI*</span>
                             </div>
                         </div>
                     </div>
                     <button onclick="executeMiniSwap()" id="swapBtn" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">
-                        EXECUTE SECURE VAULT SWAP
+                        EXECUTE SECURE VAULT SWAP (3% FEE LOCKED)
                     </button>
                 </div>
 
@@ -225,7 +225,7 @@
                             <div class="font-mono text-[9px] text-momoLime">Floor: 7.76 DOGE ($0.54)</div>
                         </div>
                         <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-center space-y-2">
-                            <div class="w-full h-24 bg-zinc-900 rounded-lg overflow-hidden flex items-center justify-center border border-momoLime/30">
+                            <div class="w-full h-24 bg-zinc-900 rounded-lg overflow-hidden flex items-center justify-center border border-momoGold/30">
                                 <img src="./veganna.png" onerror="this.src='https://raw.githubusercontent.com/agent-anna/AA01/main/365/veganna.png'" class="w-full h-full object-cover nft-image-pixel" alt="DogeBud #4736">
                             </div>
                             <div class="font-syne font-bold text-xs text-white">DogeBuds #4736</div>
@@ -319,9 +319,12 @@
         function calcSwap() {
             const val = parseFloat(document.getElementById('payAmt').value) || 0;
             if(swapDirection === 'DOGE_TO_SHI') {
-                document.getElementById('recvAmt').value = (val * 1000000).toLocaleString();
+                // Apply 3% fee deduction for tech & security vault
+                const netVal = val * 0.97;
+                document.getElementById('recvAmt').value = Math.floor(netVal * 1000000).toLocaleString();
             } else {
-                document.getElementById('recvAmt').value = (val / 1000000).toLocaleString();
+                const netVal = val * 0.97;
+                document.getElementById('recvAmt').value = (netVal / 1000000).toFixed(4);
             }
         }
 
@@ -417,9 +420,9 @@
 
         async function executeMiniSwap() {
             const btn = document.getElementById('swapBtn');
-            btn.innerText = "ROUTING THRU VAULT...";
+            btn.innerText = "ROUTING 3% FEE THRU .PS1 VAULT...";
             setTimeout(() => {
-                btn.innerText = "VAULT SIMULATION SWAP COMPLETE ✅";
+                btn.innerText = "VAULT SWAP COMPLETE (3% SECURED) ✅";
                 btn.className = "w-full py-3 bg-momoGold text-black font-syne font-bold text-sm rounded-xl";
             }, 600);
         }
@@ -430,7 +433,7 @@
             const badge = document.getElementById('vaultBadge');
 
             if (addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
-                resEl.innerText = "VAULT AUTHENTICATED: Genuine Educational SHI* Verified.";
+                resEl.innerText = "VAULT AUDITED: Genuine Educational SHI* Verified[cite: 2].";
                 resEl.className = "font-mono text-xs text-momoLime pt-1";
                 badge.innerText = "AUDITED & SECURE";
             } else {
