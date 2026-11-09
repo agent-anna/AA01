@@ -45,7 +45,7 @@
     <style>
         * { user-select: none; -webkit-user-drag: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; }
-        
+
         #webgl-container { position: absolute; inset: 0; z-index: 1; cursor: grab; }
         #webgl-container:active { cursor: grabbing; }
 
@@ -160,6 +160,7 @@
     </div>
 
     <!-- AUDIO HELPER HUD (TOP RIGHT) -->
+    <div class="fixed top-20 right-6 z-40 pointer-events-auto">
     <div class="fixed top-20 right-6 z-40 pointer-events-auto flex flex-col gap-2 items-end">
         <button onclick="toggleAutoRotate()" id="rotateBtn" class="glass-spatial px-3.5 py-2 rounded-xl font-mono text-xs text-momoLime flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span id="rotateText">Auto-Rotate: OFF</span>
@@ -248,7 +249,7 @@
             <button onclick="closeWalletModal()" class="absolute top-4 right-4 z-20 bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            
+
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-2xl bg-momoLime/20 text-momoLime flex items-center justify-center">
                     <i data-lucide="network" class="w-6 h-6"></i>
@@ -401,6 +402,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
+            // 1. Create 360 World Sphere using 360.avif (or fallback procedure grid)
             // 1. Create 360 World Sphere using 360.avif
             const sphereGeo = new THREE.SphereGeometry(500, 60, 40);
             sphereGeo.scale(-1, 1, 1);
@@ -413,12 +415,31 @@
             textureLoader.load(
                 '360.avif', 
                 (texture) => {
+                    const sphereMat = new THREE.MeshBasicMaterial({ map: texture });
+                    const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
+                    scene.add(worldSphere);
                     worldMaterial.map = texture;
                     worldMaterial.wireframe = false;
                     worldMaterial.needsUpdate = true;
                 }, 
                 undefined, 
                 (err) => {
+                    console.log('360.avif loading fallback, loading alternate spatial grid background');
+                    textureLoader.load('8LcVA.jpg', (fallbackTex) => {
+                        const fallbackMat = new THREE.MeshBasicMaterial({ map: fallbackTex });
+                        const worldSphere = new THREE.Mesh(sphereGeo, fallbackMat);
+                        scene.add(worldSphere);
+                    }, undefined, () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 1024; canvas.height = 512;
+                        const ctx = canvas.getContext('2d');
+                        const grad = ctx.createLinearGradient(0,0,0,512);
+                        grad.addColorStop(0, '#080d0a'); grad.addColorStop(0.5, '#121f17'); grad.addColorStop(1, '#050806');
+                        ctx.fillStyle = grad; ctx.fillRect(0,0,1024,512);
+                        const proceduralMat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas) });
+                        const worldSphere = new THREE.Mesh(sphereGeo, proceduralMat);
+                        scene.add(worldSphere);
+                    });
                     console.log('360.avif loading fallback active');
                 }
             );
@@ -434,6 +455,7 @@
             nodesData.forEach((node) => {
                 const markerGroup = new THREE.Group();
 
+                // Glowing Ring
                 const ringGeo = new THREE.RingGeometry(12, 16, 32);
                 const ringMat = new THREE.MeshBasicMaterial({ 
                     color: node.id === 1 ? 0xD4AF37 : (node.id === 3 ? 0xE53E3E : 0xA3E635), 
@@ -444,11 +466,13 @@
                 const ringMesh = new THREE.Mesh(ringGeo, ringMat);
                 markerGroup.add(ringMesh);
 
+                // Inner Core Sphere
                 const coreGeo = new THREE.SphereGeometry(6, 16, 16);
                 const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
                 const coreMesh = new THREE.Mesh(coreGeo, coreMat);
                 markerGroup.add(coreMesh);
 
+                // Convert Spherical to 3D Vector
                 const phiRad = THREE.MathUtils.degToRad(90 - node.lat);
                 const thetaRad = THREE.MathUtils.degToRad(node.lon);
                 const radius = 350;
@@ -463,6 +487,7 @@
                 spatialObjects.push(markerGroup);
             });
 
+            // Event Listeners for 360 Drag Interaction
             // Event Listeners for 360 Drag Interaction & Keyboard
             container.addEventListener('pointerdown', onPointerDown);
             window.addEventListener('resize', onWindowResize);
@@ -570,10 +595,12 @@
 
             camera.lookAt(camera.target);
 
+            // Rotate Spatial Markers subtle rotation
             spatialObjects.forEach(obj => {
                 obj.rotation.z += 0.01;
             });
 
+            // Update Compass Bearing HUD
             const compassRing = document.getElementById('compassRing');
             const bearingAngle = document.getElementById('bearingAngle');
             if (compassRing && bearingAngle) {
