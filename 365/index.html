@@ -124,7 +124,7 @@
                 </div>
             </div>
 
-            <!-- THROW SHI* WITH MANDATORY WALLET AUDIT GUARD -->
+            <!-- THROW SHI* LOCKED TO MASTER AUDIT STATE -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -132,7 +132,7 @@
                     </h3>
                     <span class="font-mono text-[9px] text-momoLime">100 SHI* PACKET</span>
                 </div>
-                <p class="font-mono text-[10px] text-zinc-400">Verified Drop: Sender wallet must pass Audit Filter before throwing 100 SHI* packets!</p>
+                <p class="font-mono text-[10px] text-zinc-400">Strict Audit Guard: Must verify sender wallet above before throwing 100 SHI* packets!</p>
                 <div class="flex gap-2">
                     <input type="text" id="friendWallet" placeholder="Enter friend's wallet address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
                     <button onclick="throwShi()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
@@ -153,7 +153,7 @@
                     </span>
                     <span class="text-zinc-400 text-[10px]">baananna.ps1 Connected</span>
                 </div>
-                <p class="font-mono text-xs text-zinc-400">Audited Master Vault (<code class="text-momoGold">DTzt4U...Bg2pYG</code>) recognized:</p>
+                <p class="font-mono text-xs text-zinc-400">Audited Master Vault (<code class="text-momoGold">DTzt4U...Bg2pYG</code>) recognized[cite: 2]:</p>
                 <div class="flex gap-2">
                     <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoLime">
                     <button onclick="verifyVaultWallet(); syncWalletAssets();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">AUDIT WALLET</button>
@@ -271,6 +271,7 @@
         let earnedShiCount = 0;
         let rewardTimer = null;
         let audioUnlocked = false;
+        let isWalletVerified = false; // Tracks global audit state
         let swapDirection = 'DOGE_TO_SHI';
         const audio = document.getElementById('audioPlayer');
 
@@ -348,14 +349,13 @@
             document.getElementById('earnedShi').innerText = `SHI* Earned: ${earnedShiCount.toLocaleString()}`;
         }
 
-        // THROW SHI* WITH MANDATORY WALLET AUDIT CHECK
+        // AIRTIGHT THROW SHI* GUARD (Enforces Master Audit State)
         function throwShi() {
             const friend = document.getElementById('friendWallet').value.trim();
-            const senderAddr = document.getElementById('walletInput').value.trim();
             const res = document.getElementById('throwResult');
 
-            if (senderAddr !== "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
-                res.innerText = "SECURITY ALERT: Wallet not verified or contains unwashed fake tokens! Throw rejected with penalty.";
+            if (!isWalletVerified) {
+                res.innerText = "SECURITY ERROR: Wallet NOT audited & verified yet! Hit 'AUDIT WALLET' above first.";
                 res.className = "font-mono text-[10px] text-sauceRed";
                 return;
             }
@@ -447,11 +447,13 @@
             const badge = document.getElementById('vaultBadge');
 
             if (addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
+                isWalletVerified = true;
                 resEl.innerText = "VAULT AUDITED: Genuine Educational SHI* Verified.";
                 resEl.className = "font-mono text-xs text-momoLime pt-1";
                 badge.innerText = "AUDITED & SECURE";
             } else {
-                resEl.innerText = "UNWASHED / FAKE SHI* REJECTED.";
+                isWalletVerified = false;
+                resEl.innerText = "UNWASHED / FAKE SHI* REJECTED. THROW BLOCKED.";
                 resEl.className = "font-mono text-xs text-sauceRed pt-1";
                 badge.innerText = "FILTERED";
             }
