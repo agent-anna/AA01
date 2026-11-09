@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VEG ANNA — 360° Spatial P2P Ecosystem</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Icons & GSAP & Three.js & Chart.js -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        momoDark: '#080d0a',
+                        momoMoss: '#121f17',
+                        momoGold: '#D4AF37',
+                        momoLime: '#A3E635',
+                        sauceRed: '#E53E3E',
+                    },
+                    fontFamily: {
+                        syne: ['Syne', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; touch-action: none; }
+
+        #webgl-container { position: absolute; inset: 0; z-index: 1; cursor: grab; }
+        #webgl-container:active { cursor: grabbing; }
+
+        .compass-ring {
+            border: 1.5px dashed rgba(212, 175, 55, 0.4);
+            border-radius: 50%;
+            transition: transform 0.1s linear;
+        }
+
+        .glass-spatial {
+            background: rgba(8, 13, 10, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        .glass-spatial:hover {
+            border-color: rgba(163, 230, 53, 0.6);
+            box-shadow: 0 0 30px rgba(163, 230, 53, 0.2);
+        }
+
+        .ocarina-btn {
+            background: rgba(18, 31, 23, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .ocarina-btn:hover, .ocarina-btn:active {
+            transform: translateY(-2px) scale(1.03);
+            background: #D4AF37;
+            color: #080d0a;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .scanlines {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .hotspot-label {
+            position: absolute;
+            transform: translate(-50%, -120%);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            white-space: nowrap;
+        }
+        .hotspot-label:hover {
+            transform: translate(-50%, -125%) scale(1.05);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #D4AF37; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- 360 WEBGL CANVAS CONTAINER -->
+    <div id="webgl-container"></div>
+    <div id="hotspotLabelsContainer" class="absolute inset-0 z-20 pointer-events-none"></div>
+    <div class="scanlines absolute inset-0 z-10"></div>
+
+    <!-- RESPONSIVE HEADER -->
+    <header class="fixed top-0 left-0 w-full z-40 p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pointer-events-none">
+        <div class="pointer-events-auto flex items-center gap-2 sm:gap-3 glass-spatial px-4 py-2 rounded-full">
+            <span class="w-2.5 h-2.5 rounded-full bg-momoLime animate-ping"></span>
+            <span class="font-syne font-black text-base sm:text-lg tracking-wider text-white whitespace-nowrap">VEG ANNA</span>
+            <span class="font-mono text-[9px] sm:text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-2 sm:pl-3 whitespace-nowrap">360° SPATIAL ECOSYSTEM</span>
+        </div>
+
+        <div class="pointer-events-auto flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-start sm:justify-end">
+            <button onclick="openModal('walletModal')" class="glass-spatial px-3 sm:px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-momoLime hover:text-black transition-all whitespace-nowrap">
+                <i data-lucide="wallet" class="w-4 h-4"></i> SHI* WALLET MINI
+            </button>
+            <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-3 sm:px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-1.5 sm:gap-2 hover:bg-sauceRed hover:text-white transition-all whitespace-nowrap">
+                <i data-lucide="flame" class="w-4 h-4"></i> <span class="hidden md:inline">SPONSORED BY 100MLCOOLHOTSAUCE.COM</span><span class="md:hidden">100ML SAUCE</span> <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- OCARINA-INSPIRED SPATIAL HOTSPOT SELECTOR (BOTTOM DOCK) -->
+    <div class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-4xl px-3 sm:px-4 pointer-events-none">
+        <div class="pointer-events-auto glass-spatial p-2 sm:p-3 rounded-2xl grid grid-cols-4 gap-1.5 sm:gap-2 shadow-2xl">
+            <button onclick="focusSpatialNode(0)" class="ocarina-btn py-2.5 px-1 sm:px-2 rounded-xl text-center flex flex-col items-center justify-center gap-0.5">
+                <span class="font-mono text-[9px] text-momoLime font-bold uppercase">NODE 01</span>
+                <span class="font-syne font-bold text-[9px] sm:text-xs uppercase tracking-tight truncate w-full">GENESIS NEXUS</span>
+            </button>
+
+            <button onclick="focusSpatialNode(1)" class="ocarina-btn py-2.5 px-1 sm:px-2 rounded-xl text-center flex flex-col items-center justify-center gap-1">
+                <span class="font-mono text-[9px] text-momoGold font-bold uppercase">NODE 02</span>
+                <span class="font-syne font-bold text-[9px] sm:text-xs uppercase tracking-tight truncate w-full">SOVEREIGN MATRIX</span>
+            </button>
+
+            <button onclick="focusSpatialNode(2)" class="ocarina-btn py-2.5 px-1 sm:px-2 rounded-xl text-center flex flex-col items-center justify-center gap-1">
+                <span class="font-mono text-[9px] text-momoLime font-bold uppercase">NODE 03</span>
+                <span class="font-syne font-bold text-[9px] sm:text-xs uppercase tracking-tight truncate w-full">TRUST BROADCAST</span>
+            </button>
+
+            <button onclick="focusSpatialNode(3)" class="ocarina-btn py-2.5 px-1 sm:px-2 rounded-xl text-center flex flex-col items-center justify-center gap-1">
+                <span class="font-mono text-[9px] text-sauceRed font-bold uppercase">NODE 04</span>
+                <span class="font-syne font-bold text-[9px] sm:text-xs uppercase tracking-tight truncate w-full">LIQUIDITY GATE</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 360 RADIAL COMPASS BEARING HUD (BOTTOM LEFT) -->
+    <div class="fixed bottom-20 sm:bottom-6 left-4 sm:left-6 z-40 pointer-events-none hidden md:flex items-center gap-3 glass-spatial p-3 rounded-2xl">
+        <div class="w-10 h-10 relative flex items-center justify-center">
+            <div id="compassRing" class="compass-ring absolute inset-0"></div>
+            <i data-lucide="compass" class="w-5 h-5 text-momoGold"></i>
+        </div>
+        <div class="font-mono text-xs">
+            <div class="text-zinc-400 text-[10px]">BEARING</div>
+            <div id="bearingAngle" class="text-momoLime font-bold">0° N</div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP: NODE 01 (GENESIS NEXUS) -->
+    <div id="modal-0" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 hidden">
+        <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-momoLime/40 max-h-[90vh] flex flex-col">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 z-30 bg-black/70 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="overflow-y-auto p-4 sm:p-8 space-y-5">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-momoLime animate-ping"></span>
+                    <h3 class="font-syne font-black text-xl sm:text-2xl text-white">NODE 01 — THE GENESIS NEXUS</h3>
+                </div>
+
+                <div class="grid md:grid-cols-12 gap-5">
+                    <div class="md:col-span-7 space-y-2">
+                        <video id="video-0" controls playsinline preload="auto" class="w-full rounded-2xl bg-black border border-white/10 aspect-video object-cover">
+                            <source src="veganna01.mp4" type="video/mp4">
+                        </video>
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-400">
+                            <span class="text-momoGold font-bold">ASSET:</span> veganna01.mp4
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-5 space-y-4 flex flex-col justify-between">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-momoLime/30 space-y-3">
+                            <div class="font-mono text-xs text-momoLime font-bold flex items-center gap-2">
+                                <i data-lucide="message-square" class="w-4 h-4"></i> VEG ANNA DIALOG:
+                            </div>
+                            <p class="font-serif italic text-emerald-100 text-lg leading-snug">
+                                "We aren't just selling a product; we are anchoring a sovereign plant-based empire across physical and P2P networks."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-between items-center font-mono text-xs border-t border-white/10">
+                    <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="text-sauceRed font-bold flex items-center gap-1">100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3 h-3"></i></a>
+                    <button onclick="playThroughNext(0)" class="px-5 py-2.5 bg-momoLime text-black font-bold rounded-xl hover:bg-momoGold transition-all flex items-center gap-2">
+                        NEXT NODE (SOVEREIGN MATRIX) <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP: NODE 02 (SOVEREIGN MATRIX) -->
+    <div id="modal-1" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 hidden">
+        <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-momoGold/40 max-h-[90vh] flex flex-col">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 z-30 bg-black/70 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="overflow-y-auto p-4 sm:p-8 space-y-5">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-momoGold animate-ping"></span>
+                    <h3 class="font-syne font-black text-xl sm:text-2xl text-white">NODE 02 — THE SOVEREIGN MATRIX</h3>
+                </div>
+
+                <div class="grid md:grid-cols-12 gap-5">
+                    <div class="md:col-span-7 space-y-2">
+                        <video id="video-1" controls playsinline preload="auto" class="w-full rounded-2xl bg-black border border-white/10 aspect-video object-cover">
+                            <source src="veganna02.mp4" type="video/mp4">
+                        </video>
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-400">
+                            <span class="text-momoGold font-bold">ASSET:</span> veganna02.mp4
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-5 space-y-4 flex flex-col justify-between">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-momoGold/30 space-y-3">
+                            <div class="font-mono text-xs text-momoGold font-bold flex items-center gap-2">
+                                <i data-lucide="message-square" class="w-4 h-4"></i> VEG ANNA DIALOG:
+                            </div>
+                            <p class="font-serif italic text-emerald-100 text-lg leading-snug">
+                                "As a core representative and shareholder of Kunda Cafe, transparency isn't optional—it's coded directly into our visuals."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-between items-center font-mono text-xs border-t border-white/10">
+                    <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="text-sauceRed font-bold flex items-center gap-1">100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3 h-3"></i></a>
+                    <button onclick="playThroughNext(1)" class="px-5 py-2.5 bg-momoGold text-black font-bold rounded-xl hover:bg-momoLime transition-all flex items-center gap-2">
+                        NEXT NODE (TRUST BROADCAST) <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP: NODE 03 (TRUST BROADCAST) -->
+    <div id="modal-2" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 hidden">
+        <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-momoLime/40 max-h-[90vh] flex flex-col">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 z-30 bg-black/70 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="overflow-y-auto p-4 sm:p-8 space-y-5">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-momoLime animate-ping"></span>
+                    <h3 class="font-syne font-black text-xl sm:text-2xl text-white">NODE 03 — THE TRUST BROADCAST</h3>
+                </div>
+
+                <div class="grid md:grid-cols-12 gap-5">
+                    <div class="md:col-span-7 space-y-2">
+                        <video id="video-2" controls playsinline preload="auto" class="w-full rounded-2xl bg-black border border-white/10 aspect-video object-cover">
+                            <source src="veganna03.mp4" type="video/mp4">
+                        </video>
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-400">
+                            <span class="text-momoLime font-bold">ASSET:</span> veganna03.mp4
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-5 space-y-4 flex flex-col justify-between">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-momoLime/30 space-y-3">
+                            <div class="font-mono text-xs text-momoLime font-bold flex items-center gap-2">
+                                <i data-lucide="message-square" class="w-4 h-4"></i> VEG ANNA DIALOG:
+                            </div>
+                            <p class="font-serif italic text-emerald-100 text-lg leading-snug">
+                                "How do you trust a crypto wallet? Honestly, it's fun... funny money. Who gives a shi*?"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-between items-center font-mono text-xs border-t border-white/10">
+                    <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="text-sauceRed font-bold flex items-center gap-1">100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3 h-3"></i></a>
+                    <button onclick="playThroughNext(2)" class="px-5 py-2.5 bg-momoLime text-black font-bold rounded-xl hover:bg-momoGold transition-all flex items-center gap-2">
+                        NEXT NODE (LIQUIDITY GATE) <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP: NODE 04 (LIQUIDITY GATE) -->
+    <div id="modal-3" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 hidden">
+        <div class="glass-spatial w-full max-w-4xl rounded-3xl overflow-hidden relative border border-sauceRed/50 max-h-[90vh] flex flex-col">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 z-30 bg-black/70 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="overflow-y-auto p-4 sm:p-8 space-y-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-sauceRed/20 text-sauceRed flex items-center justify-center">
+                        <i data-lucide="network" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-syne font-black text-xl sm:text-2xl text-white">NODE 04 — P2P LIQUIDITY GATE</h3>
+                        <p class="font-mono text-xs text-momoGold">Sovereign Plant Empire Infrastructure</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-12 gap-5">
+                    <div class="md:col-span-7 space-y-2">
+                        <video id="video-3" controls playsinline preload="auto" class="w-full rounded-2xl bg-black border border-white/10 aspect-video object-cover">
+                            <source src="veganna04.mp4" type="video/mp4">
+                        </video>
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-400">
+                            <span class="text-sauceRed font-bold">ASSET:</span> veganna04.mp4
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-5 space-y-4 flex flex-col justify-between">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-sauceRed/30 space-y-3">
+                            <div class="font-mono text-xs text-sauceRed font-bold flex items-center gap-2">
+                                <i data-lucide="message-square" class="w-4 h-4"></i> VEG ANNA DIALOG:
+                            </div>
+                            <p class="font-serif italic text-emerald-100 text-lg leading-snug">
+                                "Connect your wallet directly to our peer node to stream liquidity and verify wholesale inventories."
+                            </p>
+                        </div>
+                        <button onclick="openModal('walletModal')" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">
+                            OPEN SHI* WALLET MINI & SWAP
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-between items-center font-mono text-xs border-t border-white/10">
+                    <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="text-sauceRed font-bold flex items-center gap-1">100MLCOOLHOTSAUCE.COM <i data-lucide="external-link" class="w-3 h-3"></i></a>
+                    <button onclick="playThroughNext(3)" class="px-5 py-2.5 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-all flex items-center gap-2">
+                        RESTART TOUR ↺
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENHANCED SHI* WALLET MINI & PRO SWAP MODAL -->
+    <div id="walletModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-3 sm:p-6 hidden">
+        <div class="glass-spatial w-full max-w-5xl rounded-3xl overflow-hidden relative border border-momoLime/40 max-h-[92vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between bg-black/40">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-momoLime/20 text-momoLime flex items-center justify-center border border-momoLime/30">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-syne font-black text-xl text-white tracking-wide">SHI* WALLET MINI</h3>
+                            <span class="px-2 py-0.5 rounded-full bg-momoLime/20 text-momoLime font-mono text-[9px] border border-momoLime/40">DRC-20 LIVE</span>
+                        </div>
+                        <p class="font-mono text-xs text-zinc-400">Beginner-Friendly Stealth P2P Swap & Utility Hub</p>
+                    </div>
+                </div>
+                <button onclick="closeAllModals()" class="bg-black/60 text-white p-2.5 rounded-full hover:bg-sauceRed transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="overflow-y-auto p-4 sm:p-6 space-y-6">
+                <!-- Beginner Education Banner -->
+                <div class="p-4 rounded-2xl bg-momoLime/10 border border-momoLime/30 flex items-start gap-3">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-momoLime shrink-0 mt-0.5"></i>
+                    <div class="space-y-1">
+                        <h4 class="font-syne font-bold text-sm text-momoLime">New to Web3 & DRC-20 Wallets?</h4>
+                        <p class="font-sans text-xs text-zinc-300 leading-relaxed">
+                            No setup headaches! Your wallet operates on top of Dogecoin via Doginals stealth indexes. Zero complex private keys required for utility testing.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- DoggyMarket Metrics Overview Bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="p-3 bg-black/60 rounded-2xl border border-white/10">
+                        <div class="font-mono text-[10px] text-zinc-400 uppercase">SHI* PRICE</div>
+                        <div class="font-mono font-bold text-sm text-momoLime flex items-center gap-1">
+                            <span>Ð 0.000001</span>
+                            <span class="text-[9px] text-zinc-400">($0.00014)</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-black/60 rounded-2xl border border-white/10">
+                        <div class="font-mono text-[10px] text-zinc-400 uppercase">24H VOLUME</div>
+                        <div class="font-mono font-bold text-sm text-momoGold">Ð 184 DOGE</div>
+                    </div>
+                    <div class="p-3 bg-black/60 rounded-2xl border border-white/10">
+                        <div class="font-mono text-[10px] text-zinc-400 uppercase">EST. MARKET CAP</div>
+                        <div class="font-mono font-bold text-sm text-white">$69,251M</div>
+                    </div>
+                    <div class="p-3 bg-black/60 rounded-2xl border border-white/10">
+                        <div class="font-mono text-[10px] text-zinc-400 uppercase">MINT PROGRESS</div>
+                        <div class="font-mono font-bold text-sm text-momoLime">100% Minted</div>
+                    </div>
+                </div>
+
+                <!-- Real-time Interactive Chart & Swap Layout -->
+                <div class="grid lg:grid-cols-12 gap-6">
+                    <!-- Left Column: DoggyMarket Pro Chart -->
+                    <div class="lg:col-span-7 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="font-mono text-xs text-zinc-300 font-bold flex items-center gap-2">
+                                <i data-lucide="line-chart" class="w-4 h-4 text-momoLime"></i> LIVE SHI* / DOGE CHART
+                            </div>
+                            <div class="flex items-center gap-1 font-mono text-[10px]">
+                                <button class="px-2 py-1 rounded bg-momoLime/20 text-momoLime font-bold border border-momoLime/30">24H</button>
+                                <button class="px-2 py-1 rounded bg-black/40 text-zinc-400 hover:text-white">7D</button>
+                                <button class="px-2 py-1 rounded bg-black/40 text-zinc-400 hover:text-white">30D</button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-black/80 border border-white/10 h-64 relative">
+                            <canvas id="shiChart"></canvas>
+                        </div>
+
+                        <!-- Anti-Pirate & Bridge Security Notice -->
+                        <div class="p-3 bg-black/40 rounded-xl border border-white/5 font-mono text-[10px] text-zinc-400 flex items-center justify-between">
+                            <span class="flex items-center gap-1 text-momoGold">
+                                <i data-lucide="lock" class="w-3 h-3"></i> Stealth P2P Mode Enabled
+                            </span>
+                            <span>bridge.ps1 v2.4 Active</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Mini Pro-Level Swap Interface -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="p-4 rounded-2xl bg-black/60 border border-momoGold/30 space-y-4">
+                            <div class="flex items-center justify-between font-mono text-xs border-b border-white/10 pb-2">
+                                <span class="font-bold text-white uppercase">INSTANT P2P SWAP</span>
+                                <span class="text-momoGold font-mono text-[10px]">Tax Rate: 0.00%</span>
+                            </div>
+
+                            <!-- Pay Input -->
+                            <div class="space-y-1">
+                                <label class="font-mono text-[10px] text-zinc-400">YOU PAY</label>
+                                <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
+                                    <input type="number" id="payAmount" value="100" oninput="calculateSwap()" class="bg-transparent font-mono font-bold text-white w-full outline-none text-sm">
+                                    <span class="font-mono font-bold text-xs text-momoGold px-2 border-l border-white/10">DOGE</span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-center -my-2">
+                                <button class="w-7 h-7 rounded-full bg-momoLime/20 text-momoLime border border-momoLime/40 flex items-center justify-center">
+                                    <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <!-- Receive Input -->
+                            <div class="space-y-1">
+                                <label class="font-mono text-[10px] text-zinc-400">YOU RECEIVE (ESTIMATED)</label>
+                                <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
+                                    <input type="text" id="receiveAmount" value="100,000,000" readonly class="bg-transparent font-mono font-bold text-momoLime w-full outline-none text-sm">
+                                    <span class="font-mono font-bold text-xs text-momoLime px-2 border-l border-white/10">SHI*</span>
+                                </div>
+                            </div>
+
+                            <!-- Swap Details Breakdown -->
+                            <div class="p-3 bg-white/5 rounded-xl space-y-1.5 font-mono text-[10px]">
+                                <div class="flex justify-between text-zinc-400">
+                                    <span>DRC-20 Inscription Protocol:</span>
+                                    <span class="text-white">Doginals Off-Chain</span>
+                                </div>
+                                <div class="flex justify-between text-zinc-400">
+                                    <span>Network Fee (Dogecoin):</span>
+                                    <span class="text-momoLime">~ Ð 0.05</span>
+                                </div>
+                                <div class="flex justify-between text-zinc-400">
+                                    <span>Stealth Wallet Address:</span>
+                                    <span class="text-momoGold font-mono">DTzt4U...Bg2pYG</span>
+                                </div>
+                            </div>
+
+                            <button onclick="simulateWalletConnect()" id="connectBtnMain" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">
+                                CONNECT & SWAP P2P
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DRC-20 Protocol Technical Inscription Code Box -->
+                <div class="p-4 rounded-2xl bg-black/80 border border-white/10 space-y-2">
+                    <div class="flex items-center justify-between font-mono text-xs">
+                        <span class="text-momoGold font-bold flex items-center gap-1.5">
+                            <i data-lucide="code" class="w-4 h-4"></i> DRC-20 INSCRIPTION SPECIFICATION
+                        </span>
+                        <span class="text-zinc-500 text-[10px]">Plain-text JSON Witness Data</span>
+                    </div>
+                    <pre class="bg-black/90 p-3 rounded-xl border border-white/5 font-mono text-[10px] text-emerald-400 overflow-x-auto">{"p":"drc-20","op":"deploy","tick":"SHI*","max":"1000000000000000000","lim":"999999999999999969"}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- THREE.JS 360 SPATIAL SYSTEM SCRIPT -->
+    <script>
+        lucide.createIcons();
+
+        let scene, camera, renderer;
+        let isUserInteracting = false;
+        let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+        let lon = 90, onPointerDownLon = 90;
+        let lat = 0, onPointerDownLat = 0;
+        let phi = 0, theta = 0;
+
+        let previousTouchDistance = 0;
+        let touchStartX = 0, touchStartY = 0;
+        let keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const spatialObjects = [];
+
+        const nodesData = [
+            { id: 0, title: "GENESIS NEXUS", subtitle: "veganna01.mp4", lon: 90, lat: 0 },
+            { id: 1, title: "SOVEREIGN MATRIX", subtitle: "veganna02.mp4", lon: 180, lat: 10 },
+            { id: 2, title: "TRUST BROADCAST", subtitle: "veganna03.mp4", lon: 270, lat: -5 },
+            { id: 3, title: "LIQUIDITY GATE", subtitle: "veganna04.mp4", lon: 0, lat: 5 }
+        ];
+
+        function init360Scene() {
+            const container = document.getElementById('webgl-container');
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            const sphereGeo = new THREE.SphereGeometry(500, 60, 40);
+            sphereGeo.scale(-1, 1, 1);
+
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load(
+                '360.avif', 
+                (texture) => {
+                    const sphereMat = new THREE.MeshBasicMaterial({ map: texture });
+                    const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
+                    scene.add(worldSphere);
+                }, 
+                undefined, 
+                () => {
+                    textureLoader.load('veganna-img01.jpg', (fallbackTex) => {
+                        fallbackTex.wrapS = THREE.ClampToEdgeWrapping;
+                        fallbackTex.wrapT = THREE.ClampToEdgeWrapping;
+                        const fallbackMat = new THREE.MeshBasicMaterial({ map: fallbackTex });
+                        const worldSphere = new THREE.Mesh(sphereGeo, fallbackMat);
+                        scene.add(worldSphere);
+                    });
+                }
+            );
+
+            const labelsContainer = document.getElementById('hotspotLabelsContainer');
+            labelsContainer.innerHTML = '';
+
+            nodesData.forEach((node) => {
+                const markerGroup = new THREE.Group();
+
+                const ringGeo = new THREE.RingGeometry(12, 16, 32);
+                const ringMat = new THREE.MeshBasicMaterial({ 
+                    color: node.id === 3 ? 0xE53E3E : (node.id === 1 ? 0xD4AF37 : 0xA3E635), 
+                    side: THREE.DoubleSide, 
+                    transparent: true, 
+                    opacity: 0.85 
+                });
+                const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+                markerGroup.add(ringMesh);
+
+                const coreGeo = new THREE.SphereGeometry(6, 16, 16);
+                const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+                markerGroup.add(coreMesh);
+
+                const phiRad = THREE.MathUtils.degToRad(90 - node.lat);
+                const thetaRad = THREE.MathUtils.degToRad(node.lon);
+                const radius = 350;
+
+                markerGroup.position.x = radius * Math.sin(phiRad) * Math.cos(thetaRad);
+                markerGroup.position.y = radius * Math.cos(phiRad);
+                markerGroup.position.z = radius * Math.sin(phiRad) * Math.sin(thetaRad);
+                markerGroup.lookAt(0, 0, 0);
+
+                markerGroup.userData = node;
+                scene.add(markerGroup);
+                spatialObjects.push(markerGroup);
+
+                const labelEl = document.createElement('div');
+                labelEl.className = 'hotspot-label glass-spatial px-3 py-1.5 rounded-xl border border-momoGold/40 text-center shadow-xl';
+                labelEl.innerHTML = `
+                    <div class="font-syne font-bold text-xs text-white uppercase">${node.title}</div>
+                    <div class="font-mono text-[9px] text-momoLime">${node.subtitle}</div>
+                `;
+                labelEl.onclick = () => focusSpatialNode(node.id);
+                labelsContainer.appendChild(labelEl);
+                node.domElement = labelEl;
+            });
+
+            container.addEventListener('pointerdown', onPointerDown);
+            container.addEventListener('touchstart', onTouchStart, { passive: false });
+            container.addEventListener('touchmove', onTouchMove, { passive: false });
+            container.addEventListener('touchend', onTouchEnd);
+            window.addEventListener('resize', onWindowResize);
+            container.addEventListener('click', onCanvasClick);
+
+            window.addEventListener('keydown', (e) => {
+                isUserInteracting = true;
+                if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) {
+                    keys[e.key] = true;
+                    keys[e.key.toLowerCase()] = true;
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) {
+                    keys[e.key] = false;
+                    keys[e.key.toLowerCase()] = false;
+                }
+                setTimeout(() => { isUserInteracting = false; }, 2000);
+            });
+
+            animate();
+            initChart();
+        }
+
+        function onPointerDown(event) {
+            isUserInteracting = true;
+            onPointerDownPointerX = event.clientX;
+            onPointerDownPointerY = event.clientY;
+            onPointerDownLon = lon;
+            onPointerDownLat = lat;
+
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+        }
+
+        function onPointerMove(event) {
+            if (!isUserInteracting) return;
+            lon = (onPointerDownPointerX - event.clientX) * 0.2 + onPointerDownLon;
+            lat = (event.clientY - onPointerDownPointerY) * 0.2 + onPointerDownLat;
+        }
+
+        function onPointerUp() {
+            isUserInteracting = false;
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+        }
+
+        function onTouchStart(e) {
+            isUserInteracting = true;
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                onPointerDownLon = lon;
+                onPointerDownLat = lat;
+            } else if (e.touches.length === 2) {
+                previousTouchDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        }
+
+        function onTouchMove(e) {
+            if (!isUserInteracting) return;
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                const deltaX = e.touches[0].clientX - touchStartX;
+                const deltaY = e.touches[0].clientY - touchStartY;
+                lon = onPointerDownLon - deltaX * 0.3;
+                lat = Math.max(-85, Math.min(85, onPointerDownLat + deltaY * 0.3));
+            } else if (e.touches.length === 2) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const pinchDelta = previousTouchDistance - currentDistance;
+                camera.fov = Math.max(30, Math.min(100, camera.fov + pinchDelta * 0.1));
+                camera.updateProjectionMatrix();
+                previousTouchDistance = currentDistance;
+            }
+        }
+
+        function onTouchEnd() {
+            isUserInteracting = false;
+        }
+
+        function openModal(modalId) {
+            closeAllModals();
+            const el = document.getElementById(modalId);
+            if (el) {
+                el.classList.remove('hidden');
+                const v = el.querySelector('video');
+                if (v) {
+                    v.currentTime = 0;
+                    v.play().catch(e => console.log('Autoplay restriction:', e));
+                }
+            }
+        }
+
+        function closeAllModals() {
+            for (let i = 0; i < 4; i++) {
+                const m = document.getElementById(`modal-${i}`);
+                if (m) m.classList.add('hidden');
+                const v = m ? m.querySelector('video') : null;
+                if (v) v.pause();
+            }
+            const wm = document.getElementById('walletModal');
+            if (wm) wm.classList.add('hidden');
+        }
+
+        function playThroughNext(currentIndex) {
+            const nextIndex = (currentIndex + 1) % nodesData.length;
+            focusSpatialNode(nextIndex);
+        }
+
+        function focusSpatialNode(index) {
+            const target = nodesData[index];
+            if (!target) return;
+
+            gsap.to(window, {
+                duration: 1.5,
+                lon: target.lon,
+                lat: target.lat,
+                ease: "power2.inOut"
+            });
+
+            openModal(`modal-${index}`);
+        }
+
+        function onCanvasClick(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(spatialObjects, true);
+
+            if (intersects.length > 0) {
+                let obj = intersects[0].object;
+                while (obj.parent && obj.userData.id === undefined) {
+                    obj = obj.parent;
+                }
+                if (obj.userData && obj.userData.id !== undefined) {
+                    focusSpatialNode(obj.userData.id);
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const moveSpeed = 1.5;
+            if (keys['a'] || keys['A'] || keys['ArrowLeft']) { lon -= moveSpeed; isUserInteracting = true; }
+            if (keys['d'] || keys['D'] || keys['ArrowRight']) { lon += moveSpeed; isUserInteracting = true; }
+            if (keys['w'] || keys['W'] || keys['ArrowUp']) { lat = Math.min(85, lat + moveSpeed); isUserInteracting = true; }
+            if (keys['s'] || keys['S'] || keys['ArrowDown']) { lat = Math.max(-85, lat - moveSpeed); isUserInteracting = true; }
+
+            if (!isUserInteracting) {
+                lon += 0.015;
+            }
+
+            lat = Math.max(-85, Math.min(85, lat));
+
+            phi = THREE.MathUtils.degToRad(90 - lat);
+            theta = THREE.MathUtils.degToRad(lon);
+
+            camera.target = new THREE.Vector3(
+                500 * Math.sin(phi) * Math.cos(theta),
+                500 * Math.cos(phi),
+                500 * Math.sin(phi) * Math.sin(theta)
+            );
+
+            camera.lookAt(camera.target);
+
+            spatialObjects.forEach((obj, idx) => {
+                obj.rotation.z += 0.01;
+                const node = nodesData[idx];
+                if (node && node.domElement) {
+                    const tempV = obj.position.clone();
+                    tempV.project(camera);
+
+                    if (tempV.z < 1) {
+                        const x = (tempV.x * .5 + .5) * window.innerWidth;
+                        const y = (tempV.y * -.5 + .5) * window.innerHeight;
+                        node.domElement.style.transform = `translate(-50%, -120%) translate(${x}px, ${y}px)`;
+                        node.domElement.style.opacity = '1';
+                        node.domElement.style.pointerEvents = 'auto';
+                    } else {
+                        node.domElement.style.opacity = '0';
+                        node.domElement.style.pointerEvents = 'none';
+                    }
+                }
+            });
+
+            const compassRing = document.getElementById('compassRing');
+            const bearingAngle = document.getElementById('bearingAngle');
+            if (compassRing && bearingAngle) {
+                const normLon = Math.round((lon % 360 + 360) % 360);
+                compassRing.style.transform = `rotate(${normLon}deg)`;
+                bearingAngle.innerText = `${normLon}° N`;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function calculateSwap() {
+            const payVal = parseFloat(document.getElementById('payAmount').value) || 0;
+            const receiveInput = document.getElementById('receiveAmount');
+            const calculated = (payVal * 1000000).toLocaleString();
+            receiveInput.value = calculated;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('shiChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['12AM', '4AM', '8AM', '12PM', '4PM', '8PM', '11PM'],
+                    datasets: [{
+                        label: 'SHI* / DOGE Price',
+                        data: [0.0000008, 0.0000009, 0.00000085, 0.000001, 0.00000095, 0.000001, 0.00000105],
+                        borderColor: '#A3E635',
+                        backgroundColor: 'rgba(163, 230, 53, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#71717a', font: { family: 'Space Grotesk' } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717a', font: { family: 'Space Grotesk' } } }
+                    }
+                }
+            });
+        }
+
+        function simulateWalletConnect() {
+            const btns = [document.getElementById('connectBtn'), document.getElementById('connectBtnMain')];
+            btns.forEach(btn => {
+                if (btn) {
+                    btn.innerText = "EXECUTING P2P STEALTH SWAP...";
+                    setTimeout(() => {
+                        btn.innerText = "SWAP COMPLETE: 100,000,000 SHI* MINTED";
+                        btn.className = "w-full py-3 bg-momoGold text-black font-syne font-bold text-sm rounded-xl";
+                    }, 1400);
+                }
+            });
+        }
+
+        window.onload = function() {
+            init360Scene();
+        };
+    </script>
+</body>
+</html>
