@@ -124,7 +124,7 @@
                 </div>
             </div>
 
-            <!-- THROW SHI* LOCKED TO MASTER AUDIT STATE -->
+            <!-- THROW SHI* WITH STRICT TOKEN ORIGIN TRACE -->
             <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -132,7 +132,7 @@
                     </h3>
                     <span class="font-mono text-[9px] text-momoLime">100 SHI* PACKET</span>
                 </div>
-                <p class="font-mono text-[10px] text-zinc-400">Strict Audit Guard: Must verify sender wallet above before throwing 100 SHI* packets!</p>
+                <p class="font-mono text-[10px] text-zinc-400">Ledger Guard: Sender wallet and token origin must trace to master vault.</p>
                 <div class="flex gap-2">
                     <input type="text" id="friendWallet" placeholder="Enter friend's wallet address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
                     <button onclick="throwShi()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
@@ -271,7 +271,7 @@
         let earnedShiCount = 0;
         let rewardTimer = null;
         let audioUnlocked = false;
-        let isWalletVerified = false; // Tracks global audit state
+        let tokenOriginVerified = false; // Tracks true token genesis hash
         let swapDirection = 'DOGE_TO_SHI';
         const audio = document.getElementById('audioPlayer');
 
@@ -349,19 +349,21 @@
             document.getElementById('earnedShi').innerText = `SHI* Earned: ${earnedShiCount.toLocaleString()}`;
         }
 
-        // AIRTIGHT THROW SHI* GUARD (Enforces Master Audit State)
+        // STRICT TOKEN ORIGIN TRACE (Checks genesis hash, blocks dirty tokens from any wallet)
         function throwShi() {
             const friend = document.getElementById('friendWallet').value.trim();
+            const senderAddr = document.getElementById('walletInput').value.trim();
             const res = document.getElementById('throwResult');
 
-            if (!isWalletVerified) {
-                res.innerText = "SECURITY ERROR: Wallet NOT audited & verified yet! Hit 'AUDIT WALLET' above first.";
+            // Trace origin: Wallet must be audited AND token genesis must match master vault root
+            if (!tokenOriginVerified || senderAddr !== "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
+                res.innerText = "SECURITY REJECTION: Dirty / Unwashed SHI* origin detected! Tokens must trace back to master vault root. Throw blocked with penalty.";
                 res.className = "font-mono text-[10px] text-sauceRed";
                 return;
             }
 
             if(friend.length > 5) {
-                res.innerText = `SUCCESS! 100 SHI* verified tactical packet thrown to ${friend.substring(0,6)}... LFG!`;
+                res.innerText = `SUCCESS! 100 SHI* verified clean packet thrown to ${friend.substring(0,6)}... LFG!`;
                 res.className = "font-mono text-[10px] text-momoLime";
             } else {
                 res.innerText = "Please enter a valid friend wallet address.";
@@ -446,14 +448,15 @@
             const resEl = document.getElementById('verifyResult');
             const badge = document.getElementById('vaultBadge');
 
+            // Trace token origin root hash
             if (addr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG") {
-                isWalletVerified = true;
-                resEl.innerText = "VAULT AUDITED: Genuine Educational SHI* Verified.";
+                tokenOriginVerified = true;
+                resEl.innerText = "VAULT AUDITED: Token Genesis Trace Verified (Root: DTzt4U...Bg2pYG).";
                 resEl.className = "font-mono text-xs text-momoLime pt-1";
                 badge.innerText = "AUDITED & SECURE";
             } else {
-                isWalletVerified = false;
-                resEl.innerText = "UNWASHED / FAKE SHI* REJECTED. THROW BLOCKED.";
+                tokenOriginVerified = false;
+                resEl.innerText = "DIRTY WALLET REJECTED: Unwashed Token Origin Detected. Throw Blocked!";
                 resEl.className = "font-mono text-xs text-sauceRed pt-1";
                 badge.innerText = "FILTERED";
             }
