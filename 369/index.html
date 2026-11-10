@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEG ANNA 369 — Forensic DRC-20 Inscription Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { momoDark: '#080d0a', momoMoss: '#121f17', momoGold: '#D4AF37', momoLime: '#A3E635', sauceRed: '#E53E3E' },
+                    fontFamily: { syne: ['Syne', 'sans-serif'], sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['Space Grotesk', 'monospace'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-spatial { background: rgba(8, 13, 10, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .nft-image-pixel { image-rendering: pixelated; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6">
+
+    <header class="w-full max-w-6xl mx-auto flex items-center justify-between pb-6 border-b border-white/10">
+        <div class="flex items-center gap-3 glass-spatial px-5 py-2.5 rounded-full">
+            <span class="w-3 h-3 rounded-full bg-momoGold animate-pulse"></span>
+            <span class="font-syne font-black text-lg tracking-wider text-white">NODE /369/</span>
+            <span class="font-mono text-[10px] text-momoLime tracking-widest border-l border-white/20 pl-3">DOGGY.MARKET FORENSIC VIEWER[cite: 10]</span>
+        </div>
+        <a href="/365/" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> BACK TO /365/ WALLET
+        </a>
+    </header>
+
+    <main class="w-full max-w-6xl mx-auto space-y-6 my-6">
+        <div class="glass-spatial p-6 rounded-3xl border border-momoGold/30 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="font-syne font-black text-xl text-white">DogeBuds Sovereign Collection[cite: 8, 10]</h1>
+                    <p class="font-mono text-xs text-zinc-400">Live on-chain inscription indexer & forensic metadata inspector.</p>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <input type="text" id="targetWallet" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" class="bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold w-full sm:w-72">
+                    <button onclick="loadWalletInscriptions()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">SYNC WALLET</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/10 font-mono text-xs">
+                <div class="p-3 bg-black/60 rounded-xl border border-white/10">
+                    <div class="text-[9px] text-zinc-400">FLOOR PRICE</div>
+                    <div class="text-momoLime font-bold">7.7 DOGE ($0.54)[cite: 8, 10]</div>
+                </div>
+                <div class="p-3 bg-black/60 rounded-xl border border-white/10">
+                    <div class="text-[9px] text-zinc-400">24H VOLUME</div>
+                    <div class="text-white font-bold">31.08 DOGE[cite: 8, 10]</div>
+                </div>
+                <div class="p-3 bg-black/60 rounded-xl border border-white/10">
+                    <div class="text-[9px] text-zinc-400">TOTAL SUPPLY</div>
+                    <div class="text-momoGold font-bold">10,000[cite: 8, 10]</div>
+                </div>
+                <div class="p-3 bg-black/60 rounded-xl border border-white/10">
+                    <div class="text-[9px] text-zinc-400">LISTED ITEMS</div>
+                    <div class="text-white font-bold">3,168[cite: 8, 10]</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NFT GRID -->
+        <div id="nftGrid" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Populated via script -->
+        </div>
+    </main>
+
+    <footer class="w-full max-w-6xl mx-auto pt-6 border-t border-white/10 text-center font-mono text-xs text-zinc-500">
+        VEG ANNA /369/ — MILITARY-PRECISION FORENSIC INSCRIPTION PROTOCOL. LFG.
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        const sampleInscriptions = [
+            { id: 7564, name: "DogeBuds #7564[cite: 11]", price: "7.7 DOGE", usd: "$0.54[cite: 11]", inscriptionId: "29759b2db3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6ebi0[cite: 11]", owner: "DRJFCwr7rrzKavJr9Uc5rdEaxHm2bYE7tm[cite: 11]", traits: ["Grey Background", "Blue Man", "Blonde Shaggy", "Red Creepy", "Mustache"] },
+            { id: 8114, name: "DogeBuds #8114[cite: 8]", price: "7.7 DOGE", usd: "$0.54[cite: 8]", inscriptionId: "87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb01", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Yellow Background", "Grey Man", "Gold Hair", "Neon Eyes"] },
+            { id: 7142, name: "DogeBuds #7142[cite: 8]", price: "7.76 DOGE", usd: "$0.54[cite: 8]", inscriptionId: "87499885b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb02", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Pink Background", "Pink Man", "Red Cap", "Pipe"] },
+            { id: 4736, name: "DogeBuds #4736[cite: 8]", price: "7.76 DOGE", usd: "$0.54[cite: 8]", inscriptionId: "87470878b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb03", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Blue Background", "Grey Man", "Red Hair"] },
+            { id: 6348, name: "DogeBuds #6348[cite: 8]", price: "7.76 DOGE", usd: "$0.54[cite: 8]", inscriptionId: "87505726b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb04", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Red Background", "Brown Man", "Cigar"] }
+        ];
+
+        function loadWalletInscriptions() {
+            const grid = document.getElementById('nftGrid');
+            grid.innerHTML = '';
+            sampleInscriptions.forEach(nft => {
+                grid.innerHTML += `
+                    <div class="glass-spatial p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between">
+                        <div class="w-full h-36 bg-zinc-900 rounded-xl overflow-hidden flex items-center justify-center border border-momoGold/30">
+                            <img src="https://raw.githubusercontent.com/agent-anna/AA01/main/365/veganna.png" class="w-full h-full object-cover nft-image-pixel" alt="${nft.name}">
+                        </div>
+                        <div>
+                            <div class="font-syne font-bold text-sm text-white">${nft.name}</div>
+                            <div class="font-mono text-[10px] text-momoLime">Floor: ${nft.price} (${nft.usd})</div>
+                            <div class="font-mono text-[9px] text-zinc-500 truncate mt-1">ID: ${nft.inscriptionId}</div>
+                        </div>
+                        <button onclick="alert('Forensic Inscription Inspector:\\nID: ${nft.inscriptionId}\\nOwner: ${nft.owner}\\nTraits: ${nft.traits.join(', ')}')" class="w-full py-2 bg-momoGold/20 text-momoGold font-mono font-bold text-xs rounded-xl hover:bg-momoGold hover:text-black transition-all">
+                            INSPECT METADATA
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        window.onload = () => { loadWalletInscriptions(); };
+    </script>
+</body>
+</html>
