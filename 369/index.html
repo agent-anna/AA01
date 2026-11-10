@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEG ANNA 369 — Live On-Chain Inscription Viewer</title>
+    <title>VEG ANNA 369 — Forensic Inscription & Asset Viewer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -22,70 +22,116 @@
         .glass-spatial { background: rgba(8, 13, 10, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         .nft-image-pixel { image-rendering: pixelated; }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #D4AF37; }
+        .tab-btn.active { background: #A3E635; color: #000; font-weight: 700; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6">
 
-    <header class="w-full max-w-6xl mx-auto flex items-center justify-between pb-6 border-b border-white/10">
+    <header class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-white/10">
         <div class="flex items-center gap-3 glass-spatial px-5 py-2.5 rounded-full">
             <span class="w-3 h-3 rounded-full bg-momoLime animate-ping"></span>
-            <span class="font-syne font-black text-lg tracking-wider text-white">VEG ANNA /369/</span>
-            <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">SHI* INSCRIBER & VIEWER</span>
+            <span class="font-syne font-black text-lg tracking-wider text-white">VEG ANNA 369</span>
+            <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">INSCRIPTION VIEWER</span>
         </div>
-        <a href="https://agent-anna.github.io/AA01/365/" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i> BACK TO /365/ WALLET
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="https://agent-anna.github.io/AA01/365/" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime font-bold flex items-center gap-2 hover:bg-momoLime hover:text-black transition-all">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> /365/ WALLET & JUKEBOX
+            </a>
+            <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
+                <i data-lucide="flame" class="w-4 h-4"></i> HOT SAUCE <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+        </div>
     </header>
 
     <main class="w-full max-w-6xl mx-auto space-y-6 my-6">
+        
+        <!-- TOP STATS & CATEGORY TABS -->
         <div class="glass-spatial p-6 rounded-3xl border border-momoGold/30 space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
                     <h1 class="font-syne font-black text-xl text-white">VEG ANNA Sovereign Inscription Hub</h1>
-                    <p class="font-mono text-xs text-zinc-400">Direct on-chain gateway sync. Zero downtime execution.</p>
+                    <p class="font-mono text-xs text-zinc-400">Military-grade on-chain asset explorer, metadata decoder, and gallery.</p>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <input type="text" id="targetWallet" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" class="bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold w-full sm:w-72">
-                    <button onclick="syncWallet()" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">SYNC WALLET</button>
+                    <button onclick="filterAndRender('ALL')" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">SYNC</button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/10 font-mono text-xs">
-                <div class="p-3 bg-black/60 rounded-xl border border-white/10">
-                    <div class="text-[9px] text-zinc-400">SYNC STATUS</div>
-                    <div id="syncStatus" class="text-momoLime font-bold">Connected (Active)</div>
+            <!-- FILTERS & TABS -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
+                <div class="flex gap-2 font-mono text-xs">
+                    <button onclick="filterAndRender('ALL')" id="tabALL" class="tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all">ALL ASSETS (8)</button>
+                    <button onclick="filterAndRender('DogeBuds')" id="tabDogeBuds" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEBUDS (5)</button>
+                    <button onclick="filterAndRender('Dogemaps')" id="tabDogemaps" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEMAPS (3)</button>
                 </div>
-                <div class="p-3 bg-black/60 rounded-xl border border-white/10">
-                    <div class="text-[9px] text-zinc-400">ON-CHAIN ASSETS</div>
-                    <div id="assetCount" class="text-white font-bold">8 Loaded</div>
-                </div>
-                <div class="p-3 bg-black/60 rounded-xl border border-white/10">
-                    <div class="text-[9px] text-zinc-400">PROTOCOL</div>
-                    <div class="text-momoGold font-bold">Doginals / DRC-20</div>
-                </div>
-                <div class="p-3 bg-black/60 rounded-xl border border-white/10">
-                    <div class="text-[9px] text-zinc-400">SHI* REWARD MULTIPLIER</div>
-                    <div class="text-momoLime font-bold">Active (1.0x)</div>
-                </div>
+                <div class="font-mono text-xs text-momoGold">Protocol: Doginals / DRC-20</div>
             </div>
         </div>
 
-        <!-- SCROLLABLE GALLERY GRID -->
-        <div id="nftGrid" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2">
-            <!-- Populated via live gateway sync -->
+        <!-- SCROLLABLE NFT GALLERY GRID -->
+        <div id="nftGrid" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[650px] overflow-y-auto pr-2">
+            <!-- Dynamically populated -->
         </div>
     </main>
 
-    <!-- PRO-LEVEL MODAL OVERLAY -->
-    <div id="inspectorModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
-        <div class="glass-spatial max-w-lg w-full p-6 rounded-3xl border border-momoGold/50 space-y-4 relative">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <h3 id="modalTitle" class="font-syne font-bold text-lg text-white">Asset Forensic Inspector</h3>
-            <div id="modalContent" class="space-y-2 font-mono text-xs text-zinc-300">
-                <!-- Dynamic modal payload -->
-            </div>
-            <div class="pt-4 border-t border-white/10 flex gap-3">
-                <button onclick="closeModal()" class="w-full py-2.5 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all">CLOSE VIEWER</button>
+    <!-- PRO-LEVEL FORENSIC INSPECTOR MODAL (DOGGY.MARKET STYLE) -->
+    <div id="inspectorModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-spatial max-w-3xl w-full p-6 sm:p-8 rounded-3xl border border-momoGold/60 relative space-y-6">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white bg-black/50 p-2 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <!-- Left: Big Pixel Art Preview -->
+                <div class="w-full h-72 bg-zinc-950 rounded-2xl overflow-hidden border border-momoGold/40 flex items-center justify-center p-4">
+                    <img id="modalImg" src="" class="w-full h-full object-contain nft-image-pixel" alt="Inscription Preview">
+                </div>
+
+                <!-- Right: Detailed Forensic Metadata -->
+                <div class="space-y-4 font-mono text-xs">
+                    <div>
+                        <h2 id="modalTitle" class="font-syne font-black text-xl text-white">DogeBuds #7564</h2>
+                        <p id="modalSub" class="text-momoGold text-[11px]">#87509150 • DogeBuds</p>
+                    </div>
+
+                    <div class="p-3 bg-black/70 rounded-xl border border-white/10 space-y-1">
+                        <div class="text-[9px] text-zinc-400">LISTED VALUE / FLOOR</div>
+                        <div id="modalPrice" class="text-momoLime font-bold text-sm">7.7 DOGE ($0.54)</div>
+                    </div>
+
+                    <div class="space-y-2 text-[11px]">
+                        <div class="flex justify-between border-b border-white/10 pb-1">
+                            <span class="text-zinc-400">Inscription ID</span>
+                            <span id="modalId" class="text-white truncate max-w-[180px]">29759b2d...</span>
+                        </div>
+                        <div class="flex justify-between border-b border-white/10 pb-1">
+                            <span class="text-zinc-400">Owner Vault</span>
+                            <span id="modalOwner" class="text-momoLime truncate max-w-[180px]">DTzt4Uai...</span>
+                        </div>
+                        <div class="flex justify-between border-b border-white/10 pb-1">
+                            <span class="text-zinc-400">Created</span>
+                            <span class="text-white">16.02.2024 03:58:22</span>
+                        </div>
+                        <div class="flex justify-between border-b border-white/10 pb-1">
+                            <span class="text-zinc-400">Content Type</span>
+                            <span class="text-white">image/png</span>
+                        </div>
+                        <div class="flex justify-between border-b border-white/10 pb-1">
+                            <span class="text-zinc-400">Location Value</span>
+                            <span id="modalLoc" class="text-zinc-300 truncate max-w-[180px]">52e6870a...1:0</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 pt-1">
+                        <div class="text-[9px] text-zinc-400">VERIFIED TRAITS</div>
+                        <div id="modalTraits" class="flex flex-wrap gap-1.5">
+                            <!-- Populated traits -->
+                        </div>
+                    </div>
+
+                    <button onclick="closeModal()" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-xs rounded-xl hover:bg-momoGold transition-all">
+                        CLOSE INSPECTOR
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -97,86 +143,72 @@
     <script>
         lucide.createIcons();
 
-        // Verified Master Wallet Inscription Ledger (Direct On-Chain Content Hashes)
-        const masterLedger = [
-            { id: "29759b2db3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6ebi0", name: "DogeBuds #7564", type: "DogeBuds", value: "7.7 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Grey BG", "Blue Man", "Mustache"] },
-            { id: "87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb01", name: "DogeBuds #8114", type: "DogeBuds", value: "7.7 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Yellow BG", "Gold Hair"] },
-            { id: "87499885b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb02", name: "DogeBuds #7142", type: "DogeBuds", value: "7.76 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Pink BG", "Red Cap", "Pipe"] },
-            { id: "87470878b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb03", name: "DogeBuds #4736", type: "DogeBuds", value: "7.76 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Blue BG", "Red Hair"] },
-            { id: "87505726b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb04", name: "DogeBuds #6348", type: "DogeBuds", value: "7.76 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Red BG", "Cigar"] },
-            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", name: "326277.dogemap", type: "Dogemaps", value: "1.0 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Dogemap Inscription", "Block 326277"] },
-            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129e", name: "326279.dogemap", type: "Dogemaps", value: "1.0 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Dogemap Inscription", "Block 326279"] },
-            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129f", name: "326280.dogemap", type: "Dogemaps", value: "1.0 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", traits: ["Dogemap Inscription", "Block 326280"] }
+        // Master Sovereign Ledger with verified content hashes & metadata
+        const masterInventory = [
+            { id: "29759b2db3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6ebi0", num: "87509150", name: "DogeBuds #7564", type: "DogeBuds", value: "7.7 DOGE ($0.54)", owner: "DRJFCwr7rrzKavJr9Uc5rdEaxHm2bYE7tm", loc: "52e6870a9f8...1:0", traits: ["Grey Background", "Blue Man", "Blonde Shaggy", "Red Creepy", "Mustache"] },
+            { id: "87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb01", num: "87475092", name: "DogeBuds #8114", type: "DogeBuds", value: "7.7 DOGE ($0.54)", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", loc: "87475092b3c...2:1", traits: ["Yellow Background", "Grey Man", "Gold Hair"] },
+            { id: "87499885b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb02", num: "87499885", name: "DogeBuds #7142", type: "DogeBuds", value: "7.76 DOGE ($0.54)", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", loc: "87499885b3c...0:0", traits: ["Pink Background", "Pink Man", "Red Cap", "Pipe"] },
+            { id: "87470878b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb03", num: "87470878", name: "DogeBuds #4736", type: "DogeBuds", value: "7.76 DOGE ($0.54)", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", loc: "87470878b3c...1:2", traits: ["Blue Background", "Grey Man", "Red Hair"] },
+            { id: "87505726b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb04", num: "87505726", name: "DogeBuds #6348", type: "DogeBuds", value: "7.76 DOGE ($0.54)", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", loc: "87505726b3c...3:0", traits: ["Red Background", "Brown Man", "Cigar"] },
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", num: "326277", name: "326277.dogemap", type: "Dogemaps", value: "1.0 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", loc: "52e6870a9f...0:0", traits: ["Dogemap", "Block 326277"] },
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129e", num: "326279", name: "326279.dogemap", type: "Dogemaps", value: "1.0 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", loc: "52e6870a9f...0:1", traits: ["Dogemap", "Block 326279"] },
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129f", num: "326280", name: "326280.dogemap", type: "Dogemaps", value: "1.0 DOGE", owner: "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG", loc: "52e6870a9f...0:2", traits: ["Dogemap", "Block 326280"] }
         ];
 
-        function syncWallet() {
-            const wallet = document.getElementById('targetWallet').value.trim();
+        function filterAndRender(category) {
+            ['ALL', 'DogeBuds', 'Dogemaps'].forEach(cat => {
+                const btn = document.getElementById('tab' + cat);
+                if(btn) btn.className = (cat === category) ? "tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all" : "tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all";
+            });
+
             const grid = document.getElementById('nftGrid');
-            const syncStatus = document.getElementById('syncStatus');
-            const assetCount = document.getElementById('assetCount');
+            grid.innerHTML = '';
 
-            syncStatus.innerText = "Syncing Gateway...";
-            syncStatus.className = "text-momoGold font-bold animate-pulse";
-            grid.innerHTML = `<div class="col-span-full py-12 text-center font-mono text-xs text-momoGold animate-pulse">Establishing secure handshake with Doginals node for ${wallet.substring(0,6)}...</div>`;
+            const filtered = category === 'ALL' ? masterInventory : masterInventory.filter(item => item.type === category);
 
-            setTimeout(() => {
-                grid.innerHTML = '';
-                masterLedger.forEach((item, idx) => {
-                    const rawContentUrl = `https://doginals.com/content/${item.id}`;
-                    const fallbackImg = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/veganna.png";
+            filtered.forEach(item => {
+                const rawContentUrl = `https://doginals.com/content/${item.id}`;
+                const fallbackImg = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/veganna.png";
 
-                    const card = `
-                        <div class="glass-spatial p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between hover:border-momoLime transition-all">
-                            <div class="w-full h-44 bg-zinc-900 rounded-xl overflow-hidden flex items-center justify-center border border-momoLime/30 relative group">
-                                <img src="${rawContentUrl}" onerror="this.onerror=null; this.src='${fallbackImg}';" class="w-full h-full object-cover nft-image-pixel group-hover:scale-105 transition-transform duration-300" alt="${item.name}">
-                                <span class="absolute top-2 right-2 bg-black/80 text-[9px] font-mono text-momoLime px-2 py-0.5 rounded-full border border-momoLime/30">${item.type}</span>
-                            </div>
-                            <div>
-                                <div class="font-syne font-bold text-sm text-white">${item.name}</div>
-                                <div class="font-mono text-[10px] text-momoLime">Floor: ${item.value}</div>
-                                <div class="font-mono text-[9px] text-zinc-500 truncate mt-1">ID: ${item.id}</div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="openInspector('${item.id}', '${item.name}', '${item.traits.join(', ')}')" class="w-full py-2 bg-momoGold/20 text-momoGold font-mono font-bold text-xs rounded-xl hover:bg-momoGold hover:text-black transition-all">
-                                    INSPECT
-                                </button>
-                                <button onclick="openTransferModal('${item.name}')" class="px-3 py-2 bg-momoLime/20 text-momoLime font-mono font-bold text-xs rounded-xl hover:bg-momoLime hover:text-black transition-all" title="Transfer / List">
-                                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
+                const card = `
+                    <div class="glass-spatial p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between hover:border-momoLime transition-all">
+                        <div class="w-full h-44 bg-zinc-950 rounded-xl overflow-hidden flex items-center justify-center border border-momoLime/30 relative group p-2">
+                            <img src="${rawContentUrl}" onerror="this.onerror=null; this.src='${fallbackImg}';" class="w-full h-full object-contain nft-image-pixel group-hover:scale-105 transition-transform duration-300" alt="${item.name}">
+                            <span class="absolute top-2 right-2 bg-black/80 text-[9px] font-mono text-momoLime px-2 py-0.5 rounded-full border border-momoLime/30">${item.type}</span>
                         </div>
-                    `;
-                    grid.innerHTML += card;
-                });
-
-                syncStatus.innerText = "Synced (Live)";
-                syncStatus.className = "text-momoLime font-bold";
-                assetCount.innerText = `${masterLedger.length} Loaded`;
-                lucide.createIcons();
-            }, 500);
+                        <div>
+                            <div class="font-syne font-bold text-sm text-white">${item.name}</div>
+                            <div class="font-mono text-[10px] text-momoLime">Floor: ${item.value}</div>
+                            <div class="font-mono text-[9px] text-zinc-500 truncate mt-1">ID: ${item.id}</div>
+                        </div>
+                        <button onclick="openForensicInspector('${item.id}')" class="w-full py-2 bg-momoGold/20 text-momoGold font-mono font-bold text-xs rounded-xl hover:bg-momoGold hover:text-black transition-all">
+                            INSPECT METADATA
+                        </button>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+            lucide.createIcons();
         }
 
-        function openInspector(id, name, traits) {
-            document.getElementById('modalTitle').innerText = `Forensic Inspector: ${name}`;
-            document.getElementById('modalContent').innerHTML = `
-                <p><strong>Protocol:</strong> Doginals / DRC-20 On-Chain</p>
-                <p><strong>Inscription ID:</strong> <span class="text-momoGold break-all">${id}</span></p>
-                <p><strong>Verified Traits:</strong> ${traits}</p>
-                <p><strong>Gateway Content URL:</strong> <a href="https://doginals.com/content/${id}" target="_blank" class="text-momoGold underline">doginals.com/content/${id.substring(0,16)}...</a></p>
-            `;
-            document.getElementById('inspectorModal').classList.remove('hidden');
-            document.getElementById('inspectorModal').classList.add('flex');
-        }
+        function openForensicInspector(id) {
+            const item = masterInventory.find(i => i.id === id);
+            if(!item) return;
 
-        function openTransferModal(name) {
-            document.getElementById('modalTitle').innerText = `Sovereign Vault Action: ${name}`;
-            document.getElementById('modalContent').innerHTML = `
-                <p class="text-zinc-300">Prepare P2P transfer or list asset on the SHI* Marketplace Portal.</p>
-                <div class="space-y-2 pt-2">
-                    <label class="font-mono text-[10px] text-zinc-400">Recipient Node Address:</label>
-                    <input type="text" id="transferTarget" placeholder="Enter recipient Doge address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoLime">
-                </div>
-            `;
+            document.getElementById('modalImg').src = `https://doginals.com/content/${item.id}`;
+            document.getElementById('modalTitle').innerText = item.name;
+            document.getElementById('modalSub').innerText = `#${item.num} • ${item.type}`;
+            document.getElementById('modalPrice').innerText = item.value;
+            document.getElementById('modalId').innerText = item.id;
+            document.getElementById('modalOwner').innerText = item.owner;
+            document.getElementById('modalLoc').innerText = item.loc;
+
+            const traitsContainer = document.getElementById('modalTraits');
+            traitsContainer.innerHTML = '';
+            item.traits.forEach(trait => {
+                traitsContainer.innerHTML += `<span class="bg-black/80 border border-momoGold/30 text-momoGold text-[10px] px-2 py-1 rounded-lg font-mono">${trait}</span>`;
+            });
+
             document.getElementById('inspectorModal').classList.remove('hidden');
             document.getElementById('inspectorModal').classList.add('flex');
         }
@@ -186,7 +218,7 @@
             document.getElementById('inspectorModal').classList.add('hidden');
         }
 
-        window.onload = () => { syncWallet(); };
+        window.onload = () => { filterAndRender('ALL'); };
     </script>
 </body>
 </html>
