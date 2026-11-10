@@ -65,14 +65,13 @@
                 </div>
             </div>
 
-            <!-- TABS -->
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
-                <div class="flex gap-2 font-mono text-xs">
-                    <button onclick="switchTab('ALL')" id="tabALL" class="tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all">ALL ASSETS</button>
-                    <button onclick="switchTab('DogeBuds')" id="tabDogeBuds" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEBUDS</button>
-                    <button onclick="switchTab('Dogemaps')" id="tabDogemaps" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEMAPS</button>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10 font-mono text-xs">
+                <div class="flex gap-2">
+                    <button onclick="switchTab('ALL')" id="tabALL" class="tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all">ALL ASSETS (<span id="countAll">8</span>)</button>
+                    <button onclick="switchTab('DogeBuds')" id="tabDogeBuds" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEBUDS (<span id="countBuds">5</span>)</button>
+                    <button onclick="switchTab('Dogemaps')" id="tabDogemaps" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEMAPS (<span id="countMaps">3</span>)</button>
                 </div>
-                <div id="syncStatusBadge" class="font-mono text-xs text-momoLime">Status: Connected to Sovereign Node</div>
+                <div id="syncStatusBadge" class="text-momoLime">Status: Connected to Sovereign Node</div>
             </div>
         </div>
 
@@ -82,7 +81,7 @@
         </div>
     </main>
 
-    <!-- PRO-LEVEL FORENSIC INSPECTOR MODAL WITH BUY & SEND ACTIONS -->
+    <!-- PRO-LEVEL FORENSIC INSPECTOR MODAL WITH FULL TRAITS -->
     <div id="inspectorModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
         <div class="glass-spatial max-w-3xl w-full p-6 sm:p-8 rounded-3xl border border-momoGold/60 relative space-y-6">
             <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white bg-black/50 p-2 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -114,7 +113,12 @@
                         </div>
                     </div>
                     
-                    <!-- FULL ACTION BUTTONS: BUY / SEND / CLOSE -->
+                    <!-- RESTORED TRAITS DISPLAY -->
+                    <div class="space-y-1 pt-1">
+                        <div class="text-[9px] text-zinc-400">VERIFIED ON-CHAIN TRAITS</div>
+                        <div id="modalTraits" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2 pt-2">
                         <button onclick="buyAssetAction()" class="py-3 bg-momoLime text-black font-syne font-bold text-xs rounded-xl hover:bg-momoGold transition-all">BUY NOW</button>
                         <button onclick="sendAssetAction()" class="py-3 bg-momoGold text-black font-syne font-bold text-xs rounded-xl hover:bg-momoLime transition-all">SEND / TRANSFER</button>
@@ -139,9 +143,9 @@
             { id: "87499885b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb02", name: "DogeBuds #7142", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Pink Background", "Pink Man", "Red Cap"] },
             { id: "87470878b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb03", name: "DogeBuds #4736", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Blue Background", "Grey Man", "Red Hair"] },
             { id: "87505726b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb04", name: "DogeBuds #6348", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Red Background", "Brown Man", "Cigar"] },
-            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", name: "326277.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap", "Block 326277"] },
-            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129e", name: "326279.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap", "Block 326279"] },
-            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129f", name: "326280.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap", "Block 326280"] }
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", name: "326277.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap Inscription", "Block 326277"] },
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129e", name: "326279.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap Inscription", "Block 326279"] },
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129f", name: "326280.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap Inscription", "Block 326280"] }
         ];
 
         function initSovereignHub() {
@@ -182,19 +186,21 @@
             grid.innerHTML = '';
 
             statusBadge.innerText = "Status: Querying Chain...";
-            statusBadge.className = "font-mono text-xs text-momoGold animate-pulse";
+            statusBadge.className = "text-momoGold animate-pulse";
 
             setTimeout(() => {
-                const results = sovereignLedger.filter(item => {
-                    const matchWallet = item.owner.toLowerCase() === wallet.toLowerCase();
-                    const matchFilter = currentFilter === 'ALL' || item.type === currentFilter;
-                    return matchWallet && matchFilter;
-                });
+                const walletAssets = sovereignLedger.filter(item => item.owner.toLowerCase() === wallet.toLowerCase());
+                
+                document.getElementById('countAll').innerText = walletAssets.length;
+                document.getElementById('countBuds').innerText = walletAssets.filter(i => i.type === 'DogeBuds').length;
+                document.getElementById('countMaps').innerText = walletAssets.filter(i => i.type === 'Dogemaps').length;
+
+                const results = currentFilter === 'ALL' ? walletAssets : walletAssets.filter(item => item.type === currentFilter);
 
                 if (results.length === 0) {
                     grid.innerHTML = `<div class="col-span-full py-12 text-center font-mono text-xs text-zinc-500">No active assets found for this address. Try syncing master vault address.</div>`;
                     statusBadge.innerText = "Status: Synced (0 Assets)";
-                    statusBadge.className = "font-mono text-xs text-zinc-400";
+                    statusBadge.className = "text-zinc-400";
                     return;
                 }
 
@@ -214,10 +220,10 @@
                                 <div class="font-mono text-[9px] text-zinc-500 truncate mt-1">ID: ${item.id}</div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <button onclick="openModal('${item.id}', '${item.name}', '${item.price}', '${item.owner}')" class="py-2 bg-momoGold/20 text-momoGold font-mono font-bold text-xs rounded-xl hover:bg-momoGold hover:text-black transition-all">
+                                <button onclick="openModal('${item.id}')" class="py-2 bg-momoGold/20 text-momoGold font-mono font-bold text-xs rounded-xl hover:bg-momoGold hover:text-black transition-all">
                                     INSPECT
                                 </button>
-                                <button onclick="openModal('${item.id}', '${item.name}', '${item.price}', '${item.owner}')" class="py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all">
+                                <button onclick="openModal('${item.id}')" class="py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all">
                                     TRADE / BUY
                                 </button>
                             </div>
@@ -227,18 +233,27 @@
                 });
 
                 statusBadge.innerText = `Status: ${results.length} On-Chain Assets Active`;
-                statusBadge.className = "font-mono text-xs text-momoLime";
+                statusBadge.className = "text-momoLime";
                 lucide.createIcons();
-            }, 400);
+            }, 300);
         }
 
-        function openModal(id, name, price, owner) {
+        function openModal(id) {
+            const item = sovereignLedger.find(i => i.id === id);
+            if(!item) return;
+
             activeModalId = id;
             document.getElementById('modalImg').src = `https://doginals.com/content/${id}`;
-            document.getElementById('modalTitle').innerText = name;
-            document.getElementById('modalPrice').innerText = price;
-            document.getElementById('modalId').innerText = id;
-            document.getElementById('modalOwner').innerText = owner;
+            document.getElementById('modalTitle').innerText = item.name;
+            document.getElementById('modalPrice').innerText = item.price;
+            document.getElementById('modalId').innerText = item.id;
+            document.getElementById('modalOwner').innerText = item.owner;
+
+            const traitsContainer = document.getElementById('modalTraits');
+            traitsContainer.innerHTML = '';
+            item.traits.forEach(trait => {
+                traitsContainer.innerHTML += `<span class="bg-black/80 border border-momoGold/30 text-momoGold text-[10px] px-2 py-1 rounded-lg font-mono">${trait}</span>`;
+            });
 
             document.getElementById('inspectorModal').classList.remove('hidden');
             document.getElementById('inspectorModal').classList.add('flex');
