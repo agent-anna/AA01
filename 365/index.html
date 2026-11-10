@@ -27,7 +27,7 @@
 </head>
 <body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6" onload="initEcosystemNode()">
 
-    <!-- PERMANENT UNIFIED AUDIO ENGINE (NEVER UNLOADS, ZERO DROPOUTS) -->
+    <!-- PERMANENT UNIFIED AUDIO ENGINE -->
     <audio id="masterAudio" preload="auto" loop style="display:none;"></audio>
 
     <!-- MASTER GLOBAL HEADER -->
@@ -38,7 +38,6 @@
             <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">UNIFIED NODE</span>
         </div>
 
-        <!-- VIEW SWITCHER & AUDIO TICKER (FLIP INSTANTLY WITHOUT RELOADING) -->
         <div class="flex items-center gap-3 flex-wrap justify-center">
             <div class="glass-spatial px-3 py-1.5 rounded-full font-mono text-[10px] text-momoGold flex items-center gap-2 border border-momoGold/30">
                 <i data-lucide="headphones" class="w-3.5 h-3.5 text-momoLime animate-pulse"></i>
@@ -76,7 +75,7 @@
                 <div class="p-5 bg-black/60 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
                         <button onclick="togglePlay()" id="playBtn" class="w-12 h-12 bg-momoLime text-black rounded-xl flex items-center justify-center font-bold hover:bg-momoGold transition-all">
-                            <i data-lucide="play" class="w-6 h-6 fill-current"></i>
+                            <i data-lucide="pause" class="w-6 h-6 fill-current"></i>
                         </button>
                         <div>
                             <div id="trackTitle" class="font-syne font-bold text-white text-sm">Track 01: Anti Pop Club Anthem</div>
@@ -179,7 +178,7 @@
 
         const masterLedger = [
             { id: "29759b2db3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6ebi0", name: "DogeBuds #7564", type: "DogeBuds", price: "7.7 DOGE", owner: "DRJFCwr7rrzKavJr9Uc5rdEaxHm2bYE7tm", traits: ["Grey Background", "Blue Man", "Mustache"], img: "https://doginals.com/content/29759b2db3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6ebi0" },
-            { id: "87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb01", name: "DogeBuds #8114", type: "DogeBuds", price: "7.7 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Yellow Background", "Grey Man", "Gold Hair"], img: "https://doginals.com/content/87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616eb01" },
+            { id: "87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb01", name: "DogeBuds #8114", type: "DogeBuds", price: "7.7 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Yellow Background", "Grey Man", "Gold Hair"], img: "https://doginals.com/content/87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb01" },
             { id: "87499885b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb02", name: "DogeBuds #7142", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Pink Background", "Pink Man", "Red Cap"], img: "https://doginals.com/content/87499885b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb02" },
             { id: "87470878b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb03", name: "DogeBuds #4736", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Blue Background", "Grey Man", "Red Hair"], img: "https://doginals.com/content/87470878b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb03" },
             { id: "87505726b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb04", name: "DogeBuds #6348", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Red Background", "Brown Man", "Cigar"], img: "https://doginals.com/content/87505726b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb04" },
@@ -190,18 +189,28 @@
 
         function initEcosystemNode() {
             const audio = document.getElementById('masterAudio');
-            audio.src = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track1.mp3";
             
-            // Attempt auto-play; if browser restricts, user can toggle via top button
-            audio.play().then(() => {
-                document.getElementById('audioStatusText').innerText = "Soundtrack: Playing Live (Earning SHI*)";
-            }).catch(() => {
-                document.getElementById('audioStatusText').innerText = "Soundtrack: Click to Start Audio";
-            });
+            // Restore exact track and playback timestamp from localStorage so state never resets
+            const savedTrack = localStorage.getItem('veg_anna_current_track') || "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track1.mp3";
+            const savedTime = parseFloat(localStorage.getItem('veg_anna_audio_time') || "0");
+            const isPlaying = localStorage.getItem('veg_anna_is_playing') === 'true';
 
-            // SHI* Token Earning Ticker while listening and browsing
+            audio.src = savedTrack;
+            audio.currentTime = savedTime;
+
+            if (isPlaying) {
+                audio.play().then(() => {
+                    document.getElementById('audioStatusText').innerText = "Soundtrack: Playing Live (Earning SHI*)";
+                }).catch(() => {
+                    document.getElementById('audioStatusText').innerText = "Soundtrack: Click Play to Resume";
+                });
+            }
+
+            // Continuously save state so flipping tabs never loses progress
             setInterval(() => {
                 if (!audio.paused) {
+                    localStorage.setItem('veg_anna_audio_time', audio.currentTime);
+                    localStorage.setItem('veg_anna_is_playing', 'true');
                     shiCount += 0.05;
                     document.getElementById('shiCounter').innerText = shiCount.toFixed(2);
                 }
@@ -214,10 +223,12 @@
             const audio = document.getElementById('masterAudio');
             if (audio.paused) {
                 audio.play();
+                localStorage.setItem('veg_anna_is_playing', 'true');
                 document.getElementById('audioStatusText').innerText = "Soundtrack: Playing Live (Earning SHI*)";
                 document.getElementById('playBtn').innerHTML = `<i data-lucide="pause" class="w-6 h-6 fill-current"></i>`;
             } else {
                 audio.pause();
+                localStorage.setItem('veg_anna_is_playing', 'false');
                 document.getElementById('audioStatusText').innerText = "Soundtrack: Paused";
                 document.getElementById('playBtn').innerHTML = `<i data-lucide="play" class="w-6 h-6 fill-current"></i>`;
             }
@@ -228,6 +239,8 @@
             const audio = document.getElementById('masterAudio');
             audio.src = url;
             audio.play();
+            localStorage.setItem('veg_anna_current_track', url);
+            localStorage.setItem('veg_anna_is_playing', 'true');
             document.getElementById('trackTitle').innerText = title;
             document.getElementById('audioStatusText').innerText = "Soundtrack: Playing Live (Earning SHI*)";
         }
