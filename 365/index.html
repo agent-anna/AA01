@@ -402,55 +402,44 @@
                     resEl.className = "font-mono text-xs text-momoLime pt-1";
                 }
             } catch (err) {
-                try {
-                    const telResponse = await fetch('http://localhost:8082/api/telemetry');
-                    const telData = await telResponse.json();
-                    resEl.innerText = `[SUCCESS] Baandoor Shield Status: ${telData.status}`;
-                    resEl.className = "font-mono text-xs text-momoLime pt-1";
-                } catch (e2) {
-                    resEl.innerText = "[-] Baandoor offline. Ensure baandoor.ps1 is running on port 8082.";
-                    resEl.className = "font-mono text-xs text-sauceRed pt-1";
-                }
+                resEl.innerText = "[-] Baandoor offline. Ensure baandoor.ps1 is running on port 8082.";
+                resEl.className = "font-mono text-xs text-sauceRed pt-1";
             }
         }
 
-        // --- LIVE DYNAMIC FETCH VIA BAANDOOR PROXY ---
+        // --- 100% PURE LIVE FETCH: NO HARDCODED ARRAYS ALLOWED ---
         async function fetchLiveUTXOs() {
             const wallet = document.getElementById('targetWallet369').value.trim() || "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG";
             document.getElementById('status369').innerText = "Status: Querying Live Blockchain via Baandoor Proxy (Port 8082)...";
+            document.getElementById('sumWalletDisplay').innerText = wallet.substring(0, 6) + '...' + wallet.substring(wallet.length - 4);
 
             try {
                 const response = await fetch(`http://localhost:8082/api/proxy?wallet=${wallet}`);
                 const data = await response.json();
                 
-                if (data && Array.isArray(data) && data.length > 0) {
-                    liveFetchedAssets = data.map(item => ({
-                        id: item.id || item.inscriptionId,
-                        name: item.name || `Inscription #${item.id}`,
-                        type: item.collection || (item.name?.includes('Ape') ? 'Doge Ape' : (item.name?.includes('Mfer') ? 'DoginaLMfers' : 'DogeBuds')),
-                        imgUrl: `https://doginals.com/content/${item.id || item.inscriptionId}`,
-                        satoshis: item.satoshis || 69690000,
-                        traits: item.traits || ['Live Inscription']
-                    }));
+                if (data && Array.isArray(data)) {
+                    liveFetchedAssets = data.map(item => {
+                        const assetId = item.id || item.inscriptionId || item.txid || "unknown";
+                        const assetName = item.name || `Inscription #${assetId}`;
+                        const assetType = item.collection || (assetName.toLowerCase().includes('ape') ? 'Doge Ape' : (assetName.toLowerCase().includes('mfer') ? 'DoginaLMfers' : 'DogeBuds'));
+                        return {
+                            id: assetId,
+                            name: assetName,
+                            type: assetType,
+                            imgUrl: `https://doginals.com/content/${assetId}`,
+                            satoshis: item.satoshis || 42000000,
+                            traits: item.traits || [assetType, 'Live On-Chain UTXO']
+                        };
+                    });
+                    document.getElementById('status369').innerText = `[SUCCESS] Live Stream Synchronized: ${liveFetchedAssets.length} Assets Loaded from Chain.`;
                 } else {
-                    throw new Error("Using Direct Live Registry Stream");
+                    liveFetchedAssets = [];
+                    document.getElementById('status369').innerText = "[-] Live stream returned no inscriptions for this wallet.";
                 }
             } catch (err) {
-                // Live Fallback Direct Registry Stream matching Doggy Market CDN
-                liveFetchedAssets = [
-                    { id: "47799610", name: "Doge Ape #47", type: "Doge Ape", imgUrl: "https://doginals.com/content/47799610", satoshis: 696900000, traits: ['Doge Ape', 'Rare Fur'] },
-                    { id: "47799626", name: "Doge Ape #63", type: "Doge Ape", imgUrl: "https://doginals.com/content/47799626", satoshis: 696900000, traits: ['Doge Ape', 'Halo'] },
-                    { id: "57453522", name: "DoginaLMfers #300", type: "DoginaLMfers", imgUrl: "https://doginals.com/content/57453522", satoshis: 69690000, traits: ['DoginaLMfers', 'Headset'] },
-                    { id: "57453531", name: "DoginaLMfers #309", type: "DoginaLMfers", imgUrl: "https://doginals.com/content/57453531", satoshis: 69690000, traits: ['DoginaLMfers', 'Pink Back'] },
-                    { id: "57457554", name: "DoginaLMfers #1732", type: "DoginaLMfers", imgUrl: "https://doginals.com/content/57457554", satoshis: 69690000, traits: ['DoginaLMfers', 'Blue Back'] },
-                    { id: "57510529", name: "DoginaLMfers #9201", type: "DoginaLMfers", imgUrl: "https://doginals.com/content/57510529", satoshis: 69690000, traits: ['DoginaLMfers', 'Green Hair'] },
-                    { id: "87500076", name: "DogeBuds #5389", type: "DogeBuds", imgUrl: "https://doginals.com/content/87500076", satoshis: 42000000, traits: ['DogeBuds', 'Cigarette'] },
-                    { id: "87500166", name: "DogeBuds #749", type: "DogeBuds", imgUrl: "https://doginals.com/content/87500166", satoshis: 42000000, traits: ['DogeBuds', 'Torch'] }
-                ];
+                liveFetchedAssets = [];
+                document.getElementById('status369').innerText = "[-] Connection Error: Ensure baandoor.ps1 is running on port 8082.";
             }
-
-            document.getElementById('sumAssetCount').innerText = liveFetchedAssets.length + " Assets Live";
-            document.getElementById('status369').innerText = `[SUCCESS] Live Inscription Stream Synchronized: ${liveFetchedAssets.length} Assets Loaded.`;
             render369Grid();
         }
 
@@ -478,6 +467,11 @@
             document.getElementById('c369Buds').innerText = budsCount;
 
             const results = current369Filter === 'ALL' ? liveFetchedAssets : liveFetchedAssets.filter(i => i.type === current369Filter);
+
+            if (results.length === 0) {
+                grid.innerHTML = `<div class="col-span-full p-6 text-center font-mono text-xs text-zinc-500">No live assets found or waiting for proxy synchronization. Click Refresh Index.</div>`;
+                return;
+            }
 
             results.forEach(item => {
                 grid.innerHTML += `
