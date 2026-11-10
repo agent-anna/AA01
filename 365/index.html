@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEG ANNA ECOSYSTEM — SWAP /365/ & SHOP /369/</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { momoDark: '#080d0a', momoMoss: '#121f17', momoGold: '#D4AF37', momoLime: '#A3E635', sauceRed: '#E53E3E' },
+                    fontFamily: { syne: ['Syne', 'sans-serif'], sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['Space Grotesk', 'monospace'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-spatial { background: rgba(8, 13, 10, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .nft-image-pixel { image-rendering: pixelated; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #D4AF37; }
+        .view-tab.active { background: #A3E635; color: #000; font-weight: 700; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6" onload="initEcosystemNode()">
+
+    <!-- PERMANENT UNIFIED AUDIO ENGINE (NEVER UNLOADS, ZERO DROPOUTS) -->
+    <audio id="masterAudio" preload="auto" loop style="display:none;"></audio>
+
+    <!-- MASTER GLOBAL HEADER -->
+    <header class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-white/10">
+        <div class="flex items-center gap-3 glass-spatial px-5 py-2.5 rounded-full">
+            <span class="w-3 h-3 rounded-full bg-momoLime animate-ping"></span>
+            <span class="font-syne font-black text-lg tracking-wider text-white">VEG ANNA /365/ & /369/</span>
+            <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">UNIFIED NODE</span>
+        </div>
+
+        <!-- VIEW SWITCHER & AUDIO TICKER (FLIP INSTANTLY WITHOUT RELOADING) -->
+        <div class="flex items-center gap-3 flex-wrap justify-center">
+            <div class="glass-spatial px-3 py-1.5 rounded-full font-mono text-[10px] text-momoGold flex items-center gap-2 border border-momoGold/30">
+                <i data-lucide="headphones" class="w-3.5 h-3.5 text-momoLime animate-pulse"></i>
+                <span id="audioStatusText">Soundtrack: Active (Earning SHI*)</span>
+            </div>
+            
+            <div class="flex gap-1 bg-black/60 p-1 rounded-full border border-white/10 font-mono text-xs">
+                <button onclick="switchView('365')" id="nav365" class="view-tab active px-4 py-1.5 rounded-full transition-all">SWAP /365/</button>
+                <button onclick="switchView('369')" id="nav369" class="view-tab px-4 py-1.5 rounded-full transition-all text-zinc-400">SHOP /369/</button>
+            </div>
+
+            <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
+                <i data-lucide="flame" class="w-4 h-4"></i> HOT SAUCE <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- DYNAMIC VIEW CONTAINER -->
+    <main class="w-full max-w-6xl mx-auto space-y-6 my-6 flex-grow">
+        
+        <!-- VIEW 365: SWAP & JUKEBOX -->
+        <div id="view365" class="space-y-6">
+            <div class="glass-spatial p-6 sm:p-8 rounded-3xl border border-momoGold/30 space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 class="font-syne font-black text-2xl text-white">SWAP /365/ — Jukebox & Staking Hub</h1>
+                        <p class="font-mono text-xs text-zinc-400">Play sovereign audio tracks, earn SHI* tokens, and pair DOGE liquidity.</p>
+                    </div>
+                    <div class="glass-spatial px-4 py-2 rounded-2xl border border-momoLime/30 font-mono text-xs text-momoLime font-bold">
+                        SHI* Earned: <span id="shiCounter">0.00</span>
+                    </div>
+                </div>
+
+                <!-- AUDIO PLAYER CONTROLS -->
+                <div class="p-5 bg-black/60 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <button onclick="togglePlay()" id="playBtn" class="w-12 h-12 bg-momoLime text-black rounded-xl flex items-center justify-center font-bold hover:bg-momoGold transition-all">
+                            <i data-lucide="play" class="w-6 h-6 fill-current"></i>
+                        </button>
+                        <div>
+                            <div id="trackTitle" class="font-syne font-bold text-white text-sm">Track 01: Anti Pop Club Anthem</div>
+                            <div class="font-mono text-[10px] text-momoGold">Strayd Audio Archive • High Fidelity</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="changeTrack('https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track1.mp3', 'Track 01: Anti Pop Club Anthem')" class="px-3 py-1.5 bg-zinc-800 text-xs font-mono rounded-xl text-white hover:bg-momoLime hover:text-black transition-all">Track 1</button>
+                        <button onclick="changeTrack('https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track2.mp3', 'Track 02: Sovereign Chill')" class="px-3 py-1.5 bg-zinc-800 text-xs font-mono rounded-xl text-white hover:bg-momoLime hover:text-black transition-all">Track 2</button>
+                    </div>
+                </div>
+
+                <!-- SWAP INTERFACE -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-4 bg-black/80 rounded-2xl border border-white/10 space-y-2 font-mono text-xs">
+                        <div class="text-zinc-400">Pay (DOGE Vault)</div>
+                        <input type="number" id="swapAmount" value="10" class="w-full bg-zinc-900 border border-white/20 rounded-xl px-3 py-2 text-white outline-none focus:border-momoLime">
+                    </div>
+                    <div class="p-4 bg-black/80 rounded-2xl border border-white/10 space-y-2 font-mono text-xs">
+                        <div class="text-zinc-400">Receive (SHI* Bar Token)</div>
+                        <input type="text" id="receiveAmount" value="300.0" readonly class="w-full bg-zinc-900 border border-white/20 rounded-xl px-3 py-2 text-momoLime font-bold outline-none">
+                    </div>
+                </div>
+                <button onclick="executeSwap()" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all shadow-lg">
+                    EXECUTE SWAP & ACCELERATE SHI* REWARDS
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 369: SHOP & NFT EXPLORER -->
+        <div id="view369" class="space-y-6 hidden">
+            <div class="glass-spatial p-6 rounded-3xl border border-momoGold/30 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 class="font-syne font-black text-xl text-white">SHOP /369/ — Sovereign Inscription Hub</h1>
+                        <p class="font-mono text-xs text-zinc-400">Explore verified DogeBuds and Dogemaps on-chain.</p>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <input type="text" id="targetWallet" value="DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg" class="bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold w-full sm:w-72">
+                        <button onclick="renderShopGrid()" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">SYNC</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10 font-mono text-xs">
+                    <div class="flex gap-2">
+                        <button onclick="filterShop('ALL')" id="shopAll" class="tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all">ALL (<span id="cntAll">8</span>)</button>
+                        <button onclick="filterShop('DogeBuds')" id="shopBuds" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEBUDS (<span id="cntBuds">5</span>)</button>
+                        <button onclick="filterShop('Dogemaps')" id="shopMaps" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEMAPS (<span id="cntMaps">3</span>)</button>
+                    </div>
+                    <div id="shopStatus" class="text-momoLime">Status: Node Synchronized</div>
+                </div>
+            </div>
+
+            <!-- NFT GRID -->
+            <div id="shopGrid" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[650px] overflow-y-auto pr-2"></div>
+        </div>
+    </main>
+
+    <!-- INSPECTION MODAL -->
+    <div id="inspectorModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-spatial max-w-3xl w-full p-6 sm:p-8 rounded-3xl border border-momoGold/60 relative space-y-6">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white bg-black/50 p-2 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <div class="w-full h-72 bg-zinc-950 rounded-2xl overflow-hidden border border-momoGold/40 flex items-center justify-center p-4 relative">
+                    <img id="modalImg" src="" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/agent-anna/AA01/main/365/veganna.png';" class="w-full h-full object-contain nft-image-pixel" alt="Payload">
+                </div>
+                <div class="space-y-4 font-mono text-xs">
+                    <div>
+                        <h2 id="modalTitle" class="font-syne font-black text-xl text-white">Asset Name</h2>
+                        <p class="text-momoGold text-[11px]">Doginals Protocol</p>
+                    </div>
+                    <div class="p-3 bg-black/70 rounded-xl border border-white/10 flex items-center justify-between">
+                        <div>
+                            <div class="text-[9px] text-zinc-400">FLOOR VALUE</div>
+                            <div id="modalPrice" class="text-momoLime font-bold text-sm">7.7 DOGE</div>
+                        </div>
+                        <div class="bg-momoLime/20 text-momoLime px-3 py-1 rounded-lg border border-momoLime/40 text-[10px]">VERIFIED</div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="text-[9px] text-zinc-400">TRAITS</div>
+                        <div id="modalTraits" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button onclick="alert('Secure Checkout Executed!')" class="py-3 bg-momoLime text-black font-syne font-bold text-xs rounded-xl hover:bg-momoGold transition-all">BUY NOW</button>
+                        <button onclick="prompt('Enter recipient address:')" class="py-3 bg-momoGold text-black font-syne font-bold text-xs rounded-xl hover:bg-momoLime transition-all">TRANSFER</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full max-w-6xl mx-auto pt-6 border-t border-white/10 text-center font-mono text-xs text-zinc-500">
+        VEG ANNA MASTER ECOSYSTEM NODE — LFG.
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        let shiCount = 0;
+        let shopFilter = 'ALL';
+
+        const masterLedger = [
+            { id: "29759b2db3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6ebi0", name: "DogeBuds #7564", type: "DogeBuds", price: "7.7 DOGE", owner: "DRJFCwr7rrzKavJr9Uc5rdEaxHm2bYE7tm", traits: ["Grey Background", "Blue Man", "Mustache"], img: "https://doginals.com/content/29759b2db3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6ebi0" },
+            { id: "87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb01", name: "DogeBuds #8114", type: "DogeBuds", price: "7.7 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Yellow Background", "Grey Man", "Gold Hair"], img: "https://doginals.com/content/87475092b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616eb01" },
+            { id: "87499885b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb02", name: "DogeBuds #7142", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Pink Background", "Pink Man", "Red Cap"], img: "https://doginals.com/content/87499885b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb02" },
+            { id: "87470878b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb03", name: "DogeBuds #4736", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Blue Background", "Grey Man", "Red Hair"], img: "https://doginals.com/content/87470878b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb03" },
+            { id: "87505726b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb04", name: "DogeBuds #6348", type: "DogeBuds", price: "7.76 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Red Background", "Brown Man", "Cigar"], img: "https://doginals.com/content/87505726b3cbbd9574b1676cc3ae7ef63fb06902bb36d947616ea8afd5e6eb04" },
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", name: "326277.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap Inscription", "Block 326277"], img: "https://doginals.com/content/52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d" },
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129e", name: "326279.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap Inscription", "Block 326279"], img: "https://doginals.com/content/52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129e" },
+            { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129f", name: "326280.dogemap", type: "Dogemaps", price: "1.0 DOGE", owner: "DKyL8VtXYwVCqgrDQwbLrj5yNmEXHJGGXg", traits: ["Dogemap Inscription", "Block 326280"], img: "https://doginals.com/content/52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129f" }
+        ];
+
+        function initEcosystemNode() {
+            const audio = document.getElementById('masterAudio');
+            audio.src = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track1.mp3";
+            
+            // Attempt auto-play; if browser restricts, user can toggle via top button
+            audio.play().then(() => {
+                document.getElementById('audioStatusText').innerText = "Soundtrack: Playing Live (Earning SHI*)";
+            }).catch(() => {
+                document.getElementById('audioStatusText').innerText = "Soundtrack: Click to Start Audio";
+            });
+
+            // SHI* Token Earning Ticker while listening and browsing
+            setInterval(() => {
+                if (!audio.paused) {
+                    shiCount += 0.05;
+                    document.getElementById('shiCounter').innerText = shiCount.toFixed(2);
+                }
+            }, 1000);
+
+            renderShopGrid();
+        }
+
+        function togglePlay() {
+            const audio = document.getElementById('masterAudio');
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('audioStatusText').innerText = "Soundtrack: Playing Live (Earning SHI*)";
+                document.getElementById('playBtn').innerHTML = `<i data-lucide="pause" class="w-6 h-6 fill-current"></i>`;
+            } else {
+                audio.pause();
+                document.getElementById('audioStatusText').innerText = "Soundtrack: Paused";
+                document.getElementById('playBtn').innerHTML = `<i data-lucide="play" class="w-6 h-6 fill-current"></i>`;
+            }
+            lucide.createIcons();
+        }
+
+        function changeTrack(url, title) {
+            const audio = document.getElementById('masterAudio');
+            audio.src = url;
+            audio.play();
+            document.getElementById('trackTitle').innerText = title;
+            document.getElementById('audioStatusText').innerText = "Soundtrack: Playing Live (Earning SHI*)";
+        }
+
+        function switchView(viewId) {
+            if (viewId === '365') {
+                document.getElementById('view365').classList.remove('hidden');
+                document.getElementById('view369').classList.add('hidden');
+                document.getElementById('nav365').className = "view-tab active px-4 py-1.5 rounded-full transition-all";
+                document.getElementById('nav369').className = "view-tab px-4 py-1.5 rounded-full transition-all text-zinc-400";
+            } else {
+                document.getElementById('view365').classList.add('hidden');
+                document.getElementById('view369').classList.remove('hidden');
+                document.getElementById('nav369').className = "view-tab active px-4 py-1.5 rounded-full transition-all";
+                document.getElementById('nav365').className = "view-tab px-4 py-1.5 rounded-full transition-all text-zinc-400";
+                renderShopGrid();
+            }
+        }
+
+        function filterShop(filter) {
+            shopFilter = filter;
+            ['ALL', 'DogeBuds', 'Dogemaps'].forEach(f => {
+                const btnId = f === 'ALL' ? 'shopAll' : (f === 'DogeBuds' ? 'shopBuds' : 'shopMaps');
+                const btn = document.getElementById(btnId);
+                if(btn) btn.className = (f === filter) ? "tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all" : "tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all";
+            });
+            renderShopGrid();
+        }
+
+        function renderShopGrid() {
+            const wallet = document.getElementById('targetWallet').value.trim();
+            const grid = document.getElementById('shopGrid');
+            grid.innerHTML = '';
+
+            const walletAssets = masterLedger.filter(i => i.owner.toLowerCase() === wallet.toLowerCase());
+            document.getElementById('cntAll').innerText = walletAssets.length;
+            document.getElementById('cntBuds').innerText = walletAssets.filter(i => i.type === 'DogeBuds').length;
+            document.getElementById('cntMaps').innerText = walletAssets.filter(i => i.type === 'Dogemaps').length;
+
+            const results = shopFilter === 'ALL' ? walletAssets : walletAssets.filter(i => i.type === shopFilter);
+
+            if (results.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center font-mono text-xs text-zinc-500">No active assets found for this address.</div>`;
+                return;
+            }
+
+            results.forEach(item => {
+                const fallbackImg = "https://raw.githubusercontent.com/agent-anna/AA01/main/365/veganna.png";
+                const card = `
+                    <div class="glass-spatial p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between hover:border-momoLime transition-all">
+                        <div class="w-full h-44 bg-zinc-950 rounded-xl overflow-hidden flex items-center justify-center border border-momoLime/30 relative group p-2">
+                            <img src="${item.img}" onerror="this.onerror=null; this.src='${fallbackImg}';" class="w-full h-full object-contain nft-image-pixel group-hover:scale-105 transition-transform duration-300" alt="${item.name}">
+                            <span class="absolute top-2 right-2 bg-momoLime text-black font-bold text-[9px] px-2 py-0.5 rounded-full">${item.type}</span>
+                        </div>
+                        <div>
+                            <div class="font-syne font-bold text-sm text-white">${item.name}</div>
+                            <div class="font-mono text-[10px] text-momoLime">Floor: ${item.price}</div>
+                            <div class="font-mono text-[9px] text-zinc-500 truncate mt-1">ID: ${item.id}</div>
+                        </div>
+                        <button onclick="openModal('${item.id}')" class="w-full py-2 bg-momoGold/20 text-momoGold font-mono font-bold text-xs rounded-xl hover:bg-momoGold hover:text-black transition-all">
+                            INSPECT NFT
+                        </button>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+            lucide.createIcons();
+        }
+
+        function openModal(id) {
+            const item = masterLedger.find(i => i.id === id);
+            if(!item) return;
+
+            document.getElementById('modalImg').src = item.img;
+            document.getElementById('modalTitle').innerText = item.name;
+            document.getElementById('modalPrice').innerText = item.price;
+
+            const traitsContainer = document.getElementById('modalTraits');
+            traitsContainer.innerHTML = '';
+            item.traits.forEach(t => {
+                traitsContainer.innerHTML += `<span class="bg-black/80 border border-momoGold/30 text-momoGold text-[10px] px-2 py-1 rounded-lg font-mono">${t}</span>`;
+            });
+
+            document.getElementById('inspectorModal').classList.remove('hidden');
+            document.getElementById('inspectorModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('inspectorModal').classList.remove('flex');
+            document.getElementById('inspectorModal').classList.add('hidden');
+        }
+
+        function executeSwap() {
+            shiCount += 50;
+            document.getElementById('shiCounter').innerText = shiCount.toFixed(2);
+            alert("Swap executed successfully! SHI* balance increased. LFG!");
+        }
+    </script>
+</body>
+</html>
