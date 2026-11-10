@@ -407,7 +407,7 @@
             }
         }
 
-        // --- 100% PURE LIVE FETCH: NO HARDCODED ARRAYS ALLOWED ---
+        // --- PURE LIVE FETCH ROUTED THROUGH LOCAL PROXY CONTENT STREAM ---
         async function fetchLiveUTXOs() {
             const wallet = document.getElementById('targetWallet369').value.trim() || "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG";
             document.getElementById('status369').innerText = "Status: Querying Live Blockchain via Baandoor Proxy (Port 8082)...";
@@ -419,22 +419,22 @@
                 
                 if (data && Array.isArray(data)) {
                     liveFetchedAssets = data.map(item => {
-                        const assetId = item.id || item.inscriptionId || item.txid || "unknown";
-                        const assetName = item.name || `Inscription #${assetId}`;
+                        const assetId = item.id || item.inscriptionId || item.txid || item.hash || "unknown";
+                        const assetName = item.name || item.title || `Inscription #${assetId}`;
                         const assetType = item.collection || (assetName.toLowerCase().includes('ape') ? 'Doge Ape' : (assetName.toLowerCase().includes('mfer') ? 'DoginaLMfers' : 'DogeBuds'));
                         return {
                             id: assetId,
                             name: assetName,
                             type: assetType,
-                            imgUrl: `https://doginals.com/content/${assetId}`,
-                            satoshis: item.satoshis || 42000000,
+                            imgUrl: `http://localhost:8082/api/content/${assetId}`,
+                            satoshis: item.satoshis || item.value || 42000000,
                             traits: item.traits || [assetType, 'Live On-Chain UTXO']
                         };
                     });
                     document.getElementById('status369').innerText = `[SUCCESS] Live Stream Synchronized: ${liveFetchedAssets.length} Assets Loaded from Chain.`;
                 } else {
                     liveFetchedAssets = [];
-                    document.getElementById('status369').innerText = "[-] Live stream returned no inscriptions for this wallet.";
+                    document.getElementById('status369').innerText = "[-] Live stream returned no inscriptions or invalid format.";
                 }
             } catch (err) {
                 liveFetchedAssets = [];
@@ -469,7 +469,7 @@
             const results = current369Filter === 'ALL' ? liveFetchedAssets : liveFetchedAssets.filter(i => i.type === current369Filter);
 
             if (results.length === 0) {
-                grid.innerHTML = `<div class="col-span-full p-6 text-center font-mono text-xs text-zinc-500">No live assets found or waiting for proxy synchronization. Click Refresh Index.</div>`;
+                grid.innerHTML = `<div class="col-span-full p-6 text-center font-mono text-xs text-zinc-500">No assets detected or proxy waiting for connection. Ensure baandoor.ps1 is active on port 8082.</div>`;
                 return;
             }
 
@@ -477,7 +477,7 @@
                 grid.innerHTML += `
                     <div class="glass-spatial p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between hover:border-momoLime transition-all">
                         <div class="w-full h-44 bg-zinc-950 rounded-xl overflow-hidden flex items-center justify-center border border-momoLime/30 relative group p-2 cursor-pointer" onclick="open369Modal('${item.id}')">
-                            <img src="${item.imgUrl}" class="w-full h-full object-contain nft-image-pixel" alt="${item.name}">
+                            <img src="${item.imgUrl}" class="w-full h-full object-contain nft-image-pixel" alt="${item.name}" onerror="this.src='https://doggy.market/api/content/${item.id}'">
                             <span class="absolute top-2 right-2 bg-momoLime text-black font-bold text-[9px] px-2 py-0.5 rounded-full z-10">${item.type}</span>
                             <span class="absolute bottom-2 left-2 bg-black/80 text-momoGold font-mono text-[9px] px-2 py-0.5 rounded border border-momoGold/30 z-10">#${item.id}</span>
                         </div>
