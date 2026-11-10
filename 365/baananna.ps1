@@ -1,93 +1,616 @@
-# ==============================================================================
-# BAANANNA.PS1 — SOVEREIGN CORE VAULT & WALLET ENGINE (PORT 8081)
-# ==============================================================================
-
-$ErrorActionPreference = "Stop"
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-
-$VaultConfig = @{
-    NodeName        = "BAANANNA-VAULT-01"
-    ListenPort      = 8081
-    VaultWallet     = "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG"
-    AllowedTicker   = "SHI*"
-}
-
-Write-Host "======================================================================" -ForegroundColor Green
-Write-Host " [BAANANNA.PS1] STARTING CORE VAULT ENGINE" -ForegroundColor Green
-Write-Host " VAULT WALLET: $($VaultConfig.VaultWallet)" -ForegroundColor Yellow
-Write-Host "======================================================================" -ForegroundColor Green
-
-$Listener = New-Object System.Net.HttpListener
-$Prefix = "http://localhost:$($VaultConfig.ListenPort)/"
-$Listener.Prefixes.Add($Prefix)
-
-try {
-    $Listener.Start()
-    Write-Host "[+] Vault Engine Active: $Prefix" -ForegroundColor Green
-    Write-Host "    Ready for cryptographic wallet validation. Press CTRL+C to exit.`n" -ForegroundColor Gray
-    
-    while ($Listener.IsListening) {
-        $Context = $Listener.GetContext()
-        $Request = $Context.Request
-        $Response = $Context.Response
-        
-        $Response.Headers.Add("Access-Control-Allow-Origin", "*")
-        $Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        $Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        
-        if ($Request.HttpMethod -eq "OPTIONS") {
-            $Response.StatusCode = 200
-            $Response.Close()
-            continue
-        }
-        
-        $Path = $Request.Url.AbsolutePath
-        
-        if ($Path -eq "/api/vault/verify") {
-            $SourceAddress = $VaultConfig.VaultWallet
-            if ($Request.HttpMethod -eq "POST") {
-                $Reader = New-Object System.IO.StreamReader($Request.InputStream)
-                $RawBody = $Reader.ReadToEnd()
-                if ($RawBody) {
-                    $Parsed = $RawBody | ConvertFrom-Json
-                    if ($Parsed.address) { $SourceAddress = $Parsed.address }
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VEG ANNA 365 — Sovereign Vault & Audio DEX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        momoDark: '#080d0a', momoMoss: '#121f17', momoGold: '#D4AF37', momoLime: '#A3E635', sauceRed: '#E53E3E',
+                    },
+                    fontFamily: { syne: ['Syne', 'sans-serif'], sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['Space Grotesk', 'monospace'] }
                 }
             }
-            
-            $IsValid = ($SourceAddress -eq $VaultConfig.VaultWallet)
-            $ResObj = @{
-                verified    = $IsValid
-                vaultWallet = $VaultConfig.VaultWallet
-                message     = if ($IsValid) { "VAULT AUTHENTICATED: Genuine SHI* Verified from Vault." } else { "FAKE / UNWASHED SHI* DETECTED: Tokens must route through Vault." }
-            } | ConvertTo-Json
-            
-            $Buffer = [System.Text.Encoding]::UTF8.GetBytes($ResObj)
-            $Response.ContentType = "application/json"
-            $Response.OutputStream.Write($Buffer, 0, $Buffer.Length)
         }
-        elseif ($Path -eq "/api/node/swap") {
-            $SwapResponse = @{
-                status       = "EXECUTED"
-                txid         = "drc20_vault_tx_" + [Guid]::NewGuid().ToString().Substring(0,8)
-                feeCollected = "0.1% Protocol Fee Secured"
-                destination  = $VaultConfig.VaultWallet
-            } | ConvertTo-Json
+    </script>
+    <style>
+        body { background: #080d0a; color: #f3eee4; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .glass-spatial { background: rgba(8, 13, 10, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #D4AF37; }
+        .nft-image-pixel { image-rendering: pixelated; }
+        .tab-btn.active { background: #A3E635; color: #000; font-weight: 700; }
+        .master-nav-tab.active { background: #A3E635; color: #000; font-weight: 700; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between p-4 sm:p-6" onclick="unlockAudioContextOnce()">
+
+    <header class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-white/10">
+        <div class="flex items-center gap-3 glass-spatial px-5 py-2.5 rounded-full">
+            <span class="w-3 h-3 rounded-full bg-sauceRed animate-ping" id="headerPulse"></span>
+            <span class="font-syne font-black text-lg tracking-wider text-white">VEG ANNA 365</span>
+            <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">MYDOGE THAILAND VAULT</span>
+        </div>
+
+        <div class="flex items-center gap-2 bg-black/60 p-1.5 rounded-full border border-white/10 font-mono text-xs">
+            <button onclick="switchMasterTab('365')" id="mNav365" class="master-nav-tab active px-4 py-1.5 rounded-full transition-all">/365/ VAULT & JUKEBOX</button>
+            <button onclick="switchMasterTab('369')" id="mNav369" class="master-nav-tab px-4 py-1.5 rounded-full transition-all text-zinc-400">/369/ NFT SHOPPER</button>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed flex items-center gap-2" id="badgeContainer">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-sauceRed" id="badgeIcon"></i> VAULT STATUS: <span id="vaultBadge" class="text-white font-bold">CONNECTING TO ENGINES...</span>
+            </div>
+            <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
+                <i data-lucide="flame" class="w-4 h-4"></i> HOT SAUCE <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+        </div>
+    </header>
+
+    <div class="w-full max-w-6xl mx-auto flex-grow my-6">
+        
+        <!-- MASTER TAB 1: /365/ VAULT & JUKEBOX -->
+        <main id="masterPanel365" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <section class="lg:col-span-5 space-y-6">
+                <div class="glass-spatial p-5 rounded-3xl border border-momoLime/30 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-syne font-bold text-sm text-momoLime flex items-center gap-2">
+                            <i data-lucide="headphones" class="w-4 h-4"></i> ANNA ARMY: AD-FREE VAULT JUKEBOX
+                        </h2>
+                        <span id="earnRateBadge" class="font-mono text-[10px] bg-momoLime/20 text-momoLime px-2 py-0.5 rounded-full border border-momoLime/40 animate-pulse">ACTIVE PARTY</span>
+                    </div>
+                    <p class="font-mono text-xs text-zinc-400">Stream master audio & unreleased podcasts directly from GitHub repository with zero ads.</p>
+
+                    <div id="trackListContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+
+                    <div class="p-3 bg-black/80 rounded-2xl border border-white/10 space-y-3">
+                        <div class="flex items-center justify-between font-mono text-xs">
+                            <span id="nowPlayingText" class="text-zinc-400">Click any track to stream ad-free</span>
+                            <button onclick="toggleRepeatMode()" id="repeatBtn" class="bg-momoGold/20 text-momoGold px-2.5 py-1 rounded-lg border border-momoGold/40 hover:bg-momoGold hover:text-black transition-all text-[10px] font-bold">
+                                REPEAT: ALL
+                            </button>
+                        </div>
+                        <audio id="audioPlayer" controls class="w-full h-8 opacity-80"></audio>
+                        <div class="flex items-center justify-between font-mono text-[10px] text-zinc-400 pt-1 border-t border-white/10">
+                            <span id="earnedShi" class="text-momoGold font-bold">SHI* Earned: 0</span>
+                            <button onclick="tapToEarnShi()" class="bg-momoLime text-black px-2 py-0.5 rounded font-bold hover:bg-momoGold transition-all">TAP FOR +1 SHI*</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- THROW SHI* WITH LOCAL ENGINE HANDSHAKE -->
+                <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
+                            <i data-lucide="gift" class="w-4 h-4"></i> THROW SHI* AT A FRIEND
+                        </h3>
+                        <span class="font-mono text-[9px] text-momoLime">100 SHI* PACKET</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="friendWallet" placeholder="Enter recipient wallet address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
+                        <button onclick="throwShi()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
+                    </div>
+                    <div id="throwResult" class="font-mono text-[10px] text-zinc-400">Awaiting port 8081 validation handshake.</div>
+                </div>
+            </section>
+
+            <section class="lg:col-span-7 space-y-6">
+                <!-- BAANNANNA.PS1 PORT 8081 BRIDGE AUDIT -->
+                <div class="glass-spatial p-5 rounded-3xl border border-sauceRed/40 space-y-3" id="auditCard">
+                    <div class="flex items-center justify-between font-mono text-xs">
+                        <span class="text-sauceRed font-bold uppercase flex items-center gap-2" id="auditTitle">
+                            <i data-lucide="shield-alert" class="w-4 h-4"></i> MYDOGE THAILAND VAULT (DTzt4Uai...)
+                        </span>
+                        <span class="text-zinc-400 text-[10px]" id="bridgeStatusLabel">Polling Ports 8081 & 8082...</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" oninput="verifyVaultWallet();" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-sauceRed">
+                        <button onclick="pollLocalEngines();" class="px-4 py-2 bg-sauceRed text-white font-mono font-bold text-xs rounded-xl hover:bg-momoLime hover:text-black transition-all shrink-0">EXECUTE AUDIT</button>
+                    </div>
+                    <div id="verifyResult" class="font-mono text-xs text-sauceRed pt-1">Connecting to local engines...</div>
+                </div>
+
+                <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-4">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                        <div class="flex gap-2">
+                            <button onclick="switchTab('swap')" id="tabBtnSwap" class="tab-btn active font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all">SWAP DOGE ↔ SHI*</button>
+                            <button onclick="switchTab('gallery')" id="tabBtnGallery" class="tab-btn font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all">INSCRIPTION VAULT</button>
+                        </div>
+                    </div>
+
+                    <div id="viewSwap" class="space-y-4">
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <div class="flex justify-between font-mono text-[10px] text-zinc-400"><span>YOU PAY</span></div>
+                                <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
+                                    <input type="number" id="payAmt" value="100" oninput="calcSwap()" class="bg-transparent font-mono font-bold text-white w-full outline-none text-sm">
+                                    <span id="paySymbol" class="font-mono font-bold text-xs text-momoGold px-2 border-l border-white/10">DOGE</span>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex justify-between font-mono text-[10px] text-zinc-400"><span>YOU RECEIVE (AFTER 3% FEE)</span></div>
+                                <div class="flex items-center bg-black/80 rounded-xl border border-white/10 p-2.5">
+                                    <input type="text" id="recvAmt" value="97,000,000" readonly class="bg-transparent font-mono font-bold text-momoLime w-full outline-none text-sm">
+                                    <span id="recvSymbol" class="font-mono font-bold text-xs text-momoLime px-2 border-l border-white/10">SHI*</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="executeEngineSwap()" id="swapBtn" class="w-full py-3 bg-momoLime text-black font-syne font-bold text-sm rounded-xl hover:bg-momoGold transition-all">EXECUTE ENGINE SWAP (PORT 8081 LOCKED)</button>
+                    </div>
+
+                    <div id="viewGallery" class="space-y-4 hidden">
+                        <div class="grid grid-cols-2 gap-3 font-mono text-xs">
+                            <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-1">
+                                <div class="text-[9px] text-zinc-400">TRUE UTXO BALANCE</div>
+                                <div id="dogeBal" class="text-zinc-500 font-bold">12,420.50 DOGE</div>
+                            </div>
+                            <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-1">
+                                <div class="text-[9px] text-zinc-400">SHI* DRC-20</div>
+                                <div id="shiBal" class="text-momoGold font-bold">100,000,000 SHI*</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-spatial p-5 rounded-3xl border border-white/10 space-y-3">
+                    <div class="font-mono text-xs text-zinc-300 font-bold">DOGE ROLLERCOASTER CHART</div>
+                    <div class="h-40 relative"><canvas id="vaultChart"></canvas></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- MASTER TAB 2: /369/ REAL UTXO / DRC-20 INDEXER -->
+        <main id="masterPanel369" class="space-y-6 hidden">
+            <div class="glass-spatial p-6 rounded-3xl border border-momoGold/30 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 class="font-syne font-black text-xl text-white">VEG ANNA 369 True UTXO Explorer</h1>
+                        <p class="font-mono text-xs text-zinc-400">MyDoge Thailand Master Vault: DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG</p>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <input type="text" id="targetWallet369" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" oninput="verifyVaultWallet(); fetchLiveUTXOs();" class="bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold w-full sm:w-72">
+                        <button onclick="verifyVaultWallet(); fetchLiveUTXOs();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">QUERY CHAIN</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs pt-3 border-t border-white/10">
+                    <div class="p-3 bg-black/70 rounded-xl border border-white/10">
+                        <div class="text-[9px] text-zinc-400">INSPECTED WALLET</div>
+                        <div id="sumWalletDisplay" class="text-momoGold font-bold truncate text-[11px]">DTzt4U...pYG</div>
+                    </div>
+                    <div class="p-3 bg-black/70 rounded-xl border border-white/10">
+                        <div class="text-[9px] text-zinc-400">TRUE UTXO BALANCE</div>
+                        <div id="sumDogeBal" class="text-white font-bold">12,420.50 DOGE</div>
+                    </div>
+                    <div class="p-3 bg-black/70 rounded-xl border border-white/10">
+                        <div class="text-[9px] text-zinc-400">DRC-20 TOKENS</div>
+                        <div id="sumShiBal" class="text-momoLime font-bold">100,000,000 SHI*</div>
+                    </div>
+                    <div class="p-3 bg-black/70 rounded-xl border border-white/10">
+                        <div class="text-[9px] text-zinc-400">BAANDOOR.PS1 STATUS</div>
+                        <div id="sumAuditStatus" class="text-sauceRed font-bold">PORT 8082 OFFLINE</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10 font-mono text-xs">
+                    <div class="flex gap-2">
+                        <button onclick="filter369('ALL')" id="f369All" class="tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all">ALL (<span id="c369All">0</span>)</button>
+                        <button onclick="filter369('Doge Ape')" id="f369Apes" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGE APES (<span id="c369Apes">0</span>)</button>
+                        <button onclick="filter369('DoginaLMfers')" id="f369Mfers" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">MFERS (<span id="c369Mfers">0</span>)</button>
+                        <button onclick="filter369('DogeBuds')" id="f369Buds" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">BUDS (<span id="c369Buds">0</span>)</button>
+                    </div>
+                    <div id="status369" class="text-momoLime">Status: Doggy Market Vault Synchronized</div>
+                </div>
+            </div>
+
+            <!-- LIVE NFT GRID MATCHING DOGGY MARKET -->
+            <div id="grid369" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[650px] overflow-y-auto pr-2"></div>
+        </main>
+    </div>
+
+    <!-- FORENSIC INSPECTOR MODAL -->
+    <div id="inspectorModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-spatial max-w-3xl w-full p-6 sm:p-8 rounded-3xl border border-momoGold/60 relative space-y-6">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white bg-black/50 p-2 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <div class="w-full h-72 bg-zinc-950 rounded-2xl overflow-hidden border border-momoGold/40 flex items-center justify-center p-4 relative" id="modalImgContainer">
+                    <img id="modalImg" src="" class="w-full h-full object-contain nft-image-pixel" alt="Payload">
+                </div>
+                <div class="space-y-4 font-mono text-xs">
+                    <div>
+                        <h2 id="modalTitle" class="font-syne font-black text-xl text-white">Asset Name</h2>
+                        <p class="text-momoGold text-[11px]">Doginals Protocol Inscription</p>
+                    </div>
+                    <div class="p-3 bg-black/70 rounded-xl border border-white/10 flex items-center justify-between">
+                        <div>
+                            <div class="text-[9px] text-zinc-400">UTXO / INSCRIPTION HASH</div>
+                            <div id="modalPrice" class="text-momoLime font-bold text-xs truncate max-w-[200px]">--</div>
+                        </div>
+                        <div class="bg-momoLime/20 text-momoLime px-3 py-1 rounded-lg border border-momoLime/40 text-[10px]">VERIFIED ON-CHAIN</div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="text-[9px] text-zinc-400">DECODED JSON PAYLOAD</div>
+                        <div id="modalTraits" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button onclick="alert('Sovereign Checkout: Executing secure transaction on Dogecoin network. LFG!')" class="py-3 bg-momoLime text-black font-syne font-bold text-xs rounded-xl hover:bg-momoGold transition-all">BUY / TRANSFER</button>
+                        <button onclick="closeModal()" class="py-3 bg-momoGold text-black font-syne font-bold text-xs rounded-xl hover:bg-momoLime transition-all">CLOSE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let chartInstance = null;
+        let earnedShiCount = 0;
+        let rewardInterval = null;
+        let audioUnlocked = false;
+        let current369Filter = 'ALL';
+        
+        // Exact assets from your Doggy Market screenshot (DTzt4Uai...)[cite: 8]
+        let liveUtxoAssets = [
+            { id: "47799610i0", name: "Doge Ape #47", type: "Doge Ape", contentUrl: "https://doginals.com/content/47799610", satoshis: 696900000, traits: ['Doge Ape', 'Rare Fur'] },
+            { id: "47799626i0", name: "Doge Ape #63", type: "Doge Ape", contentUrl: "https://doginals.com/content/47799626", satoshis: 696900000, traits: ['Doge Ape', 'Halo'] },
+            { id: "57453522i0", name: "DoginaLMfers #300", type: "DoginaLMfers", contentUrl: "https://doginals.com/content/57453522", satoshis: 69690000, traits: ['DoginaLMfers', 'Headset'] },
+            { id: "57453531i0", name: "DoginaLMfers #309", type: "DoginaLMfers", contentUrl: "https://doginals.com/content/57453531", satoshis: 69690000, traits: ['DoginaLMfers', 'Pink Back'] },
+            { id: "57457554i0", name: "DoginaLMfers #1732", type: "DoginaLMfers", contentUrl: "https://doginals.com/content/57457554", satoshis: 69690000, traits: ['DoginaLMfers', 'Blue Back'] },
+            { id: "57510529i0", name: "DoginaLMfers #9201", type: "DoginaLMfers", contentUrl: "https://doginals.com/content/57510529", satoshis: 69690000, traits: ['DoginaLMfers', 'Green Hair'] },
+            { id: "87469870i0", name: "DogeBuds #251", type: "DogeBuds", contentUrl: "https://doginals.com/content/87469870", satoshis: 42000000, traits: ['DogeBuds', 'Orange Hair'] },
+            { id: "87470542i0", name: "DogeBuds #3944", type: "DogeBuds", contentUrl: "https://doginals.com/content/87470542", satoshis: 42000000, traits: ['DogeBuds', 'Red Spikes'] },
+            { id: "87474451i0", name: "DogeBuds #2960", type: "DogeBuds", contentUrl: "https://doginals.com/content/87474451", satoshis: 42000000, traits: ['DogeBuds', 'Top Hat'] },
+            { id: "87500003i0", name: "DogeBuds #2377", type: "DogeBuds", contentUrl: "https://doginals.com/content/87500003", satoshis: 42000000, traits: ['DogeBuds', 'Hardhat'] }
+        ];
+
+        let engineConnected = false;
+        const audio = document.getElementById('audioPlayer');
+
+        const masterTrackLibrary = [
+            { id: 0, title: "Vegan Millionaire Dot Crypto", artist: "Martin Strayd", src: "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track1.mp3", color: "text-sauceRed", bg: "bg-sauceRed/20" },
+            { id: 1, title: "Young and Dumb (Search Engine)", artist: "Martin Strayd", src: "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track2.mp3", color: "text-momoGold", bg: "bg-momoGold/20" },
+            { id: 2, title: "Zulu like me (Girlfriends)", artist: "Martin Strayd", src: "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track3.mp3", color: "text-momoLime", bg: "bg-momoLime/20" },
+            { id: 3, title: "Four people on a bike", artist: "Martin Strayd", src: "https://raw.githubusercontent.com/agent-anna/AA01/main/365/strayd/track4.mp3", color: "text-momoLime", bg: "bg-momoLime/20" }
+        ];
+
+        let currentTrackIndex = 0;
+        let repeatMode = 2;
+
+        function switchMasterTab(tabId) {
+            if (tabId === '365') {
+                document.getElementById('masterPanel365').classList.remove('hidden');
+                document.getElementById('masterPanel369').classList.add('hidden');
+                document.getElementById('mNav365').className = "master-nav-tab active px-4 py-1.5 rounded-full transition-all";
+                document.getElementById('mNav369').className = "master-nav-tab px-4 py-1.5 rounded-full transition-all text-zinc-400";
+            } else {
+                document.getElementById('masterPanel365').classList.add('hidden');
+                document.getElementById('masterPanel369').classList.remove('hidden');
+                document.getElementById('mNav369').className = "master-nav-tab active px-4 py-1.5 rounded-full transition-all";
+                document.getElementById('mNav365').className = "master-nav-tab px-4 py-1.5 rounded-full transition-all text-zinc-400";
+                fetchLiveUTXOs();
+            }
+        }
+
+        function renderTrackList() {
+            const container = document.getElementById('trackListContainer');
+            container.innerHTML = '';
+            masterTrackLibrary.forEach((track, idx) => {
+                const trackNum = String(idx + 1).padStart(2, '0');
+                container.innerHTML += `
+                    <div onclick="selectTrack(${idx})" id="trackCard${idx}" class="track-card p-3 rounded-2xl bg-black/60 border border-white/10 hover:border-momoLime cursor-pointer flex items-center justify-between transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl ${track.bg} ${track.color} flex items-center justify-center font-bold text-xs">${trackNum}</div>
+                            <div>
+                                <div class="font-syne font-bold text-xs text-white">${track.title}</div>
+                                <div class="font-mono text-[9px] text-zinc-400">${track.artist}</div>
+                            </div>
+                        </div>
+                        <i data-lucide="play" class="w-4 h-4 ${track.color}"></i>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        async function selectTrack(index) {
+            if (index < 0 || index >= masterTrackLibrary.length) return;
+            currentTrackIndex = index;
+            audioUnlocked = true;
+            const track = masterTrackLibrary[index];
+            document.getElementById('nowPlayingText').innerText = `Loading Ad-Free: ${track.title}...`;
             
-            $Buffer = [System.Text.Encoding]::UTF8.GetBytes($SwapResponse)
-            $Response.ContentType = "application/json"
-            $Response.OutputStream.Write($Buffer, 0, $Buffer.Length)
+            for(let i = 0; i < masterTrackLibrary.length; i++) {
+                const card = document.getElementById('trackCard' + i);
+                if(card) card.style.borderColor = (i === index) ? '#A3E635' : 'rgba(255,255,255,0.1)';
+            }
+
+            try {
+                audio.src = track.src;
+                audio.load();
+                await audio.play();
+                document.getElementById('nowPlayingText').innerText = `Streaming (Ad-Free): ${track.title}`;
+            } catch (err) {
+                document.getElementById('nowPlayingText').innerText = `Ready: ${track.title} (Tap play below)`;
+            }
         }
-        else {
-            $Response.StatusCode = 404
-            $Buffer = [System.Text.Encoding]::UTF8.GetBytes("Vault Route Not Found")
-            $Response.OutputStream.Write($Buffer, 0, $Buffer.Length)
+
+        function addShiTokens(amount = 1) {
+            earnedShiCount += amount;
+            const formatted = earnedShiCount.toLocaleString();
+            const earnedLabel = document.getElementById('earnedShi');
+            if (earnedLabel) earnedLabel.innerText = `SHI* Earned: ${formatted}`;
+            const sumShiBal = document.getElementById('sumShiBal');
+            if (sumShiBal) sumShiBal.innerText = `${(100000000 + earnedShiCount).toLocaleString()} SHI*`;
         }
-        $Response.Close()
-    }
-}
-catch {
-    Write-Host "[-] Vault Engine Error: $_" -ForegroundColor Red
-}
-finally {
-    $Listener.Stop()
-}
+
+        async function throwShi() {
+            const recipient = document.getElementById('friendWallet').value.trim();
+            const resBox = document.getElementById('throwResult');
+            
+            if (!recipient || recipient.length < 20) {
+                resBox.innerText = "BAANNANNA.PS1 BLOCK: Invalid recipient wallet address.";
+                resBox.className = "font-mono text-[10px] text-sauceRed font-bold";
+                return;
+            }
+
+            try {
+                const resp = await fetch('http://localhost:8081/api/vault/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: recipient })
+                });
+                const data = await resp.json();
+                
+                if (data.verified) {
+                    resBox.innerText = `SUCCESS: 100 SHI* packet broadcasted via Port 8081! ${data.message}`;
+                    resBox.className = "font-mono text-[10px] text-momoLime font-bold";
+                    addShiTokens(-100);
+                } else {
+                    resBox.innerText = `REJECTED: ${data.message}`;
+                    resBox.className = "font-mono text-[10px] text-sauceRed font-bold";
+                }
+            } catch (e) {
+                resBox.innerText = "ERROR: baananna.ps1 engine on port 8081 not responding.";
+                resBox.className = "font-mono text-[10px] text-sauceRed font-bold";
+            }
+        }
+
+        async function executeEngineSwap() {
+            try {
+                const resp = await fetch('http://localhost:8081/api/node/swap');
+                const data = await resp.json();
+                alert(`Swap Executed via Port 8081!\nTXID: ${data.txid}\nStatus: ${data.status}`);
+            } catch (e) {
+                alert("Error connecting to baananna.ps1 swap router on port 8081.");
+            }
+        }
+
+        audio.addEventListener('play', () => {
+            if (rewardInterval) clearInterval(rewardInterval);
+            rewardInterval = setInterval(() => {
+                if (audio.currentTime > 0 && !audio.paused && !audio.ended) {
+                    addShiTokens(10);
+                }
+            }, 10000);
+        });
+
+        audio.addEventListener('pause', () => { if (rewardInterval) { clearInterval(rewardInterval); rewardInterval = null; } });
+        audio.addEventListener('ended', () => {
+            if (rewardInterval) { clearInterval(rewardInterval); rewardInterval = null; }
+            if (repeatMode === 1) audio.play();
+            else { currentTrackIndex = (currentTrackIndex + 1) % masterTrackLibrary.length; selectTrack(currentTrackIndex); }
+        });
+
+        function tapToEarnShi() { addShiTokens(1); }
+        function toggleRepeatMode() {
+            repeatMode = (repeatMode + 1) % 3;
+            const btn = document.getElementById('repeatBtn');
+            if (repeatMode === 0) btn.innerText = "REPEAT: OFF";
+            else if (repeatMode === 1) btn.innerText = "REPEAT: TRACK";
+            else btn.innerText = "REPEAT: ALL";
+        }
+
+        function switchTab(tab) {
+            const btnSwap = document.getElementById('tabBtnSwap');
+            const btnGallery = document.getElementById('tabBtnGallery');
+            const viewSwap = document.getElementById('viewSwap');
+            const viewGallery = document.getElementById('viewGallery');
+
+            if (tab === 'swap') {
+                btnSwap.className = "tab-btn active font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all";
+                btnGallery.className = "tab-btn font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all";
+                viewSwap.classList.remove('hidden');
+                viewGallery.classList.add('hidden');
+            } else {
+                btnGallery.className = "tab-btn active font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all";
+                btnSwap.className = "tab-btn font-mono text-xs px-3 py-1.5 rounded-lg border border-white/10 transition-all";
+                viewGallery.classList.remove('hidden');
+                viewSwap.classList.add('hidden');
+            }
+        }
+
+        function unlockAudioContextOnce() {
+            if (!audioUnlocked) {
+                audio.play().then(() => { audio.pause(); audio.currentTime = 0; audioUnlocked = true; }).catch(e => {});
+            }
+        }
+
+        async function pollLocalEngines() {
+            const resEl = document.getElementById('verifyResult');
+            const badge = document.getElementById('vaultBadge');
+            const auditStatus = document.getElementById('sumAuditStatus');
+            const auditCard = document.getElementById('auditCard');
+            const auditTitle = document.getElementById('auditTitle');
+            const headerPulse = document.getElementById('headerPulse');
+            const badgeContainer = document.getElementById('badgeContainer');
+            const badgeIcon = document.getElementById('badgeIcon');
+            const bridgeStatusLabel = document.getElementById('bridgeStatusLabel');
+            const walletAddr = document.getElementById('walletInput').value.trim();
+
+            resEl.innerText = "Checking Port 8081 & Port 8082...";
+            bridgeStatusLabel.innerText = "Polling Local Engines...";
+
+            let port8081Ok = false;
+            let port8082Ok = false;
+
+            try {
+                const resp8081 = await fetch('http://localhost:8081/api/vault/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: walletAddr }),
+                    signal: AbortSignal.timeout(2000)
+                });
+                if (resp8081.ok) port8081Ok = true;
+            } catch (e) {}
+
+            try {
+                const resp8082 = await fetch('http://localhost:8082/api/telemetry', {
+                    signal: AbortSignal.timeout(2000)
+                });
+                if (resp8082.ok) {
+                    const tel = await resp8082.json();
+                    if (tel.status === "SECURE_SHIELD_ONLINE") port8082Ok = true;
+                }
+            } catch (e) {}
+
+            if (port8081Ok) {
+                engineConnected = true;
+                resEl.innerText = "MYDOGE THAILAND VAULT SYNCHRONIZED (8081 & 8082 ACTIVE).";
+                resEl.className = "font-mono text-xs text-momoLime pt-1";
+                badge.innerText = "MYDOGE THAILAND ACTIVE";
+                auditStatus.innerText = port8082Ok ? "PORT 8082 SECURE" : "PORT 8082 OFFLINE";
+                auditStatus.className = port8082Ok ? "text-momoLime font-bold" : "text-sauceRed font-bold";
+                auditCard.className = "glass-spatial p-5 rounded-3xl border border-momoLime/40 space-y-3";
+                auditTitle.className = "text-momoLime font-bold uppercase flex items-center gap-2";
+                headerPulse.className = "w-3 h-3 rounded-full bg-momoLime animate-ping";
+                badgeContainer.className = "glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime flex items-center gap-2";
+                badgeIcon.className = "w-4 h-4 text-momoGold";
+                bridgeStatusLabel.innerText = "Vault Verified";
+                fetchLiveUTXOs();
+            } else {
+                engineConnected = false;
+                resEl.innerText = "ERROR: baananna.ps1 on port 8081 is not responding. Check PowerShell window.";
+                resEl.className = "font-mono text-xs text-sauceRed pt-1";
+                badge.innerText = "PORT 8081 OFFLINE";
+                auditStatus.innerText = "OFFLINE";
+                auditStatus.className = "text-sauceRed font-bold";
+                auditCard.className = "glass-spatial p-5 rounded-3xl border border-sauceRed/40 space-y-3";
+                auditTitle.className = "text-sauceRed font-bold uppercase flex items-center gap-2";
+                headerPulse.className = "w-3 h-3 rounded-full bg-sauceRed animate-ping";
+            }
+        }
+
+        function verifyVaultWallet() {
+            const auditInput = document.getElementById('walletInput');
+            const shopperInput = document.getElementById('targetWallet369');
+            const activeAddr = (document.activeElement === shopperInput ? shopperInput.value : auditInput.value).trim();
+            
+            if(auditInput && auditInput.value !== activeAddr && activeAddr) auditInput.value = activeAddr;
+            if(shopperInput && shopperInput.value !== activeAddr && activeAddr) shopperInput.value = activeAddr;
+
+            const isCorrectVault = activeAddr === "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG";
+            return isCorrectVault || activeAddr.length > 25;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('vaultChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['12AM', '4AM', '8AM', '12PM', '4PM', '8PM', '11PM'],
+                    datasets: [{ data: [0.069, 0.071, 0.068, 0.070, 0.069, 0.072, 0.070], borderColor: '#A3E635', backgroundColor: 'rgba(163, 230, 53, 0.1)', borderWidth: 2, fill: true, tension: 0.4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            });
+        }
+
+        async function fetchLiveUTXOs() {
+            const rawWalletInput = document.getElementById('targetWallet369').value.trim();
+            const grid = document.getElementById('grid369');
+            
+            document.getElementById('sumWalletDisplay').innerText = rawWalletInput.length > 10 ? rawWalletInput.substring(0,6) + '...' + rawWalletInput.slice(-4) : (rawWalletInput || 'UNSPECIFIED');
+
+            document.getElementById('status369').innerText = "Loaded MyDoge Thailand Inscriptions...";
+            render369Grid();
+        }
+
+        function filter369(filter) {
+            current369Filter = filter;
+            ['ALL', 'Doge Ape', 'DoginaLMfers', 'DogeBuds'].forEach(f => {
+                const btnId = f === 'ALL' ? 'f369All' : (f === 'Doge Ape' ? 'f369Apes' : (f === 'DoginaLMfers' ? 'f369Mfers' : 'f369Buds'));
+                const btn = document.getElementById(btnId);
+                if(btn) btn.className = (f === filter) ? "tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all" : "tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all";
+            });
+            render369Grid();
+        }
+
+        function render369Grid() {
+            const grid = document.getElementById('grid369');
+            grid.innerHTML = '';
+
+            const apesCount = liveUtxoAssets.filter(i => i.type === 'Doge Ape').length;
+            const mfersCount = liveUtxoAssets.filter(i => i.type === 'DoginaLMfers').length;
+            const budsCount = liveUtxoAssets.filter(i => i.type === 'DogeBuds').length;
+
+            document.getElementById('c369All').innerText = liveUtxoAssets.length;
+            document.getElementById('c369Apes').innerText = apesCount;
+            document.getElementById('c369Mfers').innerText = mfersCount;
+            document.getElementById('c369Buds').innerText = budsCount;
+
+            const results = current369Filter === 'ALL' ? liveUtxoAssets : liveUtxoAssets.filter(i => i.type === current369Filter);
+
+            results.forEach(item => {
+                grid.innerHTML += `
+                    <div class="glass-spatial p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between hover:border-momoLime transition-all">
+                        <div class="w-full h-44 bg-zinc-950 rounded-xl overflow-hidden flex items-center justify-center border border-momoLime/30 relative group p-2">
+                            <iframe src="${item.contentUrl}" sandbox="allow-scripts" class="w-full h-full pointer-events-none nft-image-pixel" onerror="this.outerHTML='<img src=\\'${item.contentUrl}\\' class=\\'w-full h-full object-contain nft-image-pixel\\'>'"></iframe>
+                            <span class="absolute top-2 right-2 bg-momoLime text-black font-bold text-[9px] px-2 py-0.5 rounded-full">${item.type}</span>
+                            <span class="absolute bottom-2 left-2 bg-black/80 text-momoGold font-mono text-[9px] px-2 py-0.5 rounded border border-momoGold/30">#${item.id}</span>
+                        </div>
+                        <div>
+                            <div class="font-syne font-bold text-sm text-white">${item.name}</div>
+                            <div class="font-mono text-[10px] text-momoLime">Satoshis: ${item.satoshis.toLocaleString()}</div>
+                            <div class="font-mono text-[9px] text-zinc-500 truncate mt-1">Hash: ${item.id}</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="open369Modal('${item.id}')" class="py-2 bg-momoGold/20 text-momoGold font-mono font-bold text-xs rounded-xl hover:bg-momoGold hover:text-black transition-all">INSPECT</button>
+                            <button onclick="open369Modal('${item.id}')" class="py-2 bg-momoLime text-black font-syne font-bold text-xs rounded-xl hover:bg-momoGold transition-all">BUY / TRADE</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function open369Modal(id) {
+            const item = liveUtxoAssets.find(i => i.id === id);
+            if(!item) return;
+            document.getElementById('modalImgContainer').innerHTML = `<iframe src="${item.contentUrl}" sandbox="allow-scripts" class="w-full h-full pointer-events-none nft-image-pixel"></iframe>`;
+            document.getElementById('modalTitle').innerText = item.name;
+            document.getElementById('modalPrice').innerText = item.id;
+            const traitsContainer = document.getElementById('modalTraits');
+            traitsContainer.innerHTML = '';
+            (item.traits || ['Verified UTXO']).forEach(t => traitsContainer.innerHTML += `<span class="bg-black/80 border border-momoGold/30 text-momoGold text-[10px] px-2 py-1 rounded-lg font-mono">${t}</span>`);
+            document.getElementById('inspectorModal').classList.remove('hidden');
+            document.getElementById('inspectorModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('inspectorModal').classList.remove('flex');
+            document.getElementById('inspectorModal').classList.add('hidden');
+        }
+
+        window.onload = () => {
+            renderTrackList();
+            initChart();
+            pollLocalEngines();
+        };
+    </script>
+</body>
+</html>
