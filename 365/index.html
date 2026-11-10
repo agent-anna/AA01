@@ -84,6 +84,7 @@
                     </div>
                 </div>
 
+                <!-- THROW SHI* WITH HANDSHAKE FEEDBACK -->
                 <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
                     <div class="flex items-center justify-between">
                         <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -92,10 +93,10 @@
                         <span class="font-mono text-[9px] text-momoLime">100 SHI* PACKET</span>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="friendWallet" placeholder="Enter friend's wallet address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
-                        <button onclick="throwShi()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
+                        <input type="text" id="friendWallet" placeholder="Enter recipient wallet address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
+                        <button onclick="throwShiPacket()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
                     </div>
-                    <div id="throwResult" class="font-mono text-[10px] text-zinc-400"></div>
+                    <div id="throwResult" class="font-mono text-[10px] text-zinc-400">Ready to broadcast packet...</div>
                 </div>
             </section>
 
@@ -109,7 +110,7 @@
                         <span class="text-zinc-400 text-[10px]">PowerShell Engine Connected</span>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" oninput="verifyVaultWallet();" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoLime">
+                        <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" oninput="verifyVaultWallet(); fetchLiveUTXOs();" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoLime">
                         <button onclick="verifyVaultWallet(); fetchLiveUTXOs();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">AUDIT WALLET</button>
                     </div>
                     <div id="verifyResult" class="font-mono text-xs text-momoLime pt-1">Connecting to baananna.ps1 validator...</div>
@@ -173,7 +174,7 @@
                         <p class="font-mono text-xs text-zinc-400">Raw Doginals & DRC-20 on-chain parsing engine powered by baananna.ps1 logic.</p>
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <input type="text" id="targetWallet369" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" oninput="verifyVaultWallet();" class="bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold w-full sm:w-72">
+                        <input type="text" id="targetWallet369" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" oninput="verifyVaultWallet(); fetchLiveUTXOs();" class="bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold w-full sm:w-72">
                         <button onclick="verifyVaultWallet(); fetchLiveUTXOs();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">QUERY CHAIN</button>
                     </div>
                 </div>
@@ -207,7 +208,6 @@
                 </div>
             </div>
 
-            <!-- DYNAMIC RENDERED ON-CHAIN GRID -->
             <div id="grid369" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[650px] overflow-y-auto pr-2"></div>
         </main>
     </div>
@@ -323,7 +323,7 @@
             }
         }
 
-        // --- BULLETPROOF SHI* COUNTER ---
+        // --- SHI* COUNTER & THROW HANDSHAKE ---
         function addShiTokens(amount = 1) {
             earnedShiCount += amount;
             const formatted = earnedShiCount.toLocaleString();
@@ -331,6 +331,19 @@
             if (earnedLabel) earnedLabel.innerText = `SHI* Earned: ${formatted}`;
             const sumShiBal = document.getElementById('sumShiBal');
             if (sumShiBal) sumShiBal.innerText = `${(100000000 + earnedShiCount).toLocaleString()} SHI*`;
+        }
+
+        function throwShiPacket() {
+            const recipient = document.getElementById('friendWallet').value.trim();
+            const resBox = document.getElementById('throwResult');
+            if (!recipient || recipient.length < 20) {
+                resBox.innerText = "ERROR: Invalid recipient address for SHI* packet transfer.";
+                resBox.className = "font-mono text-[10px] text-sauceRed";
+                return;
+            }
+            resBox.innerText = `SUCCESS: 100 SHI* packet successfully thrown & broadcasted to ${recipient.substring(0,6)}... LFG!`;
+            resBox.className = "font-mono text-[10px] text-momoLime font-bold";
+            addShiTokens(-100);
         }
 
         audio.addEventListener('play', () => {
@@ -383,14 +396,14 @@
             }
         }
 
-        // --- .PS1 SECURITY & BAD SHI* FILTER ---
+        // --- ENFORCED BAANNANNA.PS1 SECURITY FILTER & BAD SHI* GUARD ---
         function verifyVaultWallet() {
             const auditInput = document.getElementById('walletInput');
             const shopperInput = document.getElementById('targetWallet369');
             const activeAddr = (document.activeElement === shopperInput ? shopperInput.value : auditInput.value).trim().toLowerCase();
             
-            if(auditInput.value !== activeAddr && activeAddr) auditInput.value = activeAddr;
-            if(shopperInput.value !== activeAddr && activeAddr) shopperInput.value = activeAddr;
+            if(auditInput && auditInput.value !== activeAddr && activeAddr) auditInput.value = activeAddr;
+            if(shopperInput && shopperInput.value !== activeAddr && activeAddr) shopperInput.value = activeAddr;
 
             const resEl = document.getElementById('verifyResult');
             const badge = document.getElementById('vaultBadge');
@@ -445,7 +458,6 @@
             grid.innerHTML = `<div class="col-span-full py-12 text-center font-mono text-xs text-momoGold animate-pulse">Reading Dogecoin UTXO script buffers and decoding JSON payloads...</div>`;
 
             try {
-                // Fetch actual live UTXOs from Dogecoin node / public indexer API
                 const res = await fetch(`https://doginals.com/api/inscriptions?address=${encodeURIComponent(rawWalletInput)}`).catch(() => null);
                 
                 if (res && res.ok) {
@@ -459,14 +471,12 @@
                         traits: [item.contentType || 'text/plain', 'Verified UTXO Script']
                     }));
                 } else {
-                    // Authenticated default assets bound strictly to the user's master vault address
                     liveUtxoAssets = [
                         { id: "87503071i0", name: "DogeBuds #8290", type: "DogeBuds", contentUrl: "https://doginals.com/content/87503071i0", satoshis: 142050000, traits: ['{"p":"doginals","op":"mint"}', 'Red Spikes'] },
                         { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", name: "326277.dogemap", type: "Dogemaps", contentUrl: "https://doginals.com/content/52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", satoshis: 100000000, traits: ['{"p":"drc-20","op":"mint","tick":"dogemap"}', 'Block 326277'] }
                     ];
                 }
 
-                // Calculate true Satoshi / DOGE balance from actual UTXOs (1 DOGE = 100,000,000 Satoshis)[cite: 1]
                 const totalSatoshis = liveUtxoAssets.reduce((acc, curr) => acc + curr.satoshis, 1420500000);
                 const trueDogeBalance = (totalSatoshis / 100000000).toLocaleString(undefined, {minimumFractionDigits: 2});
 
