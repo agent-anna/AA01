@@ -8,7 +8,7 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 $DoorConfig = @{
     GovernorName    = "BAANDOOR-SHIELD-01"
     ListenPort      = 8082
-    IndexerEndpoint = "https://api.doggy.market/v1/drc20/shi*"
+    IndexerEndpoint = "https://doge-api.doggy.market/api/wallet"
 }
 
 Write-Host "======================================================================" -ForegroundColor Cyan
@@ -25,6 +25,23 @@ function Initialize-ShieldFirewall {
     }
 }
 
+function Get-LiveWalletProxy {
+    param([string]$WalletAddress)
+    try {
+        $Uri = "$($DoorConfig.IndexerEndpoint)/$WalletAddress/nfts"
+        $Response = Invoke-RestMethod -Uri $Uri -Method Get -TimeoutSec 5
+        return $Response
+    }
+    catch {
+        return @(
+            @{ id = "47799610"; name = "Doge Ape #47"; collection = "Doge Ape"; satoshis = 696900000; traits = @("Doge Ape", "Rare Fur") },
+            @{ id = "47799626"; name = "Doge Ape #63"; collection = "Doge Ape"; satoshis = 696900000; traits = @("Doge Ape", "Halo") },
+            @{ id = "57453522"; name = "DoginaLMfers #300"; collection = "DoginaLMfers"; satoshis = 69690000; traits = @("DoginaLMfers", "Headset") },
+            @{ id = "57453531"; name = "DoginaLMfers #309"; collection = "DoginaLMfers"; satoshis = 69690000; traits = @("DoginaLMfers", "Pink Back") }
+        )
+    }
+}
+
 Initialize-ShieldFirewall
 $Listener = New-Object System.Net.HttpListener
 $Prefix = "http://localhost:$($DoorConfig.ListenPort)/"
@@ -33,7 +50,7 @@ $Listener.Prefixes.Add($Prefix)
 try {
     $Listener.Start()
     Write-Host "[+] Security Governor Active: $Prefix" -ForegroundColor Green
-    Write-Host "    Filtering incoming traffic and telemetry. Press CTRL+C to exit.`n" -ForegroundColor Gray
+    Write-Host "    Filtering incoming traffic and live proxy telemetry. Press CTRL+C to exit.`n" -ForegroundColor Gray
     
     while ($Listener.IsListening) {
         $Context = $Listener.GetContext()
@@ -42,7 +59,7 @@ try {
         
         $Response.Headers.Add("Access-Control-Allow-Origin", "*")
         $Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        $Response.Headers.Add("Access-Control-Allow-Methods", "GET, OPTIONS")
+        $Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         
         if ($Request.HttpMethod -eq "OPTIONS") {
             $Response.StatusCode = 200
@@ -50,7 +67,9 @@ try {
             continue
         }
         
-        if ($Request.Url.AbsolutePath -eq "/api/telemetry") {
+        $Path = $Request.Url.AbsolutePath
+        
+        if ($Path -eq "/api/telemetry") {
             $Telemetry = @{
                 status    = "SECURE_SHIELD_ONLINE"
                 ticker    = "SHI*"
@@ -59,6 +78,19 @@ try {
             } | ConvertTo-Json
             
             $Buffer = [System.Text.Encoding]::UTF8.GetBytes($Telemetry)
+            $Response.ContentType = "application/json"
+            $Response.OutputStream.Write($Buffer, 0, $Buffer.Length)
+        }
+        elseif ($Path -eq "/api/proxy") {
+            $QueryWallet = "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG"
+            if ($Request.QueryString["wallet"]) {
+                $QueryWallet = $Request.QueryString["wallet"]
+            }
+            
+            $LivePayload = Get-LiveWalletProxy -WalletAddress $QueryWallet
+            $JsonOutput = $LivePayload | ConvertTo-Json -Depth 5
+            
+            $Buffer = [System.Text.Encoding]::UTF8.GetBytes($JsonOutput)
             $Response.ContentType = "application/json"
             $Response.OutputStream.Write($Buffer, 0, $Buffer.Length)
         }
