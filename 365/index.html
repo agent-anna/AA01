@@ -33,7 +33,7 @@
 
     <header class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-white/10">
         <div class="flex items-center gap-3 glass-spatial px-5 py-2.5 rounded-full">
-            <span class="w-3 h-3 rounded-full bg-momoLime animate-ping"></span>
+            <span class="w-3 h-3 rounded-full bg-sauceRed animate-ping" id="headerPulse"></span>
             <span class="font-syne font-black text-lg tracking-wider text-white">VEG ANNA 365</span>
             <span class="font-mono text-[10px] text-momoGold tracking-widest border-l border-white/20 pl-3">SELF HELP INVESTMENT (SHI*)</span>
         </div>
@@ -44,8 +44,8 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <div class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-momoLime flex items-center gap-2">
-                <i data-lucide="shield-check" class="w-4 h-4 text-momoGold"></i> VAULT STATUS: <span id="vaultBadge" class="text-white font-bold">AUDITED & SECURE</span>
+            <div class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed flex items-center gap-2">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-sauceRed"></i> VAULT STATUS: <span id="vaultBadge" class="text-white font-bold">UNAUDITED / OFFLINE</span>
             </div>
             <a href="http://100mlcoolhotsauce.com" target="_blank" rel="noopener" class="glass-spatial px-4 py-2 rounded-full font-mono text-xs text-sauceRed font-bold flex items-center gap-2 hover:bg-sauceRed hover:text-white transition-all">
                 <i data-lucide="flame" class="w-4 h-4"></i> HOT SAUCE <i data-lucide="external-link" class="w-3 h-3"></i>
@@ -84,7 +84,7 @@
                     </div>
                 </div>
 
-                <!-- THROW SHI* WITH HANDSHAKE FEEDBACK -->
+                <!-- THROW SHI* REPAIRED HANDSHAKE -->
                 <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-3">
                     <div class="flex items-center justify-between">
                         <h3 class="font-syne font-bold text-xs text-momoGold flex items-center gap-2">
@@ -94,26 +94,26 @@
                     </div>
                     <div class="flex gap-2">
                         <input type="text" id="friendWallet" placeholder="Enter recipient wallet address..." class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoGold">
-                        <button onclick="throwShiPacket()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
+                        <button onclick="throwShi()" class="px-4 py-2 bg-momoGold text-black font-mono font-bold text-xs rounded-xl hover:bg-momoLime transition-all shrink-0">THROW SHI*</button>
                     </div>
-                    <div id="throwResult" class="font-mono text-[10px] text-zinc-400">Ready to broadcast packet...</div>
+                    <div id="throwResult" class="font-mono text-[10px] text-zinc-400">Awaiting local baananna.ps1 execution handshake.</div>
                 </div>
             </section>
 
             <section class="lg:col-span-7 space-y-6">
-                <!-- BAANNANNA.PS1 SECURE WALLET AUDIT -->
-                <div class="glass-spatial p-5 rounded-3xl border border-momoLime/40 space-y-3">
+                <!-- BAANNANNA.PS1 SECURE WALLET AUDIT (STARTS UNAUDITED) -->
+                <div class="glass-spatial p-5 rounded-3xl border border-sauceRed/40 space-y-3" id="auditCard">
                     <div class="flex items-center justify-between font-mono text-xs">
-                        <span class="text-momoLime font-bold uppercase flex items-center gap-2">
-                            <i data-lucide="shield-check" class="w-4 h-4"></i> BAANNANNA.PS1 ON-CHAIN VAULT AUDIT
+                        <span class="text-sauceRed font-bold uppercase flex items-center gap-2" id="auditTitle">
+                            <i data-lucide="shield-alert" class="w-4 h-4"></i> BAANNANNA.PS1 PENDING OFFLINE AUDIT
                         </span>
-                        <span class="text-zinc-400 text-[10px]">PowerShell Engine Connected</span>
+                        <span class="text-zinc-400 text-[10px]">Run baananna.ps1 locally</span>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" oninput="verifyVaultWallet(); fetchLiveUTXOs();" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-momoLime">
-                        <button onclick="verifyVaultWallet(); fetchLiveUTXOs();" class="px-4 py-2 bg-momoLime text-black font-mono font-bold text-xs rounded-xl hover:bg-momoGold transition-all shrink-0">AUDIT WALLET</button>
+                        <input type="text" id="walletInput" value="DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG" oninput="verifyVaultWallet();" class="w-full bg-black/80 border border-white/20 rounded-xl px-3 py-2 font-mono text-xs text-white outline-none focus:border-sauceRed">
+                        <button onclick="verifyVaultWallet(); fetchLiveUTXOs();" class="px-4 py-2 bg-sauceRed text-white font-mono font-bold text-xs rounded-xl hover:bg-momoLime hover:text-black transition-all shrink-0">EXECUTE AUDIT</button>
                     </div>
-                    <div id="verifyResult" class="font-mono text-xs text-momoLime pt-1">Connecting to baananna.ps1 validator...</div>
+                    <div id="verifyResult" class="font-mono text-xs text-sauceRed pt-1">WARNING: Local script not detected. Vault is unverified.</div>
                 </div>
 
                 <div class="glass-spatial p-5 rounded-3xl border border-momoGold/30 space-y-4">
@@ -148,7 +148,7 @@
                         <div class="grid grid-cols-2 gap-3 font-mono text-xs">
                             <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-1">
                                 <div class="text-[9px] text-zinc-400">TRUE UTXO BALANCE</div>
-                                <div id="dogeBal" class="text-white font-bold">Loading...</div>
+                                <div id="dogeBal" class="text-zinc-500 font-bold">UNVERIFIED (0.00)</div>
                             </div>
                             <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-1">
                                 <div class="text-[9px] text-zinc-400">SHI* DRC-20</div>
@@ -186,7 +186,7 @@
                     </div>
                     <div class="p-3 bg-black/70 rounded-xl border border-white/10">
                         <div class="text-[9px] text-zinc-400">TRUE UTXO BALANCE</div>
-                        <div id="sumDogeBal" class="text-white font-bold">Scanning...</div>
+                        <div id="sumDogeBal" class="text-zinc-500 font-bold">UNVERIFIED</div>
                     </div>
                     <div class="p-3 bg-black/70 rounded-xl border border-white/10">
                         <div class="text-[9px] text-zinc-400">DRC-20 TOKENS</div>
@@ -194,7 +194,7 @@
                     </div>
                     <div class="p-3 bg-black/70 rounded-xl border border-white/10">
                         <div class="text-[9px] text-zinc-400">BAANNANNA.PS1 STATUS</div>
-                        <div id="sumAuditStatus" class="text-momoLime font-bold">CLEAN (0 BAD SHI*)</div>
+                        <div id="sumAuditStatus" class="text-sauceRed font-bold">PENDING LOCAL SCRIPT</div>
                     </div>
                 </div>
 
@@ -204,11 +204,13 @@
                         <button onclick="filter369('DogeBuds')" id="f369Buds" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEBUDS (<span id="c369Buds">0</span>)</button>
                         <button onclick="filter369('Dogemaps')" id="f369Maps" class="tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all">DOGEMAPS (<span id="c369Maps">0</span>)</button>
                     </div>
-                    <div id="status369" class="text-momoLime">Status: Ready for On-Chain UTXO Parsing</div>
+                    <div id="status369" class="text-sauceRed">Status: Awaiting baananna.ps1 local connection</div>
                 </div>
             </div>
 
-            <div id="grid369" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[650px] overflow-y-auto pr-2"></div>
+            <div id="grid369" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[650px] overflow-y-auto pr-2">
+                <div class="col-span-full py-12 text-center font-mono text-xs text-zinc-500">Run local `baananna.ps1` script to populate real-time on-chain assets.</div>
+            </div>
         </main>
     </div>
 
@@ -276,7 +278,6 @@
                 document.getElementById('masterPanel369').classList.remove('hidden');
                 document.getElementById('mNav369').className = "master-nav-tab active px-4 py-1.5 rounded-full transition-all";
                 document.getElementById('mNav365').className = "master-nav-tab px-4 py-1.5 rounded-full transition-all text-zinc-400";
-                fetchLiveUTXOs();
             }
         }
 
@@ -323,7 +324,6 @@
             }
         }
 
-        // --- SHI* COUNTER & THROW HANDSHAKE ---
         function addShiTokens(amount = 1) {
             earnedShiCount += amount;
             const formatted = earnedShiCount.toLocaleString();
@@ -333,14 +333,16 @@
             if (sumShiBal) sumShiBal.innerText = `${(100000000 + earnedShiCount).toLocaleString()} SHI*`;
         }
 
-        function throwShiPacket() {
+        function throwShi() {
             const recipient = document.getElementById('friendWallet').value.trim();
             const resBox = document.getElementById('throwResult');
-            if (!recipient || recipient.length < 20) {
-                resBox.innerText = "ERROR: Invalid recipient address for SHI* packet transfer.";
-                resBox.className = "font-mono text-[10px] text-sauceRed";
+            
+            if (!recipient || recipient.length < 20 || recipient.toLowerCase().includes('fake') || recipient.toLowerCase().includes('bad')) {
+                resBox.innerText = "BAANNANNA.PS1 BLOCK: Unwashed or invalid recipient address rejected!";
+                resBox.className = "font-mono text-[10px] text-sauceRed font-bold";
                 return;
             }
+
             resBox.innerText = `SUCCESS: 100 SHI* packet successfully thrown & broadcasted to ${recipient.substring(0,6)}... LFG!`;
             resBox.className = "font-mono text-[10px] text-momoLime font-bold";
             addShiTokens(-100);
@@ -396,7 +398,7 @@
             }
         }
 
-        // --- ENFORCED BAANNANNA.PS1 SECURITY FILTER & BAD SHI* GUARD ---
+        // --- STRICT BAANNANNA.PS1 OFFLINE-FIRST SECURITY FILTER ---
         function verifyVaultWallet() {
             const auditInput = document.getElementById('walletInput');
             const shopperInput = document.getElementById('targetWallet369');
@@ -408,6 +410,9 @@
             const resEl = document.getElementById('verifyResult');
             const badge = document.getElementById('vaultBadge');
             const auditStatus = document.getElementById('sumAuditStatus');
+            const auditCard = document.getElementById('auditCard');
+            const auditTitle = document.getElementById('auditTitle');
+            const headerPulse = document.getElementById('headerPulse');
 
             const isFlagged = activeAddr.includes("fake") || activeAddr.includes("bad") || (activeAddr.length > 0 && activeAddr.length < 25);
 
@@ -415,11 +420,18 @@
                 if(resEl) { resEl.innerText = "BAANNANNA.PS1 REJECTION: Unwashed tokens or flagged bad SHI* detected!"; resEl.className = "font-mono text-xs text-sauceRed pt-1"; }
                 if(badge) badge.innerText = "FILTERED (BAD SHI*)";
                 if(auditStatus) { auditStatus.innerText = "REJECTED (BAD SHI*)"; auditStatus.className = "text-sauceRed font-bold"; }
+                if(auditCard) auditCard.className = "glass-spatial p-5 rounded-3xl border border-sauceRed/40 space-y-3";
+                if(auditTitle) auditTitle.className = "text-sauceRed font-bold uppercase flex items-center gap-2";
+                if(headerPulse) headerPulse.className = "w-3 h-3 rounded-full bg-sauceRed animate-ping";
                 return false;
             } else {
-                if(resEl) { resEl.innerText = "BAANNANNA.PS1 AUDIT PASSED: Clean UTXO structure verified."; resEl.className = "font-mono text-xs text-momoLime pt-1"; }
-                if(badge) badge.innerText = "AUDITED & SECURE";
-                if(auditStatus) { auditStatus.innerText = "CLEAN (0 BAD SHI*)"; auditStatus.className = "text-momoLime font-bold"; }
+                // If local script isn't running or verifying, stay in strict offline audit guard
+                if(resEl) { resEl.innerText = "BAANNANNA.PS1 OFFLINE: Awaiting local execution handshake."; resEl.className = "font-mono text-xs text-momoGold pt-1"; }
+                if(badge) badge.innerText = "PENDING LOCAL SCRIPT";
+                if(auditStatus) { auditStatus.innerText = "OFFLINE (AWAITING .PS1)"; auditStatus.className = "text-momoGold font-bold"; }
+                if(auditCard) auditCard.className = "glass-spatial p-5 rounded-3xl border border-momoGold/40 space-y-3";
+                if(auditTitle) auditTitle.className = "text-momoGold font-bold uppercase flex items-center gap-2";
+                if(headerPulse) headerPulse.className = "w-3 h-3 rounded-full bg-momoGold animate-ping";
                 return true;
             }
         }
@@ -436,7 +448,7 @@
             });
         }
 
-        // --- TRUE ON-CHAIN UTXO & INSCRIPTION INDEXER PARSER ---
+        // --- LOCAL HANDSHAKE UTXO INDEXER ---
         async function fetchLiveUTXOs() {
             const rawWalletInput = document.getElementById('targetWallet369').value.trim();
             const grid = document.getElementById('grid369');
@@ -454,44 +466,8 @@
                 return;
             }
 
-            document.getElementById('status369').innerText = "Parsing On-Chain UTXOs & Inscriptions...";
-            grid.innerHTML = `<div class="col-span-full py-12 text-center font-mono text-xs text-momoGold animate-pulse">Reading Dogecoin UTXO script buffers and decoding JSON payloads...</div>`;
-
-            try {
-                const res = await fetch(`https://doginals.com/api/inscriptions?address=${encodeURIComponent(rawWalletInput)}`).catch(() => null);
-                
-                if (res && res.ok) {
-                    const data = await res.json();
-                    liveUtxoAssets = (data.inscriptions || data.data || []).map(item => ({
-                        id: item.id || item.inscriptionId,
-                        name: item.meta?.name || `Inscription #${(item.id || '').substring(0,6)}`,
-                        type: item.contentType?.includes('json') ? 'DRC-20' : 'Doginals NFT',
-                        contentUrl: `https://doginals.com/content/${item.id}`,
-                        satoshis: item.satoshis || 100000000,
-                        traits: [item.contentType || 'text/plain', 'Verified UTXO Script']
-                    }));
-                } else {
-                    liveUtxoAssets = [
-                        { id: "87503071i0", name: "DogeBuds #8290", type: "DogeBuds", contentUrl: "https://doginals.com/content/87503071i0", satoshis: 142050000, traits: ['{"p":"doginals","op":"mint"}', 'Red Spikes'] },
-                        { id: "52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", name: "326277.dogemap", type: "Dogemaps", contentUrl: "https://doginals.com/content/52e6870a9f85fa4579cd8c161a53721187c85243662d73930aa8e27a113e129d", satoshis: 100000000, traits: ['{"p":"drc-20","op":"mint","tick":"dogemap"}', 'Block 326277'] }
-                    ];
-                }
-
-                const totalSatoshis = liveUtxoAssets.reduce((acc, curr) => acc + curr.satoshis, 1420500000);
-                const trueDogeBalance = (totalSatoshis / 100000000).toLocaleString(undefined, {minimumFractionDigits: 2});
-
-                document.getElementById('sumDogeBal').innerText = `${trueDogeBalance} DOGE`;
-                document.getElementById('dogeBal').innerText = `${trueDogeBalance} DOGE`;
-
-                render369Grid();
-            } catch (e) {
-                document.getElementById('sumDogeBal').innerText = "1,420.50 DOGE";
-                document.getElementById('dogeBal').innerText = "1,420.50 DOGE";
-                liveUtxoAssets = [
-                    { id: "87503071i0", name: "DogeBuds #8290", type: "DogeBuds", contentUrl: "https://doginals.com/content/87503071i0", satoshis: 142050000, traits: ['On-Chain UTXO Inscription'] }
-                ];
-                render369Grid();
-            }
+            document.getElementById('status369').innerText = "Awaiting local baananna.ps1 connection...";
+            grid.innerHTML = `<div class="col-span-full py-12 text-center font-mono text-xs text-momoGold">LOCAL SCRIPT OFFLINE: Fire up baananna.ps1 to parse UTXO script buffers.</div>`;
         }
 
         function filter369(filter) {
@@ -501,64 +477,6 @@
                 const btn = document.getElementById(btnId);
                 if(btn) btn.className = (f === filter) ? "tab-btn active px-4 py-2 rounded-xl border border-white/10 transition-all" : "tab-btn px-4 py-2 rounded-xl border border-white/10 transition-all";
             });
-            render369Grid();
-        }
-
-        function render369Grid() {
-            const grid = document.getElementById('grid369');
-            grid.innerHTML = '';
-
-            const dogeBudsCount = liveUtxoAssets.filter(i => i.type === 'DogeBuds' || i.name.includes('DogeBuds')).length;
-            const dogemapsCount = liveUtxoAssets.filter(i => i.type === 'Dogemaps' || i.name.includes('dogemap')).length;
-
-            document.getElementById('c369All').innerText = liveUtxoAssets.length;
-            document.getElementById('c369Buds').innerText = dogeBudsCount;
-            document.getElementById('c369Maps').innerText = dogemapsCount;
-
-            const results = current369Filter === 'ALL' ? liveUtxoAssets : liveUtxoAssets.filter(i => i.name.toLowerCase().includes(current369Filter.toLowerCase()));
-
-            if (results.length === 0) {
-                document.getElementById('status369').innerText = `UTXO Indexer: 0 inscriptions found.`;
-                grid.innerHTML = `<div class="col-span-full py-12 text-center font-mono text-xs text-zinc-500">No active UTXO inscriptions located for this address.</div>`;
-                return;
-            }
-
-            document.getElementById('status369').innerText = `UTXO Indexer Synchronized: ${results.length} on-chain items parsed.`;
-
-            results.forEach(item => {
-                grid.innerHTML += `
-                    <div class="glass-spatial p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between hover:border-momoLime transition-all">
-                        <div class="w-full h-44 bg-zinc-950 rounded-xl overflow-hidden flex items-center justify-center border border-momoLime/30 relative group p-2">
-                            <iframe src="${item.contentUrl}" sandbox="allow-scripts" class="w-full h-full pointer-events-none nft-image-pixel" onerror="this.outerHTML='<img src=\\'${item.contentUrl}\\' class=\\'w-full h-full object-contain nft-image-pixel\\'>'"></iframe>
-                            <span class="absolute top-2 right-2 bg-momoLime text-black font-bold text-[9px] px-2 py-0.5 rounded-full">${item.type || 'NFT'}</span>
-                            <span class="absolute bottom-2 left-2 bg-black/80 text-momoGold font-mono text-[9px] px-2 py-0.5 rounded border border-momoGold/30">#${(item.id || '').substring(0,8)}</span>
-                        </div>
-                        <div>
-                            <div class="font-syne font-bold text-sm text-white">${item.name}</div>
-                            <div class="font-mono text-[10px] text-momoLime">UTXO Satoshis: ${item.satoshis.toLocaleString()}</div>
-                            <div class="font-mono text-[9px] text-zinc-500 truncate mt-1">ID: ${item.id}</div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="open369Modal('${item.id}')" class="py-2 bg-momoGold/20 text-momoGold font-mono font-bold text-xs rounded-xl hover:bg-momoGold hover:text-black transition-all">INSPECT</button>
-                            <button onclick="open369Modal('${item.id}')" class="py-2 bg-momoLime text-black font-syne font-bold text-xs rounded-xl hover:bg-momoGold transition-all">BUY / TRADE</button>
-                        </div>
-                    </div>
-                `;
-            });
-            lucide.createIcons();
-        }
-
-        function open369Modal(id) {
-            const item = liveUtxoAssets.find(i => i.id === id);
-            if(!item) return;
-            document.getElementById('modalImgContainer').innerHTML = `<iframe src="${item.contentUrl}" sandbox="allow-scripts" class="w-full h-full pointer-events-none nft-image-pixel"></iframe>`;
-            document.getElementById('modalTitle').innerText = item.name;
-            document.getElementById('modalPrice').innerText = item.id;
-            const traitsContainer = document.getElementById('modalTraits');
-            traitsContainer.innerHTML = '';
-            (item.traits || ['Verified UTXO']).forEach(t => traitsContainer.innerHTML += `<span class="bg-black/80 border border-momoGold/30 text-momoGold text-[10px] px-2 py-1 rounded-lg font-mono">${typeof t === 'string' ? t : JSON.stringify(t)}</span>`);
-            document.getElementById('inspectorModal').classList.remove('hidden');
-            document.getElementById('inspectorModal').classList.add('flex');
         }
 
         function closeModal() {
@@ -570,7 +488,6 @@
             renderTrackList();
             initChart();
             verifyVaultWallet();
-            fetchLiveUTXOs();
         };
     </script>
 </body>
