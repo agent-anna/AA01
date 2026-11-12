@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEG ANNA AA01 — Martin Strayd Sovereign Music Portal</title>
+    <style>
+        :root {
+            --bg-deep: #090a0f;
+            --surface: #12141d;
+            --surface-elevated: #191c28;
+            --accent-green: #a3e635;
+            --accent-green-glow: rgba(163, 230, 53, 0.18);
+            --accent-gold: #d4af37;
+            --accent-blue: #38bdf8;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #252838;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* HEADER */
+        header {
+            background: rgba(9, 10, 15, 0.95); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-title { font-size: 0.9rem; font-weight: 800; letter-spacing: 1.2px; color: var(--text-main); }
+        .header-title span { color: var(--accent-gold); }
+        .header-right { display: flex; gap: 0.8rem; align-items: center; }
+        .vault-badge {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 0.45rem 0.85rem; border-radius: 6px; font-size: 0.78rem;
+            color: var(--accent-gold); font-family: monospace;
+        }
+        .connect-wallet-btn {
+            background: var(--accent-gold); color: #000; border: none;
+            padding: 0.45rem 0.95rem; border-radius: 6px; font-size: 0.8rem;
+            font-weight: 800; cursor: pointer; transition: all 0.2s;
+        }
+        .connect-wallet-btn:hover { background: #ebd068; }
+
+        /* LIVE ENGAGEMENT & PARTICIPATION METRICS BAR */
+        .engagement-bar {
+            max-width: 1400px; margin: 1rem auto 0 auto; width: calc(100% - 4rem);
+            background: linear-gradient(135deg, var(--surface) 0%, var(--surface-elevated) 100%);
+            border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+            font-size: 0.8rem;
+        }
+        .metric-group { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+        .metric-item { display: flex; align-items: center; gap: 0.4rem; color: var(--text-muted); }
+        .metric-item strong { color: var(--accent-green); font-family: monospace; }
+
+        /* DASHBOARD STATS */
+        .dashboard-banner {
+            max-width: 1400px; margin: 1rem auto 1rem auto; width: calc(100% - 4rem);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 1.25rem 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem;
+        }
+        .stat-box { display: flex; flex-direction: column; }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 0.25rem; }
+        .stat-value { font-size: 1.05rem; font-weight: 700; color: var(--text-main); }
+
+        /* TOOLBAR */
+        .market-toolbar-bar {
+            max-width: 1400px; margin: 0 auto 1.5rem auto; width: calc(100% - 4rem);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+        .market-stats { display: flex; gap: 1.5rem; font-size: 0.85rem; color: var(--text-muted); align-items: center; }
+        .market-stats strong { color: var(--accent-gold); }
+        .toolbar-actions { display: flex; align-items: center; gap: 0.75rem; position: relative; }
+        .tool-icon-btn {
+            background: var(--surface); border: 1px solid var(--border); color: var(--text-main);
+            height: 40px; padding: 0 0.9rem; border-radius: 8px; display: flex; align-items: center; gap: 0.4rem;
+            cursor: pointer; font-size: 0.85rem; font-weight: 700; transition: all 0.2s; position: relative;
+        }
+        .tool-icon-btn:hover { border-color: var(--accent-green); background: var(--surface-elevated); }
+        .cart-pill {
+            background: var(--accent-green); color: #000; font-size: 0.72rem;
+            font-weight: 800; padding: 0.1rem 0.45rem; border-radius: 99px;
+        }
+
+        .sweep-bar {
+            background: var(--surface); border: 1px solid var(--border); padding: 0.45rem 0.9rem;
+            border-radius: 8px; display: none; align-items: center; gap: 0.6rem; font-size: 0.82rem;
+        }
+        .sweep-bar.show { display: flex; }
+        .sweep-input {
+            background: #08090c; border: 1px solid var(--border); color: var(--text-main);
+            padding: 0.25rem 0.5rem; border-radius: 4px; width: 54px; text-align: center; font-weight: 700;
+        }
+        .sweep-confirm { background: var(--accent-green); color: #000; border: none; padding: 0.3rem 0.75rem; border-radius: 4px; font-weight: 800; cursor: pointer; }
+
+        .dropdown-menu {
+            position: absolute; top: 48px; right: 0; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; width: 240px; box-shadow: 0 12px 30px rgba(0,0,0,0.8); display: none; z-index: 50; padding: 0.5rem;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item {
+            padding: 0.65rem 0.9rem; font-size: 0.83rem; color: var(--text-muted); cursor: pointer; border-radius: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .dropdown-item:hover { background: var(--surface-elevated); color: var(--text-main); }
+        .dropdown-item.selected { color: var(--accent-green); font-weight: 700; }
+
+        /* PRODUCT GRID */
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem 4rem 2rem; width: 100%; flex: 1; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+        .card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+            overflow: hidden; display: flex; flex-direction: column;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; cursor: pointer; position: relative;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent-green); box-shadow: 0 8px 24px var(--accent-green-glow); }
+        .card.selected-for-bulk { border-color: var(--accent-gold); box-shadow: 0 0 16px rgba(212, 175, 55, 0.28); }
+        .bulk-checkbox {
+            position: absolute; top: 10px; left: 10px; width: 24px; height: 24px; background: rgba(0,0,0,0.75);
+            border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            z-index: 5; color: transparent; font-weight: 900; font-size: 0.8rem; transition: all 0.2s;
+        }
+        .card.selected-for-bulk .bulk-checkbox { background: var(--accent-gold); border-color: var(--accent-gold); color: #000; }
+
+        .card-img-wrapper { position: relative; width: 100%; aspect-ratio: 1; background: #000; overflow: hidden; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .badge-tag {
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px);
+            color: var(--accent-green); border: 1px solid var(--accent-green); font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;
+        }
+        .card-body { padding: 1rem; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+        .track-id { font-size: 0.7rem; color: var(--accent-gold); font-family: monospace; margin-bottom: 0.2rem; }
+        .track-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+        .price-tag { font-size: 0.82rem; color: var(--accent-green); font-weight: 700; margin-bottom: 0.85rem; }
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+        .action-btn {
+            padding: 0.55rem; border-radius: 6px; font-size: 0.78rem; font-weight: 800;
+            cursor: pointer; text-align: center; border: 1px solid var(--border); transition: all 0.2s;
+        }
+        .add-cart-btn { background: transparent; color: var(--text-main); border-color: var(--border); }
+        .add-cart-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+        .buy-now-btn { background: var(--accent-green); color: #000; border: none; }
+        .buy-now-btn:hover { background: #bdfd54; }
+
+        /* INSPECTION PREVIEW MODAL WITH FULL QR & MULTI-RAIL CHECKOUT */
+        #inspect-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 6, 10, 0.92); backdrop-filter: blur(14px);
+            display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem;
+        }
+        .inspect-modal-card {
+            background: #11131c; border: 1px solid #2a2e42; border-radius: 18px;
+            max-width: 960px; width: 100%; padding: 2.2rem; position: relative;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.85);
+            display: grid; grid-template-columns: 1fr 1.25fr; gap: 2.2rem; align-items: start;
+            max-height: 92vh; overflow-y: auto;
+        }
+        @media(max-width: 860px) { .inspect-modal-card { grid-template-columns: 1fr; max-width: 520px; } }
+        .inspect-img {
+            width: 100%; aspect-ratio: 1; border-radius: 14px; object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+        }
+        .modal-close {
+            position: absolute; top: 18px; right: 20px; background: #1a1d29; border: 1px solid var(--border);
+            color: var(--text-muted); width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer;
+        }
+        .modal-close:hover { color: var(--text-main); border-color: var(--text-muted); }
+
+        .modal-engagement-pill {
+            background: rgba(163, 230, 53, 0.08); border: 1px solid var(--accent-green);
+            padding: 0.55rem 0.85rem; border-radius: 8px; font-size: 0.78rem; color: var(--accent-green);
+            display: flex; align-items: center; gap: 0.4rem; font-weight: 700; margin-top: 0.5rem;
+        }
+
+        .modal-rail-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; margin-top: 0.75rem; }
+        .modal-rail-tab {
+            background: #08090d; border: 1px solid var(--border); color: var(--text-muted);
+            padding: 0.55rem 0.2rem; border-radius: 6px; font-size: 0.74rem; font-weight: 800;
+            cursor: pointer; text-align: center; transition: all 0.2s;
+        }
+        .modal-rail-tab:hover { color: var(--text-main); border-color: #3f445e; }
+        .modal-rail-tab.active { background: var(--surface-elevated); border-color: var(--accent-gold); color: var(--accent-gold); }
+
+        .modal-rail-content {
+            background: #08090d; border: 1px solid var(--border); border-radius: 10px;
+            padding: 1rem; margin-top: 0.75rem; display: none; flex-direction: column; gap: 0.75rem;
+        }
+        .modal-rail-content.active { display: flex; }
+
+        .modal-qr-layout { display: flex; gap: 1rem; align-items: center; }
+        .modal-qr-frame {
+            background: #fff; padding: 0.4rem; border-radius: 8px; width: 110px; height: 110px;
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+        }
+        .modal-qr-frame img { width: 100%; height: 100%; }
+
+        .modal-addr-box {
+            background: #10121a; border: 1px solid var(--border); padding: 0.5rem;
+            border-radius: 6px; font-family: monospace; font-size: 0.72rem; color: var(--accent-gold);
+            word-break: break-all; cursor: pointer;
+        }
+        .modal-addr-box:hover { border-color: var(--accent-gold); }
+
+        .modal-pay-action {
+            width: 100%; padding: 0.75rem; border-radius: 8px; border: none;
+            font-size: 0.85rem; font-weight: 800; cursor: pointer; text-align: center;
+            transition: all 0.2s; text-decoration: none; display: block;
+        }
+        .btn-modal-doge { background: var(--accent-gold); color: #000; }
+        .btn-modal-doge:hover { background: #ebd068; }
+        .btn-modal-shi { background: var(--accent-green); color: #000; }
+        .btn-modal-shi:hover { background: #bdfd54; }
+        .btn-modal-gpay { background: var(--accent-blue); color: #000; }
+        .btn-modal-gpay:hover { background: #7dd3fc; }
+        .btn-modal-paypal { background: #0070ba; color: #fff; }
+        .btn-modal-paypal:hover { background: #0084db; }
+
+        .shi-edu-box {
+            background: rgba(212, 175, 55, 0.08); border: 1px solid var(--accent-gold);
+            padding: 0.65rem; border-radius: 8px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;
+        }
+        .shi-edu-box strong { color: var(--accent-gold); }
+
+        /* UNIFIED CHECKOUT MODAL */
+        #checkout-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 5, 8, 0.92); backdrop-filter: blur(14px);
+            display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem;
+        }
+        .checkout-modal {
+            background: #10121a; border: 1px solid #2a2e42; border-radius: 18px;
+            max-width: 980px; width: 100%; padding: 2rem; position: relative;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.9);
+            display: grid; grid-template-columns: 1.05fr 1.15fr; gap: 2rem;
+            max-height: 92vh; overflow-y: auto;
+        }
+        @media(max-width: 860px) { .checkout-modal { grid-template-columns: 1fr; max-width: 540px; } }
+
+        .order-panel { display: flex; flex-direction: column; gap: 1rem; }
+        .panel-heading { font-size: 1.15rem; font-weight: 800; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        .order-items-scroll {
+            display: flex; flex-direction: column; gap: 0.65rem;
+            max-height: 290px; overflow-y: auto; padding-right: 0.4rem;
+        }
+        .order-item-card {
+            display: flex; align-items: center; gap: 0.85rem;
+            background: #08090d; border: 1px solid var(--border); padding: 0.65rem; border-radius: 10px;
+        }
+        .order-item-card img { width: 58px; height: 58px; border-radius: 8px; object-fit: cover; }
+        .order-item-meta { flex: 1; min-width: 0; }
+        .order-item-id { font-family: monospace; font-size: 0.7rem; color: var(--accent-gold); }
+        .order-item-name { font-size: 0.88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .order-item-price { font-size: 0.82rem; font-weight: 700; color: var(--accent-green); font-family: monospace; }
+        .remove-item-btn { background: none; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; padding: 0.2rem 0.4rem; }
+        .remove-item-btn:hover { color: #ef4444; }
+
+        .totals-box {
+            background: #08090d; border: 1px solid var(--border); padding: 1rem 1.2rem;
+            border-radius: 10px; display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.88rem;
+        }
+        .total-row { display: flex; justify-content: space-between; color: var(--text-muted); }
+        .total-row.grand-total {
+            border-top: 1px solid var(--border); padding-top: 0.6rem; margin-top: 0.2rem;
+            font-size: 1.05rem; font-weight: 800; color: var(--text-main);
+        }
+        .total-row.grand-total span:last-child { color: var(--accent-gold); font-family: monospace; }
+
+        .payment-panel { display: flex; flex-direction: column; gap: 1rem; }
+        .rail-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.45rem; }
+        .rail-tab {
+            background: #08090d; border: 1px solid var(--border); color: var(--text-muted);
+            padding: 0.65rem 0.4rem; border-radius: 8px; font-size: 0.76rem; font-weight: 800;
+            cursor: pointer; text-align: center; transition: all 0.2s;
+        }
+        .rail-tab:hover { color: var(--text-main); border-color: #3f445e; }
+        .rail-tab.active { background: var(--surface-elevated); border-color: var(--accent-gold); color: var(--accent-gold); }
+
+        .rail-content {
+            background: #08090d; border: 1px solid var(--border); border-radius: 12px;
+            padding: 1.25rem; display: none; flex-direction: column; gap: 1rem;
+        }
+        .rail-content.active { display: flex; }
+
+        .qr-layout { display: flex; gap: 1.2rem; align-items: center; }
+        @media(max-width: 500px) { .qr-layout { flex-direction: column; text-align: center; } }
+        .qr-frame {
+            background: #fff; padding: 0.6rem; border-radius: 10px; width: 132px; height: 132px;
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+        }
+        .qr-frame img { width: 100%; height: 100%; }
+
+        .addr-copy-box {
+            background: #10121a; border: 1px solid var(--border); padding: 0.75rem;
+            border-radius: 8px; font-family: monospace; font-size: 0.76rem; color: var(--accent-gold);
+            word-break: break-all; cursor: pointer;
+        }
+        .addr-copy-box:hover { border-color: var(--accent-gold); }
+
+        .pay-action-btn {
+            width: 100%; padding: 0.9rem; border-radius: 10px; border: none;
+            font-size: 0.92rem; font-weight: 800; cursor: pointer; text-align: center;
+            text-decoration: none; display: block; transition: all 0.2s;
+        }
+        .btn-doge { background: var(--accent-gold); color: #000; }
+        .btn-doge:hover { background: #ebd068; }
+        .btn-shi { background: var(--accent-green); color: #000; }
+        .btn-shi:hover { background: #bdfd54; }
+        .btn-paypal { background: #0070ba; color: #fff; }
+        .btn-paypal:hover { background: #0084db; }
+        .btn-coffee { background: #ffdd00; color: #000; }
+        .btn-coffee:hover { background: #ffe642; }
+
+        .status-banner { font-size: 0.82rem; font-weight: 700; text-align: center; color: var(--accent-gold); min-height: 1.2rem; }
+        .unlocked-downloads {
+            display: none; flex-direction: column; gap: 0.5rem;
+            background: rgba(163, 230, 53, 0.08); border: 1px solid var(--accent-green);
+            padding: 1rem; border-radius: 10px;
+        }
+        .dl-link {
+            background: var(--accent-green); color: #000; text-decoration: none;
+            padding: 0.6rem 0.9rem; border-radius: 6px; font-size: 0.80rem; font-weight: 800;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .dl-link:hover { background: #bdfd54; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">VEG ANNA <span>AA01</span> — MARTIN STRAYD SOVEREIGN MUSIC PORTAL</div>
+        <div class="header-right">
+            <div class="vault-badge" id="wallet-badge-header">VAULT: DTzt4U...pYG</div>
+            <button class="connect-wallet-btn" id="connect-wallet-nav-btn" onclick="connectWallet()">CONNECT SHI* WALLET</button>
+        </div>
+    </header>
+
+    <!-- LIVE ENGAGEMENT & PARTICIPATION METRICS BAR -->
+    <div class="engagement-bar">
+        <div class="metric-group">
+            <div class="metric-item">🟢 Portal Status: <strong>ONLINE (Standalone Local)</strong></div>
+            <div class="metric-item">👥 Active Browsing Peers: <strong style="color: var(--accent-gold);"><span id="live-peers-count">8</span> Active Now</strong></div>
+            <div class="metric-item">⚡ Daily Inscription Volume: <strong id="daily-vol">142 Releases</strong></div>
+        </div>
+        <div class="metric-item" id="wallet-status-text">
+            🔒 Vault Protocol: <strong style="color: var(--accent-gold);">DTzt4UaiB5...Bg2pYG</strong>
+        </div>
+    </div>
+
+    <div class="dashboard-banner">
+        <div class="stat-box">
+            <span class="stat-label">Sovereign Price</span>
+            <span class="stat-value" style="color: var(--accent-gold);">1.00 DOGE per Single</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Ecosystem Utility</span>
+            <span class="stat-value" style="color: var(--accent-green);">SHI* Rewards Active</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Tax / Duty Rate</span>
+            <span class="stat-value" style="color: var(--accent-green);">3.0% Enforced</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Catalog Inventory</span>
+            <span class="stat-value" id="inv-count">74 Sovereign Singles</span>
+        </div>
+    </div>
+
+    <!-- MARKETPLACE TOOLBAR -->
+    <div class="market-toolbar-bar">
+        <div class="market-stats">
+            <span>Listings: <strong id="listing-count">74</strong></span>
+            <span>Gateway: <strong>DTzt4U...pYG</strong></span>
+        </div>
+        <div class="toolbar-actions">
+            <!-- Floor Sweep -->
+            <div id="sweep-bar" class="sweep-bar">
+                <span>Sweep Floor:</span>
+                <input type="number" id="sweep-input" class="sweep-input" value="3" min="1" max="25">
+                <button class="sweep-confirm" onclick="executeSweep()">Sweep &amp; Checkout</button>
+            </div>
+            <button class="tool-icon-btn" title="Sweep Floor Items" onclick="toggleSweepBar()">🧹 Sweep</button>
+
+            <!-- Checkout Cart Button -->
+            <button class="tool-icon-btn" onclick="openCartCheckout()">
+                🛒 Checkout <span id="cart-badge" class="cart-pill">0</span>
+            </button>
+
+            <!-- Sort Dropdown -->
+            <div style="position: relative;">
+                <button class="tool-icon-btn" id="filter-btn" onclick="toggleSortDropdown()">⚙️ Sort</button>
+                <div id="sort-dropdown" class="dropdown-menu">
+                    <div class="dropdown-item selected" onclick="setSortMode('price-low', this)">Price: Lowest first <span>✓</span></div>
+                    <div class="dropdown-item" onclick="setSortMode('price-high', this)">Price: Highest first</div>
+                    <div class="dropdown-item" onclick="setSortMode('recent', this)">Recently listed</div>
+                    <div class="dropdown-item" onclick="setSortMode('id', this)">ID: Lowest first</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="grid" id="store-grid"></div>
+    </div>
+
+    <!-- INSPECTION / PREVIEW MODAL WITH FULL QR & MULTI-RAIL SETTLEMENT -->
+    <div id="inspect-overlay" onclick="closeInspectOutside(event)">
+        <div class="inspect-modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeInspect()">&times;</button>
+            <div>
+                <img id="inspect-img-el" class="inspect-img" src="" alt="High-Res Artwork">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <div>
+                    <div id="inspect-id-el" style="font-family: monospace; color: var(--accent-gold); font-size: 0.8rem; margin-bottom: 0.2rem;"></div>
+                    <div id="inspect-title-el" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.2rem; line-height: 1.2;"></div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Artist: Martin Strayd (VEG ANNA AA01 Portal)</div>
+                </div>
+
+                <!-- LIVE ENGAGEMENT TICKET INSIDE MODAL -->
+                <div class="modal-engagement-pill">
+                    🔥 <span id="modal-active-watchers">13</span> people looking right now • <span id="modal-purchased-today">6</span> purchased today
+                </div>
+
+                <div>
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 0.3rem;">Select Settlement Rail &amp; QR Access:</div>
+                    <div class="modal-rail-tabs">
+                        <button class="modal-rail-tab active" onclick="switchModalRail('doge', this)">🐕 DOGE QR</button>
+                        <button class="modal-rail-tab" onclick="switchModalRail('shi', this)">💎 SHI* Wallet</button>
+                        <button class="modal-rail-tab" onclick="switchModalRail('gpay', this)">💳 GPay</button>
+                        <button class="modal-rail-tab" onclick="switchModalRail('paypal', this)">🅿️ PayPal</button>
+                    </div>
+
+                    <!-- DOGE QR TAB -->
+                    <div id="mrail-doge" class="modal-rail-content active">
+                        <div class="modal-qr-layout">
+                            <div class="modal-qr-frame">
+                                <img id="modal-doge-qr" src="" alt="DOGE QR">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.4rem; flex: 1;">
+                                <div style="font-size: 0.74rem; color: var(--text-muted);">Scan QR or copy address:</div>
+                                <div class="modal-addr-box" onclick="copyModalAddress()" title="Click to Copy">DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG</div>
+                            </div>
+                        </div>
+                        <button class="modal-pay-action btn-modal-doge" onclick="confirmModalPayment('DOGE QR')">VERIFY &amp; UNLOCK MASTER ZIP</button>
+                    </div>
+
+                    <!-- SHI* WALLET TAB WITH EDUCATION -->
+                    <div id="mrail-shi" class="modal-rail-content">
+                        <div class="shi-edu-box">
+                            💡 <strong>SHI* (DRC-20) Ecosystem Guide:</strong> Connect your node or transfer 100 SHI* to the sovereign vault address below to instantly unlock master FLAC &amp; ZIP files.
+                        </div>
+                        <div class="modal-addr-box" onclick="copyModalAddress()">Vault: DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG</div>
+                        <button class="modal-pay-action btn-modal-shi" onclick="confirmModalPayment('SHI* Wallet')">SETTLE WITH 100 SHI*</button>
+                    </div>
+
+                    <!-- GPAY TAB -->
+                    <div id="mrail-gpay" class="modal-rail-content">
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Instant mobile fiat checkout via Google Pay.</div>
+                        <button class="modal-pay-action btn-modal-gpay" onclick="confirmModalPayment('Google Pay')">PAY $0.16 USD VIA GPAY</button>
+                    </div>
+
+                    <!-- PAYPAL TAB -->
+                    <div id="mrail-paypal" class="modal-rail-content">
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Secure fiat gateway via PayPal invoice.</div>
+                        <button class="modal-pay-action btn-modal-paypal" onclick="confirmModalPayment('PayPal')">PROCEED WITH PAYPAL ($0.16)</button>
+                    </div>
+                </div>
+
+                <div id="modal-status-text" style="font-size: 0.78rem; font-weight: 700; color: var(--accent-gold); text-align: center; min-height: 1rem;"></div>
+                <div id="modal-download-box" style="display: none; flex-direction: column; gap: 0.4rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UNIFIED CHECKOUT MODAL -->
+    <div id="checkout-overlay" onclick="closeCheckoutOutside(event)">
+        <div class="checkout-modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeCheckout()">&times;</button>
+
+            <!-- LEFT: ITEMS & TOTALS -->
+            <div class="order-panel">
+                <div class="panel-heading">
+                    <span id="checkout-heading-title">Order Summary</span>
+                </div>
+                <div class="order-items-scroll" id="checkout-items-list"></div>
+                <div class="totals-box">
+                    <div class="total-row">
+                        <span>Base Subtotal (<span id="summary-item-count">0</span> items):</span>
+                        <span id="summary-subtotal">0.00 DOGE</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Tax / Duty (3.0%):</span>
+                        <span style="color: var(--accent-green);" id="summary-tax">0.00 DOGE</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Est. Fiat Equivalent:</span>
+                        <span id="summary-fiat">$0.00 USD</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>TOTAL DUE:</span>
+                        <span id="summary-total">0.00 DOGE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: PAYMENT RAILS -->
+            <div class="payment-panel">
+                <div class="panel-heading">Select Payment Rail</div>
+
+                <div class="rail-tabs">
+                    <button class="rail-tab active" onclick="switchRail('doge', this)">DOGE / QR</button>
+                    <button class="rail-tab" onclick="switchRail('shi', this)">SHI* Token</button>
+                    <button class="rail-tab" onclick="switchRail('paypal', this)">PayPal</button>
+                    <button class="rail-tab" onclick="switchRail('coffee', this)">Support</button>
+                </div>
+
+                <!-- DOGE / QR -->
+                <div id="rail-doge" class="rail-content active">
+                    <div style="background: rgba(212, 175, 55, 0.1); border: 1px solid var(--accent-gold); padding: 0.65rem; border-radius: 8px; font-size: 0.78rem; color: var(--accent-gold); line-height: 1.4;">
+                        ⚠️ <strong>Mobile QR Mode:</strong> Scan QR with your phone wallet app, send transfer, then click <strong>Verify Transfer</strong> below to unlock your files!
+                    </div>
+                    <div class="qr-layout">
+                        <div class="qr-frame">
+                            <img id="doge-qr-img" src="" alt="DOGE QR">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">
+                                Send exact DOGE amount to vault address:
+                            </div>
+                            <div class="addr-copy-box" onclick="copyAddress()" title="Click to Copy">
+                                DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG
+                            </div>
+                        </div>
+                    </div>
+                    <button class="pay-action-btn btn-doge" onclick="confirmOrderSettlement('DOGE')">
+                        VERIFY &amp; UNLOCK DOWNLOADS
+                    </button>
+                </div>
+
+                <!-- SHI* TOKEN -->
+                <div id="rail-shi" class="rail-content">
+                    <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+                        Pay with <strong>SHI* (DRC-20)</strong> via the VEG ANNA ecosystem node.
+                    </div>
+                    <div class="addr-copy-box" onclick="copyAddress()">
+                        Vault: DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG<br>
+                        Amount: <span id="shi-token-amount" style="color: var(--accent-green);">0 SHI*</span>
+                    </div>
+                    <button class="pay-action-btn btn-shi" onclick="confirmOrderSettlement('SHI* DRC-20')">
+                        SETTLE WITH SHI* WALLET
+                    </button>
+                </div>
+
+                <!-- PAYPAL -->
+                <div id="rail-paypal" class="rail-content">
+                    <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+                        Instant fiat settlement via PayPal checkout.
+                    </div>
+                    <div class="addr-copy-box" style="color: var(--accent-blue);">
+                        Invoice Ref: <span id="paypal-ref-code">STRAYD-TEST</span><br>
+                        Total USD: <span id="paypal-usd-amount">$0.00</span>
+                    </div>
+                    <button class="pay-action-btn btn-paypal" onclick="confirmOrderSettlement('PayPal')">
+                        PROCEED WITH PAYPAL
+                    </button>
+                </div>
+
+                <!-- BUY ME A COFFEE -->
+                <div id="rail-coffee" class="rail-content">
+                    <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+                        Support Martin Strayd releases directly.
+                    </div>
+                    <div class="addr-copy-box" style="color: #ffdd00;">
+                        Supporter Pack: <span id="coffee-pack-summary">1 Release</span> (<span id="coffee-usd-amount">$0.00</span>)
+                    </div>
+                    <button class="pay-action-btn btn-coffee" onclick="confirmOrderSettlement('Support')">
+                        PAY VIA SUPPORTER PACK
+                    </button>
+                </div>
+
+                <div id="checkout-status" class="status-banner">Awaiting verified blockchain transfer...</div>
+                <div id="unlocked-downloads-box" class="unlocked-downloads"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const VAULT_WALLET = "DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG";
+        const TEST_PRICE_DOGE = 1.00;
+        const DOGE_TO_USD = 0.16;
+        const DOGE_TO_SHI = 100;
+        let globalSerialCounter = 1242;
+
+        const catalogTracks = [
+            { "id": "STRAYD-ID-001", "title": "Adhd I Can Do That (Travillen Disorder)", "img": "./store-art/Martin Strayd - Adhd I Can Do That (Travillen Disorder).png", "zip": "./buyer-zips/Martin Strayd - Adhd I Can Do That (Travillen Disorder).zip", "time": 1 },
+            { "id": "STRAYD-ID-002", "title": "Always Hard (Backstage Knee Pads)", "img": "./store-art/Martin Strayd - Always Hard (Backstage Knee Pads).png", "zip": "./buyer-zips/Martin Strayd - Always Hard (Backstage Knee Pads).zip", "time": 2 },
+            { "id": "STRAYD-ID-003", "title": "Andaman Escape", "img": "./store-art/Martin Strayd - Andaman Escape.png", "zip": "./buyer-zips/Martin Strayd - Andaman Escape.zip", "time": 3 },
+            { "id": "STRAYD-ID-004", "title": "Angelic Gorilla (Fantasy Mix)", "img": "./store-art/Martin Strayd - Angelic Gorilla (Fantasy Mix).png", "zip": "./buyer-zips/Martin Strayd - Angelic Gorilla (Fantasy Mix).zip", "time": 4 },
+            { "id": "STRAYD-ID-005", "title": "Bad Habits (I Found Nun)", "img": "./store-art/Martin Strayd - Bad Habits (I Found Nun).png", "zip": "./buyer-zips/Martin Strayd - Bad Habits (I Found Nun).zip", "time": 5 },
+            { "id": "STRAYD-ID-006", "title": "Bloody Mary (Cool Hot Hot Shots)", "img": "./store-art/Martin Strayd - Bloody Mary (Cool Hot Hot Shots).png", "zip": "./buyer-zips/Martin Strayd - Bloody Mary (Cool Hot Hot Shots).zip", "time": 6 },
+            { "id": "STRAYD-ID-007", "title": "Christmas Song (Yadda Ho Ho)", "img": "./store-art/Martin Strayd - Christmas Song (Yadda Ho Ho).png", "zip": "./buyer-zips/Martin Strayd - Christmas Song (Yadda Ho Ho).zip", "time": 7 },
+            { "id": "STRAYD-ID-008", "title": "Click Bait Love Story (Internet Culture Club MIX)", "img": "./store-art/Martin Strayd - Click Bait Love Story (Internet Culture Club MIX).png", "zip": "./buyer-zips/Martin Strayd - Click Bait Love Story (Internet Culture Club MIX).zip", "time": 8 },
+            { "id": "STRAYD-ID-009", "title": "Danny Penniman (Reward Offered)", "img": "./store-art/Martin Strayd - Danny Penniman (Reward Offered).png", "zip": "./buyer-zips/Martin Strayd - Danny Penniman (Reward Offered).zip", "time": 9 },
+            { "id": "STRAYD-ID-010", "title": "Debbie Diamond (Dudeist)", "img": "./store-art/Martin Strayd - Debbie Diamond (Dudeist).png", "zip": "./buyer-zips/Martin Strayd - Debbie Diamond (Dudeist).zip", "time": 10 },
+            { "id": "STRAYD-ID-011", "title": "Debbie Diamond (Succeed)", "img": "./store-art/Martin Strayd - Debbie Diamond (Succeed).png", "zip": "./buyer-zips/Martin Strayd - Debbie Diamond (Succeed).zip", "time": 11 },
+            { "id": "STRAYD-ID-012", "title": "Dejavu (Crazy)", "img": "./store-art/Martin Strayd - Dejavu (Crazy).png", "zip": "./buyer-zips/Martin Strayd - Dejavu (Crazy).zip", "time": 12 },
+            { "id": "STRAYD-ID-013", "title": "Devils Goin Public (Beelzebub)", "img": "./store-art/Martin Strayd - Devils Goin Public (Beelzebub).png", "zip": "./buyer-zips/Martin Strayd - Devils Goin Public (Beelzebub).zip", "time": 13 },
+            { "id": "STRAYD-ID-014", "title": "Down Under (Australian Land)", "img": "./store-art/Martin Strayd - Down Under (Australian Land).png", "zip": "./buyer-zips/Martin Strayd - Down Under (Australian Land).zip", "time": 14 },
+            { "id": "STRAYD-ID-015", "title": "Everybody Knows (It's Illegal)", "img": "./store-art/Martin Strayd - Everybody Knows (It's Illegal).png", "zip": "./buyer-zips/Martin Strayd - Everybody Knows (It's Illegal).zip", "time": 15 },
+            { "id": "STRAYD-ID-016", "title": "Factory Blues (Regency)", "img": "./store-art/Martin Strayd - Factory Blues (Regency).png", "zip": "./buyer-zips/Martin Strayd - Factory Blues (Regency).zip", "time": 16 },
+            { "id": "STRAYD-ID-017", "title": "Factory Work (Night Shift)", "img": "./store-art/Martin Strayd - Factory Work (Night Shift).png", "zip": "./buyer-zips/Martin Strayd - Factory Work (Night Shift).zip", "time": 17 },
+            { "id": "STRAYD-ID-018", "title": "Fall into the Circle (High School)", "img": "./store-art/Martin Strayd - Fall into the Circle (High School).png", "zip": "./buyer-zips/Martin Strayd - Fall into the Circle (High School).zip", "time": 18 },
+            { "id": "STRAYD-ID-019", "title": "Favorite Home (Hyatt)", "img": "./store-art/Martin Strayd - Favorite Home (Hyatt).png", "zip": "./buyer-zips/Martin Strayd - Favorite Home (Hyatt).zip", "time": 19 },
+            { "id": "STRAYD-ID-020", "title": "Fool for a Good Time (Good to Be Alive)", "img": "./store-art/Martin Strayd - Fool for a Good Time (Good to Be Alive).png", "zip": "./buyer-zips/Martin Strayd - Fool for a Good Time (Good to Be Alive).zip", "time": 20 },
+            { "id": "STRAYD-ID-021", "title": "Forgot (About You)", "img": "./store-art/Martin Strayd - Forgot (About You).png", "zip": "./buyer-zips/Martin Strayd - Forgot (About You).zip", "time": 21 },
+            { "id": "STRAYD-ID-022", "title": "Four People on a Bike (Acoustic Guitar)", "img": "./store-art/Martin Strayd - Four People on a Bike (Acoustic Guitar).png", "zip": "./buyer-zips/Martin Strayd - Four People on a Bike (Acoustic Guitar).zip", "time": 22 },
+            { "id": "STRAYD-ID-023", "title": "Golden Shore (Krabi)", "img": "./store-art/Martin Strayd - Golden Shore (Krabi).png", "zip": "./buyer-zips/Martin Strayd - Golden Shore (Krabi).zip", "time": 23 },
+            { "id": "STRAYD-ID-024", "title": "Great Escape (Hotel Rock)", "img": "./store-art/Martin Strayd - Great Escape (Hotel Rock).png", "zip": "./buyer-zips/Martin Strayd - Great Escape (Hotel Rock).zip", "time": 24 },
+            { "id": "STRAYD-ID-025", "title": "Happy Endings (Buy a Ticket)", "img": "./store-art/Martin Strayd - Happy Endings (Buy a Ticket).png", "zip": "./buyer-zips/Martin Strayd - Happy Endings (Buy a Ticket).zip", "time": 25 },
+            { "id": "STRAYD-ID-026", "title": "Have You Heard the One About (Bank Job)", "img": "./store-art/Martin Strayd - Have You Heard the One About (Bank Job).png", "zip": "./buyer-zips/Martin Strayd - Have You Heard the One About (Bank Job).zip", "time": 26 },
+            { "id": "STRAYD-ID-027", "title": "Hell Aint a Bad Place", "img": "./store-art/Martin Strayd - Hell Aint a Bad Place.png", "zip": "./buyer-zips/Martin Strayd - Hell Aint a Bad Place.zip", "time": 27 },
+            { "id": "STRAYD-ID-028", "title": "Hit Song Tonight (Good Line Good Hook)", "img": "./store-art/Martin Strayd - Hit Song Tonight (Good Line Good Hook).png", "zip": "./buyer-zips/Martin Strayd - Hit Song Tonight (Good Line Good Hook).zip", "time": 28 },
+            { "id": "STRAYD-ID-029", "title": "How Old Were You", "img": "./store-art/Martin Strayd - How Old Were You.png", "zip": "./buyer-zips/Martin Strayd - How Old Were You.zip", "time": 29 },
+            { "id": "STRAYD-ID-030", "title": "How to Write Hit Songs (On My Deck)", "img": "./store-art/Martin Strayd - How to Write Hit Songs (On My Deck).png", "zip": "./buyer-zips/Martin Strayd - How to Write Hit Songs (On My Deck).zip", "time": 30 },
+            { "id": "STRAYD-ID-031", "title": "I Can Do That (Didgeridoo)", "img": "./store-art/Martin Strayd - I Can Do That (Didgeridoo).png", "zip": "./buyer-zips/Martin Strayd - I Can Do That (Didgeridoo).zip", "time": 31 },
+            { "id": "STRAYD-ID-032", "title": "I Had a Good Time (Welcome)", "img": "./store-art/Martin Strayd - I Had a Good Time (Welcome).png", "zip": "./buyer-zips/Martin Strayd - I Had a Good Time (Welcome).zip", "time": 32 },
+            { "id": "STRAYD-ID-033", "title": "Invisible Censorship (Ai Agent Predicts New President)", "img": "./store-art/Martin Strayd - Invisible Censorship (Ai Agent Predicts New President).png", "zip": "./buyer-zips/Martin Strayd - Invisible Censorship (Ai Agent Predicts New President).zip", "time": 33 },
+            { "id": "STRAYD-ID-034", "title": "Japanese Holiday (Rock Roll)", "img": "./store-art/Martin Strayd - Japanese Holiday (Rock Roll).png", "zip": "./buyer-zips/Martin Strayd - Japanese Holiday (Rock Roll).zip", "time": 34 },
+            { "id": "STRAYD-ID-035", "title": "Jewish Girls Yadda Yadda & Yada (Meshuggeneh)", "img": "./store-art/Martin Strayd - Jewish Girls Yadda Yadda & Yada (Meshuggeneh).png", "zip": "./buyer-zips/Martin Strayd - Jewish Girls Yadda Yadda & Yada (Meshuggeneh).zip", "time": 35 },
+            { "id": "STRAYD-ID-036", "title": "Just a Cut (Healing)", "img": "./store-art/Martin Strayd - Just a Cut (Healing).png", "zip": "./buyer-zips/Martin Strayd - Just a Cut (Healing).zip", "time": 36 },
+            { "id": "STRAYD-ID-037", "title": "Mary Had a Little (Bloody Virgin Mary)", "img": "./store-art/Martin Strayd - Mary Had a Little (Bloody Virgin Mary).png", "zip": "./buyer-zips/Martin Strayd - Mary Had a Little (Bloody Virgin Mary).zip", "time": 37 },
+            { "id": "STRAYD-ID-038", "title": "Mile High Club (Guest Pass)", "img": "./store-art/Martin Strayd - Mile High Club (Guest Pass).png", "zip": "./buyer-zips/Martin Strayd - Mile High Club (Guest Pass).zip", "time": 38 },
+            { "id": "STRAYD-ID-039", "title": "Modern May Day (Stand Up)", "img": "./store-art/Martin Strayd - Modern May Day (Stand Up).png", "zip": "./buyer-zips/Martin Strayd - Modern May Day (Stand Up).zip", "time": 39 },
+            { "id": "STRAYD-ID-040", "title": "Morning Rain (Aussie True Blue)", "img": "./store-art/Martin Strayd - Morning Rain (Aussie True Blue).png", "zip": "./buyer-zips/Martin Strayd - Morning Rain (Aussie True Blue).zip", "time": 40 },
+            { "id": "STRAYD-ID-041", "title": "Move It (Crazy)", "img": "./store-art/Martin Strayd - Move It (Crazy).png", "zip": "./buyer-zips/Martin Strayd - Move It (Crazy).zip", "time": 41 },
+            { "id": "STRAYD-ID-042", "title": "Move It for the Lady", "img": "./store-art/Martin Strayd - Move It for the Lady.png", "zip": "./buyer-zips/Martin Strayd - Move It for the Lady.zip", "time": 42 },
+            { "id": "STRAYD-ID-043", "title": "No Romance in France (Eiffel Tower Twins)", "img": "./store-art/Martin Strayd - No Romance in France (Eiffel Tower Twins).png", "zip": "./buyer-zips/Martin Strayd - No Romance in France (Eiffel Tower Twins).zip", "time": 43 },
+            { "id": "STRAYD-ID-044", "title": "Old School Rock Star (Over 55)", "img": "./store-art/Martin Strayd - Old School Rock Star (Over 55).png", "zip": "./buyer-zips/Martin Strayd - Old School Rock Star (Over 55).zip", "time": 44 },
+            { "id": "STRAYD-ID-045", "title": "Once Upon a Rock (Make Believe)", "img": "./store-art/Martin Strayd - Once Upon a Rock (Make Believe).png", "zip": "./buyer-zips/Martin Strayd - Once Upon a Rock (Make Believe).zip", "time": 45 },
+            { "id": "STRAYD-ID-046", "title": "Once Upon a Time", "img": "./store-art/Martin Strayd - Once Upon a Time.png", "zip": "./buyer-zips/Martin Strayd - Once Upon a Time.zip", "time": 46 },
+            { "id": "STRAYD-ID-047", "title": "One Two Threesome (Club Dominance MIX)", "img": "./store-art/Martin Strayd - One Two Threesome (Club Dominance MIX).png", "zip": "./buyer-zips/Martin Strayd - One Two Threesome (Club Dominance MIX).zip", "time": 47 },
+            { "id": "STRAYD-ID-048", "title": "Paradise (Thailand)", "img": "./store-art/Martin Strayd - Paradise (Thailand).png", "zip": "./buyer-zips/Martin Strayd - Paradise (Thailand).zip", "time": 48 },
+            { "id": "STRAYD-ID-049", "title": "Queen Meets King (Queen of Click Bait Free Drink)", "img": "./store-art/Martin Strayd - Queen Meets King (Queen of Click Bait Free Drink).png", "zip": "./buyer-zips/Martin Strayd - Queen Meets King (Queen of Click Bait Free Drink).zip", "time": 49 },
+            { "id": "STRAYD-ID-050", "title": "Queen Meets Millionaire (Monopoly Money)", "img": "./store-art/Martin Strayd - Queen Meets Millionaire (Monopoly Money).png", "zip": "./buyer-zips/Martin Strayd - Queen Meets Millionaire (Monopoly Money).zip", "time": 50 },
+            { "id": "STRAYD-ID-051", "title": "Queen of Clickbait (I Made My First Million Dollars)", "img": "./store-art/Martin Strayd - Queen of Clickbait (I Made My First Million Dollars).png", "zip": "./buyer-zips/Martin Strayd - Queen of Clickbait (I Made My First Million Dollars).zip", "time": 51 },
+            { "id": "STRAYD-ID-052", "title": "Really They Called Me Crazy", "img": "./store-art/Martin Strayd - Really They Called Me Crazy.png", "zip": "./buyer-zips/Martin Strayd - Really They Called Me Crazy.zip", "time": 52 },
+            { "id": "STRAYD-ID-053", "title": "Scan Qr Pre Payment (Modern Love Ritual MIX)", "img": "./store-art/Martin Strayd - Scan Qr Pre Payment (Modern Love Ritual MIX).png", "zip": "./buyer-zips/Martin Strayd - Scan Qr Pre Payment (Modern Love Ritual MIX).zip", "time": 53 },
+            { "id": "STRAYD-ID-054", "title": "Sex Education (Bangkok Crazy)", "img": "./store-art/Martin Strayd - Sex Education (Bangkok Crazy).png", "zip": "./buyer-zips/Martin Strayd - Sex Education (Bangkok Crazy).zip", "time": 54 },
+            { "id": "STRAYD-ID-055", "title": "Sex with Everyone (Crazy Bitch)", "img": "./store-art/Martin Strayd - Sex with Everyone (Crazy Bitch).png", "zip": "./buyer-zips/Martin Strayd - Sex with Everyone (Crazy Bitch).zip", "time": 55 },
+            { "id": "STRAYD-ID-056", "title": "Sex with Everyone (Sex Sex Sex)", "img": "./store-art/Martin Strayd - Sex with Everyone (Sex Sex Sex).png", "zip": "./buyer-zips/Martin Strayd - Sex with Everyone (Sex Sex Sex).zip", "time": 56 },
+            { "id": "STRAYD-ID-057", "title": "Smile High Club Mix (Free Ride)", "img": "./store-art/Martin Strayd - Smile High Club Mix (Free Ride).png", "zip": "./buyer-zips/Martin Strayd - Smile High Club Mix (Free Ride).zip", "time": 57 },
+            { "id": "STRAYD-ID-058", "title": "The End (Addiction)", "img": "./store-art/Martin Strayd - The End (Addiction).png", "zip": "./buyer-zips/Martin Strayd - The End (Addiction).zip", "time": 58 },
+            { "id": "STRAYD-ID-059", "title": "They Called Me Crazy (Blues Version)", "img": "./store-art/Martin Strayd - They Called Me Crazy (Blues Version).png", "zip": "./buyer-zips/Martin Strayd - They Called Me Crazy (Blues Version).zip", "time": 59 },
+            { "id": "STRAYD-ID-060", "title": "Threesome Secrets (Ménage À Trois MIX)", "img": "./store-art/Martin Strayd - Threesome Secrets (Ménage À Trois MIX).png", "zip": "./buyer-zips/Martin Strayd - Threesome Secrets (Ménage À Trois MIX).zip", "time": 60 },
+            { "id": "STRAYD-ID-061", "title": "Tropical Island (Monkey)", "img": "./store-art/Martin Strayd - Tropical Island (Monkey).png", "zip": "./buyer-zips/Martin Strayd - Tropical Island (Monkey).zip", "time": 61 },
+            { "id": "STRAYD-ID-062", "title": "Tropical Island", "img": "./store-art/Martin Strayd - Tropical Island.png", "zip": "./buyer-zips/Martin Strayd - Tropical Island.zip", "time": 62 },
+            { "id": "STRAYD-ID-063", "title": "Tuk Tuk Secret Spice (Muay Thailand)", "img": "./store-art/Martin Strayd - Tuk Tuk Secret Spice (Muay Thailand).png", "zip": "./buyer-zips/Martin Strayd - Tuk Tuk Secret Spice (Muay Thailand).zip", "time": 63 },
+            { "id": "STRAYD-ID-064", "title": "Two Best Friends", "img": "./store-art/Martin Strayd - Two Best Friends.png", "zip": "./buyer-zips/Martin Strayd - Two Best Friends.zip", "time": 64 },
+            { "id": "STRAYD-ID-065", "title": "Untimely Overdose", "img": "./store-art/Martin Strayd - Untimely Overdose.png", "zip": "./buyer-zips/Martin Strayd - Untimely Overdose.zip", "time": 65 },
+            { "id": "STRAYD-ID-066", "title": "Vegan Millionaire (Cool Hot Sauce)", "img": "./store-art/Martin Strayd - Vegan Millionaire (Cool Hot Sauce).png", "zip": "./buyer-zips/Martin Strayd - Vegan Millionaire (Cool Hot Sauce).zip", "time": 66 },
+            { "id": "STRAYD-ID-067", "title": "Vegan Millionaire (Crypto)", "img": "./store-art/Martin Strayd - Vegan Millionaire (Crypto).png", "zip": "./buyer-zips/Martin Strayd - Vegan Millionaire (Crypto).zip", "time": 67 },
+            { "id": "STRAYD-ID-068", "title": "Who Killed Fun (Pay the Rent)", "img": "./store-art/Martin Strayd - Who Killed Fun (Pay the Rent).png", "zip": "./buyer-zips/Martin Strayd - Who Killed Fun (Pay the Rent).zip", "time": 68 },
+            { "id": "STRAYD-ID-069", "title": "Wonderful Day (Everyday)", "img": "./store-art/Martin Strayd - Wonderful Day (Everyday).png", "zip": "./buyer-zips/Martin Strayd - Wonderful Day (Everyday).zip", "time": 69 },
+            { "id": "STRAYD-ID-070", "title": "X Rated Algorithm (Drunken Disco Money)", "img": "./store-art/Martin Strayd - X Rated Algorithm (Drunken Disco Money).png", "zip": "./buyer-zips/Martin Strayd - X Rated Algorithm (Drunken Disco Money).zip", "time": 70 },
+            { "id": "STRAYD-ID-071", "title": "You Know Me (Sunset Blues)", "img": "./store-art/Martin Strayd - You Know Me (Sunset Blues).png", "zip": "./buyer-zips/Sunset Blues.zip", "time": 71 },
+            { "id": "STRAYD-ID-072", "title": "You Know What (Blues Version)", "img": "./store-art/Martin Strayd - You Know What (Blues Version).png", "zip": "./buyer-zips/Martin Strayd - You Know What (Blues Version).zip", "time": 72 },
+            { "id": "STRAYD-ID-073", "title": "Young and Dumb (Search Engine)", "img": "./store-art/Martin Strayd - Young and Dumb (Search Engine).png", "zip": "./buyer-zips/Young and Dumb.zip", "time": 73 },
+            { "id": "STRAYD-ID-074", "title": "Zulu Dancers Like Me (You're Too Much)", "img": "./store-art/Martin Strayd - Zulu Dancers Like Me (You're Too Much).png", "zip": "./buyer-zips/Martin Strayd - Zulu Dancers Like Me (You're Too Much).zip", "time": 74 }
+        ];
+
+        let currentSort = 'price-low';
+        let cartIds = new Set();
+        let activeCheckoutItems = [];
+        let currentlyInspectedTrack = null;
+        let connectedWallet = null;
+        let currentTotalDoge = 0;
+
+        function initEngagementTelemetry() {
+            let activePeers = 8;
+            const peerEl = document.getElementById('live-peers-count');
+            if (peerEl) peerEl.innerText = activePeers;
+
+            setInterval(() => {
+                const fluctuation = Math.random() > 0.4 ? 1 : -1;
+                activePeers = Math.max(6, Math.min(18, activePeers + fluctuation));
+                const target = document.getElementById('live-peers-count');
+                if (target) target.innerText = activePeers;
+
+                const modalWatchers = document.getElementById('modal-active-watchers');
+                if (modalWatchers) {
+                    modalWatchers.innerText = 10 + Math.floor(Math.random() * 6);
+                }
+            }, 3500);
+        }
+
+        async function connectWallet() {
+            const btn = document.getElementById('connect-wallet-nav-btn');
+            const badge = document.getElementById('wallet-badge-header');
+            const statusText = document.getElementById('wallet-status-text');
+
+            connectedWallet = "VEG-ANNA-SHI-NODE";
+            btn.innerText = "SHI* WALLET LINKED";
+            btn.style.background = "var(--accent-green)";
+            badge.innerText = `VAULT: ${VAULT_WALLET.substring(0, 6)}...`;
+            if (statusText) {
+                statusText.innerHTML = `SHI* Wallet Linked ✓ <strong style="color: var(--accent-green);">Node Active</strong>`;
+            }
+        }
+
+        function renderStore() {
+            const grid = document.getElementById('store-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            let sorted = [...catalogTracks];
+            if (currentSort === 'price-low') sorted.sort((a, b) => a.time - b.time);
+            if (currentSort === 'price-high') sorted.sort((a, b) => b.time - a.time);
+            if (currentSort === 'recent') sorted.sort((a, b) => b.time - a.time);
+            if (currentSort === 'id') sorted.sort((a, b) => a.id.localeCompare(b.id));
+
+            const listingCount = document.getElementById('listing-count');
+            const invCount = document.getElementById('inv-count');
+            if (listingCount) listingCount.innerText = sorted.length;
+            if (invCount) invCount.innerText = `${sorted.length} Sovereign Singles`;
+
+            sorted.forEach(track => {
+                const isSelected = cartIds.has(track.id);
+                const card = document.createElement('div');
+                card.className = `card ${isSelected ? 'selected-for-bulk' : ''}`;
+                card.onclick = () => openInspectModal(track);
+
+                card.innerHTML = `
+                    <div class="bulk-checkbox" title="Toggle Bulk Selection">✓</div>
+                    <div class="card-img-wrapper">
+                        <img src="${track.img}" alt="${track.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=60'">
+                        <div class="badge-tag">Sovereign Single</div>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <div class="track-id">${track.id}</div>
+                            <div class="track-title" title="${track.title}">${track.title}</div>
+                            <div class="track-artist">Martin Strayd</div>
+                            <div class="price-tag">${TEST_PRICE_DOGE.toFixed(2)} DOGE + Tax</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn add-cart-btn" onclick="event.stopPropagation(); toggleCartSelection('${track.id}')">
+                                ${isSelected ? 'IN CART ✓' : '+ CART'}
+                            </button>
+                            <button class="action-btn buy-now-btn" onclick="event.stopPropagation(); buySingleNow('${track.id}')">
+                                BUY NOW
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            updateCartBadge();
+        }
+
+        function openInspectModal(track) {
+            currentlyInspectedTrack = track;
+            document.getElementById('inspect-img-el').src = track.img;
+            document.getElementById('inspect-id-el').innerText = track.id;
+            document.getElementById('inspect-title-el').innerText = track.title;
+            
+            document.getElementById('modal-active-watchers').innerText = 10 + Math.floor(Math.random() * 6);
+            document.getElementById('modal-purchased-today').innerText = 4 + Math.floor(Math.random() * 5);
+
+            const dogeUri = `dogecoin:${VAULT_WALLET}?amount=${TEST_PRICE_DOGE.toFixed(2)}`;
+            document.getElementById('modal-doge-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(dogeUri)}`;
+            
+            document.getElementById('modal-status-text').innerText = "";
+            document.getElementById('modal-download-box').style.display = 'none';
+            document.getElementById('modal-download-box').innerHTML = '';
+
+            document.getElementById('inspect-overlay').style.display = 'flex';
+        }
+
+        function closeInspect() {
+            document.getElementById('inspect-overlay').style.display = 'none';
+        }
+
+        function closeInspectOutside(e) {
+            if (e.target.id === 'inspect-overlay') closeInspect();
+        }
+
+        function switchModalRail(railName, btnEl) {
+            document.querySelectorAll('.modal-rail-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.modal-rail-content').forEach(c => c.classList.remove('active'));
+            btnEl.classList.add('active');
+            document.getElementById(`mrail-${railName}`).classList.add('active');
+        }
+
+        function copyModalAddress() {
+            navigator.clipboard.writeText(VAULT_WALLET).then(() => {
+                const stat = document.getElementById('modal-status-text');
+                stat.innerText = "Vault Address Copied to Clipboard!";
+                setTimeout(() => { stat.innerText = ""; }, 1800);
+            });
+        }
+
+        function confirmModalPayment(railName) {
+            if (!currentlyInspectedTrack) return;
+            const stat = document.getElementById('modal-status-text');
+            const dlBox = document.getElementById('modal-download-box');
+
+            stat.innerText = `Verifying ${railName} settlement...`;
+            stat.style.color = "var(--accent-gold)";
+
+            setTimeout(() => {
+                globalSerialCounter++;
+                stat.innerText = `✓ Settlement Confirmed! Serial #${globalSerialCounter} Assigned.`;
+                stat.style.color = "var(--accent-green)";
+
+                dlBox.innerHTML = `
+                    <a href="${currentlyInspectedTrack.zip}" class="dl-link" download>
+                        <span>⬇ Download ${currentlyInspectedTrack.title}.zip</span>
+                        <span>SAVE</span>
+                    </a>
+                `;
+                dlBox.style.display = 'flex';
+            }, 1200);
+        }
+
+        function toggleCartSelection(id) {
+            if (cartIds.has(id)) {
+                cartIds.delete(id);
+            } else {
+                cartIds.add(id);
+            }
+            renderStore();
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cart-badge');
+            if (badge) badge.innerText = cartIds.size;
+        }
+
+        function toggleSweepBar() {
+            document.getElementById('sweep-bar').classList.toggle('show');
+        }
+
+        function executeSweep() {
+            const count = parseInt(document.getElementById('sweep-input').value) || 1;
+            cartIds.clear();
+            const floorSorted = [...catalogTracks];
+            for (let i = 0; i < Math.min(count, floorSorted.length); i++) {
+                cartIds.add(floorSorted[i].id);
+            }
+            renderStore();
+            openCartCheckout();
+        }
+
+        function toggleSortDropdown() {
+            document.getElementById('sort-dropdown').classList.toggle('show');
+        }
+
+        function setSortMode(mode, el) {
+            currentSort = mode;
+            document.querySelectorAll('.dropdown-item').forEach(i => {
+                i.classList.remove('selected');
+                i.querySelector('span')?.remove();
+            });
+            el.classList.add('selected');
+            el.innerHTML += ' <span>✓</span>';
+            document.getElementById('sort-dropdown').classList.remove('show');
+            renderStore();
+        }
+
+        function buySingleNow(id) {
+            const track = catalogTracks.find(t => t.id === id);
+            if (!track) return;
+            activeCheckoutItems = [track];
+            launchUnifiedCheckout();
+        }
+
+        function openCartCheckout() {
+            if (cartIds.size === 0) {
+                alert("Select 1 or more tracks (or use Sweep) to open checkout.");
+                return;
+            }
+            activeCheckoutItems = Array.from(cartIds)
+                .map(id => catalogTracks.find(t => t.id === id))
+                .filter(Boolean);
+            launchUnifiedCheckout();
+        }
+
+        function removeFromActiveCheckout(id) {
+            cartIds.delete(id);
+            activeCheckoutItems = activeCheckoutItems.filter(item => item.id !== id);
+            renderStore();
+            if (activeCheckoutItems.length === 0) {
+                closeCheckout();
+            } else {
+                launchUnifiedCheckout();
+            }
+        }
+
+        function launchUnifiedCheckout() {
+            const listEl = document.getElementById('checkout-items-list');
+            listEl.innerHTML = '';
+
+            let subtotal = 0;
+            activeCheckoutItems.forEach(item => {
+                subtotal += TEST_PRICE_DOGE;
+                listEl.innerHTML += `
+                    <div class="order-item-card">
+                        <img src="${item.img}" alt="${item.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60'">
+                        <div class="order-item-meta">
+                            <div class="order-item-id">${item.id}</div>
+                            <div class="order-item-name" title="${item.title}">${item.title}</div>
+                        </div>
+                        <div class="order-item-price">${TEST_PRICE_DOGE.toFixed(2)} DOGE</div>
+                        <button class="remove-item-btn" title="Remove item" onclick="removeFromActiveCheckout('${item.id}')">&times;</button>
+                    </div>
+                `;
+            });
+
+            const tax = subtotal * 0.03;
+            currentTotalDoge = subtotal + tax;
+            const totalUsd = currentTotalDoge * DOGE_TO_USD;
+            const totalShi = Math.round(currentTotalDoge * DOGE_TO_SHI);
+
+            document.getElementById('checkout-heading-title').innerText =
+                activeCheckoutItems.length === 1
+                    ? "Sovereign Release Checkout"
+                    : `Bulk Order Summary (${activeCheckoutItems.length} Releases)`;
+
+            document.getElementById('summary-item-count').innerText = activeCheckoutItems.length;
+            document.getElementById('summary-subtotal').innerText = `${subtotal.toFixed(2)} DOGE`;
+            document.getElementById('summary-tax').innerText = `${tax.toFixed(2)} DOGE`;
+            document.getElementById('summary-fiat').innerText = `$${totalUsd.toFixed(2)} USD`;
+            document.getElementById('summary-total').innerText = `${currentTotalDoge.toFixed(2)} DOGE`;
+
+            const dogeUri = `dogecoin:${VAULT_WALLET}?amount=${currentTotalDoge.toFixed(2)}`;
+            document.getElementById('doge-qr-img').src =
+                `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(dogeUri)}`;
+
+            document.getElementById('shi-token-amount').innerText = `${totalShi.toLocaleString()} SHI*`;
+            document.getElementById('paypal-ref-code').innerText =
+                activeCheckoutItems.map(i => i.id.replace('STRAYD-ID-', '#')).join(',');
+            document.getElementById('paypal-usd-amount').innerText = `$${totalUsd.toFixed(2)} USD`;
+            document.getElementById('coffee-pack-summary').innerText =
+                `${activeCheckoutItems.length} Release${activeCheckoutItems.length > 1 ? 's' : ''}`;
+            document.getElementById('coffee-usd-amount').innerText = `$${totalUsd.toFixed(2)} USD`;
+
+            document.getElementById('checkout-status').innerText = "Awaiting verified blockchain transfer...";
+            document.getElementById('unlocked-downloads-box').style.display = 'none';
+            document.getElementById('unlocked-downloads-box').innerHTML = '';
+
+            document.getElementById('checkout-overlay').style.display = 'flex';
+        }
+
+        function switchRail(railName, btnEl) {
+            document.querySelectorAll('.rail-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.rail-content').forEach(c => c.classList.remove('active'));
+            btnEl.classList.add('active');
+            document.getElementById(`rail-${railName}`).classList.add('active');
+        }
+
+        function copyAddress() {
+            navigator.clipboard.writeText(VAULT_WALLET).then(() => {
+                const statusEl = document.getElementById('checkout-status');
+                const prev = statusEl.innerText;
+                statusEl.innerText = "Vault Address Copied to Clipboard!";
+                setTimeout(() => { statusEl.innerText = prev; }, 1600);
+            });
+        }
+
+        function confirmOrderSettlement(railLabel) {
+            const statusEl = document.getElementById('checkout-status');
+            const dlBox = document.getElementById('unlocked-downloads-box');
+
+            statusEl.innerText = `Verifying ${railLabel} settlement for Martin Strayd catalog...`;
+            statusEl.style.color = "var(--accent-gold)";
+
+            setTimeout(() => {
+                globalSerialCounter++;
+                statusEl.innerText = `✓ Settlement Confirmed via ${railLabel}! Serial #${globalSerialCounter} Assigned. Master Buyer Zips Unlocked:`;
+                statusEl.style.color = "var(--accent-green)";
+                
+                dlBox.innerHTML = '';
+                activeCheckoutItems.forEach(item => {
+                    dlBox.innerHTML += `
+                        <a href="${item.zip}" class="dl-link" download>
+                            <span>⬇ [Serial #${globalSerialCounter}] ${item.id} — ${item.title}.zip</span>
+                            <span>DOWNLOAD</span>
+                        </a>
+                    `;
+                });
+                dlBox.style.display = 'flex';
+
+                activeCheckoutItems.forEach(item => cartIds.delete(item.id));
+                renderStore();
+            }, 1200);
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-overlay').style.display = 'none';
+        }
+
+        function closeCheckoutOutside(e) {
+            if (e.target.id === 'checkout-overlay') closeCheckout();
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('#filter-btn') && !event.target.closest('#sort-dropdown')) {
+                document.getElementById('sort-dropdown').classList.remove('show');
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderStore();
+            initEngagementTelemetry();
+        });
+    </script>
+</body>
+</html>
