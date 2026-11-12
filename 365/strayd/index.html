@@ -90,9 +90,10 @@
         .sweep-bar.show { display: flex; }
         .sweep-input {
             background: #08090c; border: 1px solid var(--border); color: var(--text-main);
-            padding: 0.25rem 0.5rem; border-radius: 4px; width: 54px; text-align: center; font-weight: 700;
+            padding: 0.25rem 0.5rem; border-radius: 4px; width: 50px; text-align: center; font-weight: 700;
         }
         .sweep-confirm { background: var(--accent-green); color: #000; border: none; padding: 0.3rem 0.75rem; border-radius: 4px; font-weight: 800; cursor: pointer; }
+        .sweep-mode-btn { background: var(--surface-elevated); border: 1px solid var(--border); color: var(--accent-gold); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.76rem; font-weight: 800; cursor: pointer; }
 
         .dropdown-menu {
             position: absolute; top: 48px; right: 0; background: var(--surface); border: 1px solid var(--border);
@@ -144,7 +145,7 @@
         .buy-now-btn { background: var(--accent-green); color: #000; border: none; }
         .buy-now-btn:hover { background: #bdfd54; }
 
-        /* INSPECTION PREVIEW MODAL WITH FULL QR & MULTI-RAIL CHECKOUT */
+        /* INSPECTION PREVIEW MODAL WITH FULL QR & MULTI-RAIL SETTLEMENT */
         #inspect-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5, 6, 10, 0.92); backdrop-filter: blur(14px);
@@ -374,11 +375,12 @@
             <span>Gateway: <strong>DTzt4U...pYG</strong></span>
         </div>
         <div class="toolbar-actions">
-            <!-- Floor Sweep -->
+            <!-- Sweep Floor Bar -->
             <div id="sweep-bar" class="sweep-bar">
-                <span>Sweep Floor:</span>
-                <input type="number" id="sweep-input" class="sweep-input" value="3" min="1" max="25">
-                <button class="sweep-confirm" onclick="executeSweep()">Sweep &amp; Checkout</button>
+                <button id="sweep-mode-toggle" class="sweep-mode-btn" onclick="toggleSweepMode()" title="Switch Sweep Crate Mode">Top Listed ▾</button>
+                <span>Qty:</span>
+                <input type="number" id="sweep-input" class="sweep-input" value="3" min="1" max="25" oninput="updateSweepButtonLabel()">
+                <button id="sweep-action-btn" class="sweep-confirm" onclick="executeSweep()">Sweep (3.09 DOGE)</button>
             </div>
             <button class="tool-icon-btn" title="Sweep Floor Items" onclick="toggleSweepBar()">🧹 Sweep</button>
 
@@ -409,7 +411,7 @@
         <div class="inspect-modal-card" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeInspect()">&times;</button>
             <div>
-                <img id="inspect-img-el" class="inspect-img" src="" alt="High-Res Artwork">
+                <img id="inspect-img-el" class="inspect-img" src="" alt="High-Res Artwork" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80'">
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.85rem;">
                 <div>
@@ -449,7 +451,7 @@
                     <!-- SHI* WALLET TAB WITH EDUCATION -->
                     <div id="mrail-shi" class="modal-rail-content">
                         <div class="shi-edu-box">
-                            💡 <strong>SHI* (DRC-20) Ecosystem Guide:</strong> Connect your node or transfer 100 SHI* to the sovereign vault address below to instantly unlock master FLAC &amp; ZIP files.
+                            💡 <strong>SHI* (DRC-20) Ecosystem Guide:</strong> Connect your node or transfer 100 SHI* to the sovereign vault address below to instantly unlock master FLAC &amp; ZIP files + earn reward multipliers.
                         </div>
                         <div class="modal-addr-box" onclick="copyModalAddress()">Vault: DTzt4UaiB5EVguujuZrBbcMFSivmBg2pYG</div>
                         <button class="modal-pay-action btn-modal-shi" onclick="confirmModalPayment('SHI* Wallet')">SETTLE WITH 100 SHI*</button>
@@ -592,6 +594,7 @@
         const DOGE_TO_USD = 0.16;
         const DOGE_TO_SHI = 100;
         let globalSerialCounter = 1242;
+        let sweepModeIsRandom = false;
 
         const catalogTracks = [
             { "id": "STRAYD-ID-001", "title": "Adhd I Can Do That (Travillen Disorder)", "img": "./store-art/Martin Strayd - Adhd I Can Do That (Travillen Disorder).png", "zip": "./buyer-zips/Martin Strayd - Adhd I Can Do That (Travillen Disorder).zip", "time": 1 },
@@ -657,7 +660,7 @@
             { "id": "STRAYD-ID-061", "title": "Tropical Island (Monkey)", "img": "./store-art/Martin Strayd - Tropical Island (Monkey).png", "zip": "./buyer-zips/Martin Strayd - Tropical Island (Monkey).zip", "time": 61 },
             { "id": "STRAYD-ID-062", "title": "Tropical Island", "img": "./store-art/Martin Strayd - Tropical Island.png", "zip": "./buyer-zips/Martin Strayd - Tropical Island.zip", "time": 62 },
             { "id": "STRAYD-ID-063", "title": "Tuk Tuk Secret Spice (Muay Thailand)", "img": "./store-art/Martin Strayd - Tuk Tuk Secret Spice (Muay Thailand).png", "zip": "./buyer-zips/Martin Strayd - Tuk Tuk Secret Spice (Muay Thailand).zip", "time": 63 },
-            { "id": "STRAYD-ID-064", "title": "Two Best Friends", "img": "./store-art/Martin Strayd - Two Best Friends.png", "zip": "./buyer-zips/Martin Strayd - Two Best Friends.zip", "time": 64 },
+            { "id": "STRAYD-ID-064", "title": "Two Best Friends", "img": "./store-art/Martin Strayd - Two Best Friends.png", "zip": "./buyer-zips/Two Best Friends.zip", "time": 64 },
             { "id": "STRAYD-ID-065", "title": "Untimely Overdose", "img": "./store-art/Martin Strayd - Untimely Overdose.png", "zip": "./buyer-zips/Martin Strayd - Untimely Overdose.zip", "time": 65 },
             { "id": "STRAYD-ID-066", "title": "Vegan Millionaire (Cool Hot Sauce)", "img": "./store-art/Martin Strayd - Vegan Millionaire (Cool Hot Sauce).png", "zip": "./buyer-zips/Martin Strayd - Vegan Millionaire (Cool Hot Sauce).zip", "time": 66 },
             { "id": "STRAYD-ID-067", "title": "Vegan Millionaire (Crypto)", "img": "./store-art/Martin Strayd - Vegan Millionaire (Crypto).png", "zip": "./buyer-zips/Martin Strayd - Vegan Millionaire (Crypto).zip", "time": 67 },
@@ -665,7 +668,7 @@
             { "id": "STRAYD-ID-069", "title": "Wonderful Day (Everyday)", "img": "./store-art/Martin Strayd - Wonderful Day (Everyday).png", "zip": "./buyer-zips/Martin Strayd - Wonderful Day (Everyday).zip", "time": 69 },
             { "id": "STRAYD-ID-070", "title": "X Rated Algorithm (Drunken Disco Money)", "img": "./store-art/Martin Strayd - X Rated Algorithm (Drunken Disco Money).png", "zip": "./buyer-zips/Martin Strayd - X Rated Algorithm (Drunken Disco Money).zip", "time": 70 },
             { "id": "STRAYD-ID-071", "title": "You Know Me (Sunset Blues)", "img": "./store-art/Martin Strayd - You Know Me (Sunset Blues).png", "zip": "./buyer-zips/Sunset Blues.zip", "time": 71 },
-            { "id": "STRAYD-ID-072", "title": "You Know What (Blues Version)", "img": "./store-art/Martin Strayd - You Know What (Blues Version).png", "zip": "./buyer-zips/Martin Strayd - You Know What (Blues Version).zip", "time": 72 },
+            { "id": "STRAYD-ID-072", "title": "You Know What (Blues Version)", "img": "./store-art/Martin Strayd - You Know What (Blues Version).png", "zip": "./buyer-zips/Martin Strayd - Martin Strayd - You Know What (Blues Version).zip", "time": 72 },
             { "id": "STRAYD-ID-073", "title": "Young and Dumb (Search Engine)", "img": "./store-art/Martin Strayd - Young and Dumb (Search Engine).png", "zip": "./buyer-zips/Young and Dumb.zip", "time": 73 },
             { "id": "STRAYD-ID-074", "title": "Zulu Dancers Like Me (You're Too Much)", "img": "./store-art/Martin Strayd - Zulu Dancers Like Me (You're Too Much).png", "zip": "./buyer-zips/Martin Strayd - Zulu Dancers Like Me (You're Too Much).zip", "time": 74 }
         ];
@@ -705,7 +708,7 @@
             btn.style.background = "var(--accent-green)";
             badge.innerText = `VAULT: ${VAULT_WALLET.substring(0, 6)}...`;
             if (statusText) {
-                statusText.innerHTML = `SHI* Wallet Linked ✓ <strong style="color: var(--accent-green);">Node Active</strong>`;
+                statusText.innerHTML = `SHI* Wallet Linked ✓ <strong style="color: var(--accent-green);">Node Active (+Rewards)</strong>`;
             }
         }
 
@@ -757,6 +760,7 @@
                 grid.appendChild(card);
             });
             updateCartBadge();
+            updateSweepButtonLabel();
         }
 
         function openInspectModal(track) {
@@ -811,12 +815,12 @@
 
             setTimeout(() => {
                 globalSerialCounter++;
-                stat.innerText = `✓ Settlement Confirmed! Serial #${globalSerialCounter} Assigned.`;
+                stat.innerText = `✓ Settlement Confirmed! Serial #${globalSerialCounter} Assigned. SHI* Rewards Dropped.`;
                 stat.style.color = "var(--accent-green)";
 
                 dlBox.innerHTML = `
                     <a href="${currentlyInspectedTrack.zip}" class="dl-link" download>
-                        <span>⬇ Download ${currentlyInspectedTrack.title}.zip</span>
+                        <span>⬇ Download [Serial #${globalSerialCounter}] ${currentlyInspectedTrack.title}.zip</span>
                         <span>SAVE</span>
                     </a>
                 `;
@@ -840,15 +844,56 @@
 
         function toggleSweepBar() {
             document.getElementById('sweep-bar').classList.toggle('show');
+            updateSweepButtonLabel();
+        }
+
+        function toggleSweepMode() {
+            sweepModeIsRandom = !sweepModeIsRandom;
+            const toggleBtn = document.getElementById('sweep-mode-toggle');
+            if (sweepModeIsRandom) {
+                toggleBtn.innerText = "Mystery 🎲";
+                toggleBtn.style.color = "var(--accent-green)";
+            } else {
+                toggleBtn.innerText = "Top Listed ▾";
+                toggleBtn.style.color = "var(--accent-gold)";
+            }
+            updateSweepButtonLabel();
+        }
+
+        function updateSweepButtonLabel() {
+            const countInput = document.getElementById('sweep-input');
+            const btn = document.getElementById('sweep-action-btn');
+            if (!countInput || !btn) return;
+            const qty = parseInt(countInput.value) || 1;
+            const subtotal = qty * TEST_PRICE_DOGE;
+            const totalWithTax = subtotal * 1.03;
+            const modePrefix = sweepModeIsRandom ? "Mystery" : "Sweep";
+            btn.innerText = `${modePrefix} (${totalWithTax.toFixed(2)} DOGE)`;
+        }
+
+        function getSortedCatalog() {
+            let sorted = [...catalogTracks];
+            if (currentSort === 'price-low') sorted.sort((a, b) => a.time - b.time);
+            if (currentSort === 'price-high') sorted.sort((a, b) => b.time - a.time);
+            if (currentSort === 'recent') sorted.sort((a, b) => b.time - a.time);
+            if (currentSort === 'id') sorted.sort((a, b) => a.id.localeCompare(b.id));
+            return sorted;
         }
 
         function executeSweep() {
             const count = parseInt(document.getElementById('sweep-input').value) || 1;
-            cartIds.clear();
-            const floorSorted = [...catalogTracks];
-            for (let i = 0; i < Math.min(count, floorSorted.length); i++) {
-                cartIds.add(floorSorted[i].id);
+            let pool = getSortedCatalog().filter(track => !cartIds.has(track.id));
+
+            if (sweepModeIsRandom) {
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
             }
+
+            const toAdd = pool.slice(0, Math.min(count, pool.length));
+            toAdd.forEach(track => cartIds.add(track.id));
+
             renderStore();
             openCartCheckout();
         }
